@@ -1,5 +1,6 @@
-package com.ecar.servciestation.modules.Ecar.domain;
+package com.ecar.servciestation.modules.user.domain;
 
+import com.ecar.servciestation.modules.ecar.domain.Station;
 import lombok.*;
 
 import javax.persistence.*;
@@ -11,26 +12,21 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class Charger {
+public class History {
 
     @Id
     @GeneratedValue
-    @Column(name = "charger_id")
+    @Column(name = "history_id")
     private Long id;
 
-    // 충전기 정보 //
-
-    private Long chargerNumber;
-
-    private String chargerName;
-
-    private Integer mode;
-
-    private Integer state;
-
-    private LocalDateTime stateUpdatedAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "station_id")
     private Station station;
+
+    private LocalDateTime searchedAt;
+
 }

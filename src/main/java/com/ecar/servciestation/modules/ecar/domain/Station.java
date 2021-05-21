@@ -1,4 +1,4 @@
-package com.ecar.servciestation.modules.Ecar.domain;
+package com.ecar.servciestation.modules.ecar.domain;
 
 import lombok.*;
 

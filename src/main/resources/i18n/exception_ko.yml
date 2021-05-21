@@ -1,0 +1,11 @@
+userNotFound:
+  code : "-1000"
+  msg : "존재하지 않은 계정입니다."
+
+loginFailed:
+  code : "-1001"
+  msg : "로그인 정보가 일치하지 않거나 이메일 인증이 완료되지 않은 계정입니다."
+
+signUpFailed:
+  code : "-1002"
+  msg : "이미 존재하는 계정(이메일)입니다."

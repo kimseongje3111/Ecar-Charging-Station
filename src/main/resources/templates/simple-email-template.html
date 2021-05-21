@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>전기차 충전소 알림 앱</title>
+
+    <style>
+        button {
+            border: 1px solid skyblue;
+            border-radius: 5px;
+            background-color: skyblue;
+            color: white;
+            padding: 5px;
+        }
+
+        input {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+<div>
+    <p>안녕하세요. <span th:text="${userName}"></span> 님</p>
+
+    <h2 th:text="${messageTitle}"></h2>
+
+    <div>
+        <form th:action="${link}" method="post">
+            <input id="email" type="text" th:value="${email}">
+            <input id="token" type="text" th:value="${token}">
+            <button type="submit">계정 인증 완료</button>
+        </form>
+    </div>
+
+    <p th:text="${messageContent}"></p>
+</div>
+
+<footer style="margin-top: 10px">
+    <small>&copy;전기차 충전소 알림 앱 2021</small>
+</footer>
+</body>
+</html>

@@ -1,6 +1,6 @@
-package com.ecar.servciestation.modules.User.domain;
+package com.ecar.servciestation.modules.user.domain;
 
-import com.ecar.servciestation.modules.Ecar.domain.Station;
+import com.ecar.servciestation.modules.ecar.domain.Station;
 import lombok.*;
 
 import javax.persistence.*;
@@ -12,16 +12,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class UserBookmark {
+public class Bookmark {
 
     @Id
     @GeneratedValue
-    @Column(name = "user_bookmark_id")
+    @Column(name = "bookmark_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "account_id")
+    private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "station_id")
