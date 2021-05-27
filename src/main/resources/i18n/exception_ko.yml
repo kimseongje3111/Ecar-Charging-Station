@@ -9,3 +9,23 @@ loginFailed:
 signUpFailed:
   code : "-1002"
   msg : "이미 존재하는 계정(이메일)입니다."
+
+entryPointException:
+  code : "-2000"
+  msg : "해당 리소스에 접근하기 위한 권한이 없습니다."
+
+accessDeniedException:
+  code : "-2001"
+  msg : "해당 권한으로 접근할 수 없는 리소스입니다."
+
+evInfoNotFoundException:
+  code : "-3000"
+  msg : "요청한 데이터를 찾을 수 없습니다."
+
+evInfoServiceException:
+  code : "-3001"
+  msg : "제공기관 서비스 장애 또는 요청이 제한된 상태입니다."
+
+reverseGeoCodingException:
+  code : "-3002"
+  msg : "해당 주소를 찾을 수 없습니다."

@@ -1,5 +1,4 @@
 spring:
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,3 +13,15 @@ spring:
         auth: true
         timeout: 5000
         starttls.enable: true
+
+ecarapi:
+  url: http://openapi.kepco.co.kr/service/EvInfoServiceV2/getEvSearchList
+  servicekey:
+    encoding: s1JOtbjG1eE5QK9En2gYhKyeh8yfrztyNa14LBzHlqS5Fc2pmUtJdvkNTS89h8xGZkj2HVv3U55rBlWScj6T%2Fg%3D%3D
+    decoding: s1JOtbjG1eE5QK9En2gYhKyeh8yfrztyNa14LBzHlqS5Fc2pmUtJdvkNTS89h8xGZkj2HVv3U55rBlWScj6T/g==
+
+mapapi:
+  url: https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc
+  servicekey:
+    x_ncp_apigw_api_key_id: m2dzjqqhu0
+    x_ncp_apigw_api_key: tkR0ZYYNJ517MRoanAh82Jpu3lqPkJwQhNXurwYX

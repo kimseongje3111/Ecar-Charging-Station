@@ -9,3 +9,23 @@ loginFailed:
 signUpFailed:
   code : "-1002"
   msg : "This account(email address) already exists."
+
+entryPointException:
+  code : "-2000"
+  msg : "You do not have permission to access this resources."
+
+accessDeniedException:
+  code : "-2001"
+  msg : "Resources not accessible with that privilege."
+
+evInfoNotFoundException:
+  code : "-3000"
+  msg : "The requested data could not be found."
+
+evInfoServiceException:
+  code : "-3001"
+  msg : "Provider service failure or request restricted."
+
+reverseGeoCodingException:
+  code : "-3002"
+  msg : "The address could not be found."
