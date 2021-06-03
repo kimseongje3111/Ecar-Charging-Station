@@ -4,11 +4,10 @@ import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.dto.SingleResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
 import com.ecar.servicestation.modules.user.domain.Account;
-import com.ecar.servicestation.modules.user.dto.LoginRequestDto;
-import com.ecar.servicestation.modules.user.dto.SignUpRequestDto;
+import com.ecar.servicestation.modules.user.dto.LoginRequest;
+import com.ecar.servicestation.modules.user.dto.SignUpRequest;
 import com.ecar.servicestation.modules.user.service.UserLoginAndSignUpService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,7 @@ public class UserLoginAndSignUpApiController {
 
     @ApiOperation(value = "로그인", notes = "로그인 요청, 로그인 성공 시 인증 토큰(JWT) 발급")
     @PostMapping("/login")
-    public SingleResult<String> login(@RequestBody LoginRequestDto request) {
+    public SingleResult<String> login(@RequestBody LoginRequest request) {
         String token = userLoginAndSignUpService.login(request);
 
         return responseService.getSingleResult(token);
@@ -33,7 +32,7 @@ public class UserLoginAndSignUpApiController {
 
     @ApiOperation(value = "회원가입", notes = "회원가입 요청")
     @PostMapping("/sign-up")
-    public CommonResult signUp(@RequestBody SignUpRequestDto request) {
+    public CommonResult signUp(@RequestBody SignUpRequest request) {
         Account account = userLoginAndSignUpService.signUp(request);
 
         userLoginAndSignUpService.sendEmailForAuthentication(account);

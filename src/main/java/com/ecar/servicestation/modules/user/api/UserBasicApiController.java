@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api(tags = {"(2) USER SERVICE"})
+@Api(tags = {"(2) USER BASIC SERVICE"})
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
@@ -29,5 +29,6 @@ public class UserBasicApiController {
         return responseService.getSingleResult(userBasicService.getUserBasicInfo());
     }
 
-    
+    // TODO : 최근 검색 목록 조회
+    // TODO : 충전소 즐겨 찾기 등록/조회/삭제
 }

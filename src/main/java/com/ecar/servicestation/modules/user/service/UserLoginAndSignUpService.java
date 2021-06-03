@@ -5,8 +5,8 @@ import com.ecar.servicestation.infra.auth.AuthTokenProvider;
 import com.ecar.servicestation.infra.mail.EmailMessage;
 import com.ecar.servicestation.infra.mail.MailService;
 import com.ecar.servicestation.modules.user.domain.Account;
-import com.ecar.servicestation.modules.user.dto.LoginRequestDto;
-import com.ecar.servicestation.modules.user.dto.SignUpRequestDto;
+import com.ecar.servicestation.modules.user.dto.LoginRequest;
+import com.ecar.servicestation.modules.user.dto.SignUpRequest;
 import com.ecar.servicestation.modules.user.exception.CUserLoginFailedException;
 import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.exception.CUserSignUpFailedException;
@@ -41,7 +41,7 @@ public class UserLoginAndSignUpService {
         return account.orElseThrow(CUserNotFoundException::new);
     }
 
-    public String login(LoginRequestDto request) {      // 로그인 성공시, 인증 token 발급
+    public String login(LoginRequest request) {      // 로그인 성공시, 인증 token 발급
         Account account = findByEmail(request.getEmail());
 
         if (!passwordEncoder.matches(request.getPassword(), account.getPassword()) || !account.isEmailAuthVerified()) {
@@ -52,7 +52,7 @@ public class UserLoginAndSignUpService {
     }
 
     @Transactional
-    public Account signUp(SignUpRequestDto request) {
+    public Account signUp(SignUpRequest request) {
         if (userRepository.existsAccountByEmail(request.getEmail())) {
             throw new CUserSignUpFailedException();
         }

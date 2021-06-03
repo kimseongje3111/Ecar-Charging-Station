@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface ChargerRepositoryCustom {
 
+    Charger findChargerWithStationById(Long id);
+
     Page<Charger> findAllWithStationBySearchConditionAndPaging(List<Long> ids, SearchCondition condition, Pageable pageable);
 
     Page<Charger> findAllWithStationByPaging(List<Long> ids, Pageable pageable);

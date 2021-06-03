@@ -13,7 +13,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 
-@Api(tags = {"(3) E_CAR SERVICE"})
+@Api(tags = {"(3) E_CAR SEARCH SERVICE"})
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ecar")

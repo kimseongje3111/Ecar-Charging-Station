@@ -3,7 +3,7 @@ package com.ecar.servicestation.modules.user.dto;
 import lombok.Data;
 
 @Data
-public class LoginRequestDto {
+public class LoginRequest {
 
     private String email;
 

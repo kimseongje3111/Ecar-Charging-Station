@@ -5,8 +5,8 @@ import com.ecar.servicestation.infra.mail.EmailMessage;
 import com.ecar.servicestation.infra.mail.MailService;
 import com.ecar.servicestation.modules.user.factory.UserFactory;
 import com.ecar.servicestation.modules.user.domain.Account;
-import com.ecar.servicestation.modules.user.dto.LoginRequestDto;
-import com.ecar.servicestation.modules.user.dto.SignUpRequestDto;
+import com.ecar.servicestation.modules.user.dto.LoginRequest;
+import com.ecar.servicestation.modules.user.dto.SignUpRequest;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import com.ecar.servicestation.modules.user.service.UserLoginAndSignUpService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,7 +56,7 @@ class UserLoginAndSignUpApiControllerTest {
     @DisplayName("[회원가입]정상 처리")
     public void signUp_success() throws Exception {
         // Given
-        SignUpRequestDto signUpRequest = new SignUpRequestDto();
+        SignUpRequest signUpRequest = new SignUpRequest();
         signUpRequest.setUserName("admin");
         signUpRequest.setPassword("1234");
         signUpRequest.setEmail("admin@test.com");
@@ -88,7 +88,7 @@ class UserLoginAndSignUpApiControllerTest {
     @DisplayName("[회원가입]실패 - 필수 요청 파라미터 부재")
     public void signUp_failed_by_missing_required_request_parameters() throws Exception {
         // Given
-        SignUpRequestDto signUpRequest = new SignUpRequestDto();
+        SignUpRequest signUpRequest = new SignUpRequest();
         signUpRequest.setPassword("1234");
         signUpRequest.setEmail("admin@test.com");
 
@@ -107,7 +107,7 @@ class UserLoginAndSignUpApiControllerTest {
         // Given
         userFactory.createSimpleAccount("admin", "1234", "admin@test.com");
 
-        SignUpRequestDto signUpRequest = new SignUpRequestDto();
+        SignUpRequest signUpRequest = new SignUpRequest();
         signUpRequest.setUserName("admin2");
         signUpRequest.setPassword("1234");
         signUpRequest.setEmail("admin@test.com");
@@ -161,7 +161,7 @@ class UserLoginAndSignUpApiControllerTest {
         // Given
         userFactory.createVerifiedAccount("admin", "1234", "admin@test.com");
 
-        LoginRequestDto loginRequestDto = new LoginRequestDto();
+        LoginRequest loginRequestDto = new LoginRequest();
         loginRequestDto.setEmail("admin@test.com");
         loginRequestDto.setPassword("1234");
 
@@ -188,7 +188,7 @@ class UserLoginAndSignUpApiControllerTest {
         // Given
         userFactory.createVerifiedAccount("admin", "1234", "admin@test.com");
 
-        LoginRequestDto loginRequestDto = new LoginRequestDto();
+        LoginRequest loginRequestDto = new LoginRequest();
         loginRequestDto.setEmail("user@test.com");
         loginRequestDto.setPassword("1234");
 
@@ -213,7 +213,7 @@ class UserLoginAndSignUpApiControllerTest {
         // Given
         userFactory.createVerifiedAccount("admin", "1234", "admin@test.com");
 
-        LoginRequestDto loginRequestDto = new LoginRequestDto();
+        LoginRequest loginRequestDto = new LoginRequest();
         loginRequestDto.setEmail("admin@test.com");
         loginRequestDto.setPassword("4321");
 

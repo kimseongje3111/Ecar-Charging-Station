@@ -5,6 +5,8 @@ import com.ecar.servicestation.infra.auth.exception.CAuthenticationEntryPointExc
 import com.ecar.servicestation.infra.data.exception.EVINfoNotFoundException;
 import com.ecar.servicestation.infra.data.exception.EVInfoServiceException;
 import com.ecar.servicestation.infra.map.exception.MapServiceException;
+import com.ecar.servicestation.modules.ecar.exception.CChargerNotFoundException;
+import com.ecar.servicestation.modules.ecar.exception.CStationNotFoundException;
 import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
 import com.ecar.servicestation.modules.user.exception.CUserLoginFailedException;
@@ -31,7 +33,7 @@ public class ExceptionAdvice {
     private final ResponseService responseService;
     private final MessageSource messageSource;
 
-    // 유저 서비스 예외 //
+    // 서비스 예외 //
 
     @ExceptionHandler(CUserNotFoundException.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
@@ -51,30 +53,42 @@ public class ExceptionAdvice {
         return responseService.getFailedResult(parseInt(getMessage("signUpFailed.code")), getMessage("signUpFailed.msg"));
     }
 
+    @ExceptionHandler(CStationNotFoundException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult stationNotFound(HttpServletRequest request, CStationNotFoundException e) {
+        return responseService.getFailedResult(parseInt(getMessage("stationNotFound.code")), getMessage("stationNotFound.msg"));
+    }
+
+    @ExceptionHandler(CChargerNotFoundException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult chargerNotFound(HttpServletRequest request, CChargerNotFoundException e) {
+        return responseService.getFailedResult(parseInt(getMessage("chargerNotFound.code")), getMessage("chargerNotFound.msg"));
+    }
+
     // 외부 API 예외 //
 
     @ExceptionHandler(EVINfoNotFoundException.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
-    public CommonResult evInfoNotFoundException(HttpServletRequest request, EVINfoNotFoundException e) {
-        return responseService.getFailedResult(parseInt(getMessage("evInfoNotFoundException.code")), getMessage("evInfoNotFoundException.msg"));
+    public CommonResult evInfoNotFound(HttpServletRequest request, EVINfoNotFoundException e) {
+        return responseService.getFailedResult(parseInt(getMessage("evInfoNotFound.code")), getMessage("evInfoNotFound.msg"));
     }
 
     @ExceptionHandler(EVInfoServiceException.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
-    public CommonResult evInfoServiceException(HttpServletRequest request, EVInfoServiceException e) {
-        return responseService.getFailedResult(parseInt(getMessage("evInfoServiceException.code")), getMessage("evInfoServiceException.msg"));
+    public CommonResult evInfoServiceFailed(HttpServletRequest request, EVInfoServiceException e) {
+        return responseService.getFailedResult(parseInt(getMessage("evInfoServiceFailed.code")), getMessage("evInfoServiceFailed.msg"));
     }
 
     @ExceptionHandler(MapServiceException.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
-    public CommonResult mapServiceException(HttpServletRequest request, MapServiceException e) {
-        return responseService.getFailedResult(parseInt(getMessage("mapServiceException.code")), getMessage("mapServiceException.msg"));
+    public CommonResult mapServiceFailed(HttpServletRequest request, MapServiceException e) {
+        return responseService.getFailedResult(parseInt(getMessage("mapServiceFailed.code")), getMessage("mapServiceFailed.msg"));
     }
 
     @ExceptionHandler(AddressServiceException.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
-    public CommonResult addressServiceException(HttpServletRequest request, AddressServiceException e) {
-        return responseService.getFailedResult(parseInt(getMessage("addressServiceException.code")), getMessage("addressServiceException.msg"));
+    public CommonResult addressServiceFailed(HttpServletRequest request, AddressServiceException e) {
+        return responseService.getFailedResult(parseInt(getMessage("addressServiceFailed.code")), getMessage("addressServiceFailed.msg"));
     }
 
     // 인증 예외 //
@@ -82,13 +96,13 @@ public class ExceptionAdvice {
     @ExceptionHandler(CAuthenticationEntryPointException.class)
     @ResponseStatus(FORBIDDEN)
     public CommonResult authenticationEntryPointException(HttpServletRequest request, CAuthenticationEntryPointException e) {
-        return responseService.getFailedResult(parseInt(getMessage("entryPointException.code")), getMessage("entryPointException.msg"));
+        return responseService.getFailedResult(parseInt(getMessage("entryPoint.code")), getMessage("entryPoint.msg"));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(FORBIDDEN)
-    public CommonResult accessDeniedException(HttpServletRequest request, AccessDeniedException e) {
-        return responseService.getFailedResult(parseInt(getMessage("accessDeniedException.code")), getMessage("accessDeniedException.msg"));
+    public CommonResult accessDenied(HttpServletRequest request, AccessDeniedException e) {
+        return responseService.getFailedResult(parseInt(getMessage("accessDenied.code")), getMessage("accessDenied.msg"));
     }
 
     private String getMessage(String value) {

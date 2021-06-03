@@ -1,35 +1,43 @@
 userNotFound:
-  code : "-1000"
-  msg : "This account does not exist."
+  code: "-1000"
+  msg: "This account does not exist."
 
 loginFailed:
-  code : "-1001"
-  msg : "Login information does not match or email authentication has not completed."
+  code: "-1001"
+  msg: "Login information does not match or email authentication has not completed."
 
 signUpFailed:
-  code : "-1002"
-  msg : "This account(email address) already exists."
+  code: "-1002"
+  msg: "This account(email address) already exists."
 
-entryPointException:
-  code : "-2000"
-  msg : "You do not have permission to access this resources."
+stationNotFound:
+  code: "-1003"
+  msg: "The station not found."
 
-accessDeniedException:
-  code : "-2001"
-  msg : "Resources not accessible with that privilege."
+chargerNotFound:
+  code: "-1004"
+  msg: "The charger not found."
 
-evInfoNotFoundException:
-  code : "-3000"
-  msg : "The requested data could not be found."
+entryPoint:
+  code: "-2000"
+  msg: "You do not have permission to access this resources."
 
-evInfoServiceException:
-  code : "-3001"
-  msg : "Provider service failure or request restricted."
+accessDenied:
+  code: "-2001"
+  msg: "Resources not accessible with that privilege."
 
-mapServiceException:
-  code : "-3002"
-  msg : "The address could not be found."
+evInfoNotFound:
+  code: "-3000"
+  msg: "The requested data could not be found."
 
-addressServiceException:
-  code : "-3003"
-  msg : "Invalid address format or provider service restricted."
+evInfoServiceFailed:
+  code: "-3001"
+  msg: "Provider service failure or request restricted."
+
+mapServiceFailed:
+  code: "-3002"
+  msg: "The address could not be found."
+
+addressServiceFailed:
+  code: "-3003"
+  msg: "Invalid address format or provider service restricted."

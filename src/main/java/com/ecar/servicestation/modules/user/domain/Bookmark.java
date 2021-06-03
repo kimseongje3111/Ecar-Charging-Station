@@ -27,6 +27,6 @@ public class Bookmark {
     @JoinColumn(name = "station_id")
     private Station station;
 
-    private LocalDateTime setAt;
+    private LocalDateTime registeredAt;
 
 }

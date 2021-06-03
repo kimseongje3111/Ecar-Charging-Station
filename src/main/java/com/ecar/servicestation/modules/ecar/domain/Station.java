@@ -14,6 +14,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @EqualsAndHashCode(of = "id")
 public class Station {
 
@@ -35,6 +36,7 @@ public class Station {
 
     private Double longitude;
 
+    @Builder.Default
     @OneToMany(mappedBy = "station", cascade = CascadeType.ALL)
     @JsonProperty(access = WRITE_ONLY)
     private Set<Charger> chargers = new HashSet<>();

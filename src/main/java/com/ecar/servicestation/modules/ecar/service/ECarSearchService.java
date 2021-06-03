@@ -13,6 +13,7 @@ import com.ecar.servicestation.modules.ecar.dto.SearchCondition;
 import com.ecar.servicestation.modules.ecar.dto.SearchLocation;
 import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
 import com.ecar.servicestation.modules.ecar.repository.StationRepository;
+import com.ecar.servicestation.modules.user.repository.HistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
