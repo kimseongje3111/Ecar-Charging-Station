@@ -149,6 +149,7 @@ class UserLoginAndSignUpApiControllerTest {
                 .andExpect(jsonPath("responseCode").value(0))
                 .andExpect(jsonPath("message").value("성공하였습니다."));
 
+        // Then(2)
         Optional<Account> account = userRepository.findAccountByEmail(newAccount.getEmail());
         assertThat(account.get().isEmailAuthVerified()).isTrue();
         assertThat(account.get().getJoinedAt()).isNotNull();

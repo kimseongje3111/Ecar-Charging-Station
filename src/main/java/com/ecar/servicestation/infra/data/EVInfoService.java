@@ -1,9 +1,9 @@
 package com.ecar.servicestation.infra.data;
 
 import com.ecar.servicestation.infra.data.dto.EVInfo;
+import com.ecar.servicestation.infra.data.dto.EVInfoBody;
 import com.ecar.servicestation.infra.data.dto.EVInfoHeader;
 import com.ecar.servicestation.infra.data.dto.EVInfoResponse;
-import com.ecar.servicestation.infra.data.exception.EVINfoNotFoundException;
 import com.ecar.servicestation.infra.data.exception.EVInfoServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-@Profile("dev")
+@Profile({"dev","test"})
 public class EVInfoService implements ECarChargingStationInfoProvider {
 
     @Value("${ecarapi.servicekey.encoding}")
@@ -27,37 +27,23 @@ public class EVInfoService implements ECarChargingStationInfoProvider {
     private String URL;
 
     private final String RESPONSE_SUCCESS = "00";
-    private final String RESPONSE_NO_DATA = "03";
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public List<EVInfo> getData(String search, int page, int numberOfRows) {
-        String uri = getUri(search, page, numberOfRows, SERVICE_KEY_ENCODING);
+        String uri = getURI(search, page, numberOfRows, SERVICE_KEY_DECODING);
         EVInfoResponse response = restTemplate.getForObject(uri, EVInfoResponse.class);
-        EVInfoHeader evInfoHeader = Objects.requireNonNull(response).getEvInfoHeader();
+        EVInfoHeader header = Objects.requireNonNull(response).getHeader();
+        EVInfoBody body = Objects.requireNonNull(response).getBody();
 
-        if (evInfoHeader.getResultCode().equals(RESPONSE_NO_DATA)) {
-            throw new EVINfoNotFoundException();
+        if (!header.getResultCode().equals(RESPONSE_SUCCESS) || body == null) {
+            throw new EVInfoServiceException();
         }
 
-        if (!evInfoHeader.getResultCode().equals(RESPONSE_SUCCESS)) {
-            uri = getUri(search, page, numberOfRows, SERVICE_KEY_DECODING);
-            response = restTemplate.getForObject(uri, EVInfoResponse.class);
-            evInfoHeader = Objects.requireNonNull(response).getEvInfoHeader();
-
-            if (evInfoHeader.getResultCode().equals(RESPONSE_NO_DATA)) {
-                throw new EVINfoNotFoundException();
-            }
-
-            if (!evInfoHeader.getResultCode().equals(RESPONSE_SUCCESS)) {
-                throw new EVInfoServiceException();
-            }
-        }
-
-        return response.getEvInfoBody().getEvInfoList();
+        return body.getItems();
     }
 
-    private String getUri(String search, int page, int numberOfRows, String serviceKeyType) {
+    private String getURI(String search, int page, int numberOfRows, String serviceKeyType) {
         StringBuilder stringBuilder = new StringBuilder();
 
         return stringBuilder

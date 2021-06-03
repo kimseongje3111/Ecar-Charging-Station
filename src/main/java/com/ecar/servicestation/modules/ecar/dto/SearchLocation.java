@@ -7,8 +7,8 @@ import lombok.Data;
 public class SearchLocation {
 
     @ApiParam(value = "위도", required = true)
-    private Long lat;
+    private Double latitude;
 
     @ApiParam(value = "경도", required = true)
-    private Long lang;
+    private Double longitude;
 }

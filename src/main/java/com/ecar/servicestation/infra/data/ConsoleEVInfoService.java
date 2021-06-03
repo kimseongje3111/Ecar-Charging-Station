@@ -10,7 +10,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-@Profile({"local", "test"})
+@Profile("local")
 public class ConsoleEVInfoService implements ECarChargingStationInfoProvider {
 
     @Override

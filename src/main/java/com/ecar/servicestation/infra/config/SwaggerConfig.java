@@ -1,5 +1,6 @@
 package com.ecar.servicestation.infra.config;
 
+import com.google.common.base.Predicates;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -22,6 +23,7 @@ public class SwaggerConfig {
                 .apiInfo(swaggerInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.ecar.servicestation.modules"))
+                .apis(Predicates.not(RequestHandlerSelectors.basePackage("com.ecar.servicestation.modules.main.exception")))
                 .paths(PathSelectors.any())
                 .build()
                 .useDefaultResponseMessages(false);
@@ -32,7 +34,7 @@ public class SwaggerConfig {
                 .title("Spring API Documentation")
                 .description("본 애플리케이션이 제공하는 서비스에 대한 Srping 서버 API 명세")
                 .license("kimseongje3111")
-                .licenseUrl("https://github.com/kimseongje3111/Ecar-Charging-Station/license")
+                .licenseUrl("https://github.com/kimseongje3111/Ecar-Charging-Station")
                 .version("V_1.0")
                 .build();
     }

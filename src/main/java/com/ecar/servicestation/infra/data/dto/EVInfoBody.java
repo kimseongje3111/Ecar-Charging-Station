@@ -1,6 +1,8 @@
 package com.ecar.servicestation.infra.data.dto;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -11,17 +13,18 @@ import java.util.List;
 @XmlRootElement(name = "body")
 public class EVInfoBody {
 
+    @Getter(AccessLevel.NONE)
+    private List<EVInfo> items;
+
+    private Integer numOfRows;
+
+    private Integer pageNo;
+
+    private Integer totalCount;
+
     @XmlElementWrapper(name = "items")
     @XmlElement(name = "item")
-    private List<EVInfo> evInfoList;
-
-    @XmlElement(name = "numOfRows")
-    public Integer numOfRows;
-
-    @XmlElement(name = "pageNo")
-    public Integer pageNo;
-
-    @XmlElement(name = "totalCount")
-    public Integer totalCount;
-
+    public List<EVInfo> getItems() {
+        return items;
+    }
 }

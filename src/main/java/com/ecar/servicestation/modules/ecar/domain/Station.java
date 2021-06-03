@@ -31,9 +31,9 @@ public class Station {
 
     private String stationAddress;
 
-    private Long latitude;
+    private Double latitude;
 
-    private Long longitude;
+    private Double longitude;
 
     @OneToMany(mappedBy = "station", cascade = CascadeType.ALL)
     @JsonProperty(access = WRITE_ONLY)

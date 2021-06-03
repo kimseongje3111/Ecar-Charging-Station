@@ -26,6 +26,10 @@ evInfoServiceException:
   code : "-3001"
   msg : "제공기관 서비스 장애 또는 요청이 제한된 상태입니다."
 
-reverseGeoCodingException:
+mapServiceException:
   code : "-3002"
   msg : "해당 주소를 찾을 수 없습니다."
+
+addressServiceException:
+  code : "-3003"
+  msg : "올바르지 않은 주소 형식이거나 제공기관 서비스가 제한 상태입니다."

@@ -26,6 +26,10 @@ evInfoServiceException:
   code : "-3001"
   msg : "Provider service failure or request restricted."
 
-reverseGeoCodingException:
+mapServiceException:
   code : "-3002"
   msg : "The address could not be found."
+
+addressServiceException:
+  code : "-3003"
+  msg : "Invalid address format or provider service restricted."

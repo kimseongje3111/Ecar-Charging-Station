@@ -3,16 +3,20 @@ package com.ecar.servicestation.infra.data.dto;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.Station;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @XmlRootElement(name = "item")
 @XmlAccessorType(XmlAccessType.FIELD)
+@EqualsAndHashCode(of = "chargerNumber")
 public class EVInfo {
 
     @XmlElement(name = "csId")
@@ -25,10 +29,10 @@ public class EVInfo {
     private String stationName;
 
     @XmlElement(name = "lat")
-    private Long latitude;
+    private Double latitude;
 
     @XmlElement(name = "longi")
-    private Long longitude;
+    private Double longitude;
 
     @XmlElement(name = "cpId")
     private Long chargerNumber;
@@ -46,6 +50,7 @@ public class EVInfo {
     private Integer chargerState;
 
     @XmlElement(name = "statUpdateDatetime")
+    @XmlJavaTypeAdapter(CustomLocalDateTimeAdapter.class)
     private LocalDateTime chargerStateUpdatedAt;
 
     public Station EVInfoToStation() {

@@ -1,9 +1,10 @@
 package com.ecar.servicestation.modules.main.exception;
 
+import com.ecar.servicestation.infra.address.exception.AddressServiceException;
 import com.ecar.servicestation.infra.auth.exception.CAuthenticationEntryPointException;
 import com.ecar.servicestation.infra.data.exception.EVINfoNotFoundException;
 import com.ecar.servicestation.infra.data.exception.EVInfoServiceException;
-import com.ecar.servicestation.infra.map.exception.ReverseGeoCodingException;
+import com.ecar.servicestation.infra.map.exception.MapServiceException;
 import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
 import com.ecar.servicestation.modules.user.exception.CUserLoginFailedException;
@@ -12,7 +13,6 @@ import com.ecar.servicestation.modules.user.exception.CUserSignUpFailedException
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -65,10 +65,16 @@ public class ExceptionAdvice {
         return responseService.getFailedResult(parseInt(getMessage("evInfoServiceException.code")), getMessage("evInfoServiceException.msg"));
     }
 
-    @ExceptionHandler(ReverseGeoCodingException.class)
+    @ExceptionHandler(MapServiceException.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
-    public CommonResult reverseGeoCodingException(HttpServletRequest request, ReverseGeoCodingException e) {
-        return responseService.getFailedResult(parseInt(getMessage("reverseGeoCodingException.code")), getMessage("reverseGeoCodingException.msg"));
+    public CommonResult mapServiceException(HttpServletRequest request, MapServiceException e) {
+        return responseService.getFailedResult(parseInt(getMessage("mapServiceException.code")), getMessage("mapServiceException.msg"));
+    }
+
+    @ExceptionHandler(AddressServiceException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    public CommonResult addressServiceException(HttpServletRequest request, AddressServiceException e) {
+        return responseService.getFailedResult(parseInt(getMessage("addressServiceException.code")), getMessage("addressServiceException.msg"));
     }
 
     // 인증 예외 //
