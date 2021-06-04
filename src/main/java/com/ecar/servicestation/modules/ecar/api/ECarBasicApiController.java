@@ -27,7 +27,7 @@ public class ECarBasicApiController {
     })
     @ApiOperation(value = "전기차 충전소 단건 조회", notes = "전기차 충전소 단건 조회 요청")
     @GetMapping("/station/{id}")
-    public SingleResult<StationInfo> getStationInfo(@PathVariable @ApiParam(value = "충전소 ID") Long id) {
+    public SingleResult<StationInfo> getStationInfo(@ApiParam(value = "충전소 ID") @PathVariable Long id) {
         return responseService.getSingleResult(eCarBasicService.getStationInfo(id));
     }
 
@@ -37,7 +37,7 @@ public class ECarBasicApiController {
     })
     @ApiOperation(value = "전기차 충전소 단건 조회 및 기록 저장", notes = "전기차 충전소 단건 조회 및 기록 저장 요청")
     @GetMapping("/station/{id}/register")
-    public SingleResult<StationInfo> getChargerInfoAndSaveHistory(@PathVariable @ApiParam(value = "충전기 ID") Long id) {
+    public SingleResult<StationInfo> getChargerInfoAndSaveHistory(@ApiParam(value = "충전기 ID") @PathVariable Long id) {
         return responseService.getSingleResult(eCarBasicService.getChargerInfoAndSaveHistory(id));
     }
 
@@ -47,7 +47,7 @@ public class ECarBasicApiController {
     })
     @ApiOperation(value = "전기차 충전소의 충전기 단건 조회", notes = "전기차 충전소의 충전기 단건 조회 요청")
     @GetMapping("/charger/{id}")
-    public SingleResult<Charger> getChargerInfo(@PathVariable @ApiParam(value = "충전기 ID") Long id) {
+    public SingleResult<Charger> getChargerInfo(@ApiParam(value = "충전기 ID") @PathVariable Long id) {
         return responseService.getSingleResult(eCarBasicService.getChargerInfo(id));
     }
 

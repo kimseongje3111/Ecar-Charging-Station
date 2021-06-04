@@ -12,11 +12,19 @@ signUpFailed:
 
 stationNotFound:
   code: "-1003"
-  msg: "충전소를 찾을 수 없습니다."
+  msg: "해당 충전소를 찾을 수 없습니다."
 
 chargerNotFound:
   code: "-1004"
-  msg: "충전기를 찾을 수 없습니다."
+  msg: "해당 충전기를 찾을 수 없습니다."
+
+bookmarkFaild:
+  code: "-1005"
+  msg: "이미 존재하는 즐겨찾기입니다."
+
+bookmarkNotFound:
+  code: "-1006"
+  msg: "해당 즐겨찾기를 찾을 수 없습니다."
 
 entryPoint:
   code: "-2000"

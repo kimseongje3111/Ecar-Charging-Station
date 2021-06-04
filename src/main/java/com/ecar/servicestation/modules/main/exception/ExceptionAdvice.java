@@ -9,9 +9,7 @@ import com.ecar.servicestation.modules.ecar.exception.CChargerNotFoundException;
 import com.ecar.servicestation.modules.ecar.exception.CStationNotFoundException;
 import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
-import com.ecar.servicestation.modules.user.exception.CUserLoginFailedException;
-import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
-import com.ecar.servicestation.modules.user.exception.CUserSignUpFailedException;
+import com.ecar.servicestation.modules.user.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -63,6 +61,18 @@ public class ExceptionAdvice {
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     protected CommonResult chargerNotFound(HttpServletRequest request, CChargerNotFoundException e) {
         return responseService.getFailedResult(parseInt(getMessage("chargerNotFound.code")), getMessage("chargerNotFound.msg"));
+    }
+
+    @ExceptionHandler(CBookmarkFailedException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult bookmarkFailed(HttpServletRequest request, CBookmarkFailedException e) {
+        return responseService.getFailedResult(parseInt(getMessage("bookmarkFailed.code")), getMessage("bookmarkFailed.msg"));
+    }
+
+    @ExceptionHandler(CBookmarkNotFoundException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult bookmarkNotFound(HttpServletRequest request, CBookmarkNotFoundException e) {
+        return responseService.getFailedResult(parseInt(getMessage("bookmarkNotFound.code")), getMessage("bookmarkNotFound.msg"));
     }
 
     // 외부 API 예외 //

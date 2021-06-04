@@ -18,6 +18,14 @@ chargerNotFound:
   code: "-1004"
   msg: "The charger not found."
 
+bookmarkFaild:
+  code: "-1005"
+  msg: "The bookmark already exists."
+
+bookmarkNotFound:
+  code: "-1006"
+  msg: "The bookmark not found."
+
 entryPoint:
   code: "-2000"
   msg: "You do not have permission to access this resources."
