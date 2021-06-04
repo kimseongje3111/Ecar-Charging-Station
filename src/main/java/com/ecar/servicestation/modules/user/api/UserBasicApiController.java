@@ -1,14 +1,18 @@
 package com.ecar.servicestation.modules.user.api;
 
+import com.ecar.servicestation.modules.main.dto.ListResult;
 import com.ecar.servicestation.modules.main.dto.SingleResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
 import com.ecar.servicestation.modules.user.domain.Account;
+import com.ecar.servicestation.modules.user.dto.UserHistory;
 import com.ecar.servicestation.modules.user.service.UserBasicService;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Api(tags = {"(2) USER BASIC SERVICE"})
 @RestController
@@ -29,6 +33,16 @@ public class UserBasicApiController {
         return responseService.getSingleResult(userBasicService.getUserBasicInfo());
     }
 
-    // TODO : 최근 검색 목록 조회
-    // TODO : 충전소 즐겨 찾기 등록/조회/삭제
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급된 ACCESS_TOKEN",
+                    required = true, dataType = "String", paramType = "header")
+    })
+    @ApiOperation(value = "최근 검색 목록(충전소) 조회", notes = "최근 검색 목록(충전소) 조회")
+    @GetMapping("/history")
+    public ListResult<UserHistory> getUserHistories(
+            @ApiParam(value = "페이지") @PageableDefault(value = 10, sort = "searchedAt", direction = DESC) Pageable pageable) {
+
+        return responseService.getListResult(userBasicService.getUserHistories(pageable));
+    }
+
 }
