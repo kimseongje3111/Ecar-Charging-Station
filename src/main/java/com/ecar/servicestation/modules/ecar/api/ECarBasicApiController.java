@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api(tags = {"(4) E_CAR BASIC SERVICE"})
+@Api(tags = {"(5) E_CAR BASIC SERVICE"})
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ecar")

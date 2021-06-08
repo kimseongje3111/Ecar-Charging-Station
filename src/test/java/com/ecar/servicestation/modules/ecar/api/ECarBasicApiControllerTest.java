@@ -4,7 +4,7 @@ import com.ecar.servicestation.infra.MockMvcTest;
 import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.Station;
-import com.ecar.servicestation.modules.ecar.factory.ECarFactory;
+import com.ecar.servicestation.modules.ecar.factory.ECarStationFactory;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.repository.HistoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,14 +36,14 @@ class ECarBasicApiControllerTest {
     WithLoginAccount withLoginAccount;
 
     @Autowired
-    ECarFactory eCarFactory;
+    ECarStationFactory eCarStationFactory;
 
     @Autowired
     HistoryRepository historyRepository;
 
     @BeforeEach
     void beforeEach() {
-        this.station = eCarFactory.createStationAndAddCharger();
+        this.station = eCarStationFactory.createStationAndAddCharger();
     }
 
     @Test

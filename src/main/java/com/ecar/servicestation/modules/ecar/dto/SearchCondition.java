@@ -3,13 +3,18 @@ package com.ecar.servicestation.modules.ecar.dto;
 import io.swagger.annotations.ApiParam;
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
 @Data
 public class SearchCondition {
 
     @ApiParam(value = "검색 유형", defaultValue = "0")
+    @Pattern(regexp = "^[01]$")
     private Integer searchType = 0;
 
     @ApiParam(value = "검색 대상", required = true)
+    @NotNull
     private String search;
 
     @ApiParam(value = "충전기 상태")

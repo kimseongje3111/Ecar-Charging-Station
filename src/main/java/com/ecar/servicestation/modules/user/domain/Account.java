@@ -63,12 +63,17 @@ public class Account implements UserDetails {
     @Builder.Default
     @JsonProperty(access = WRITE_ONLY)
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<History> histories = new ArrayList<>();
+
+    @Builder.Default
+    @JsonProperty(access = WRITE_ONLY)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Bookmark> bookmarks = new ArrayList<>();
 
     @Builder.Default
     @JsonProperty(access = WRITE_ONLY)
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-    private List<History> histories = new ArrayList<>();
+    private List<Car> myCars = new ArrayList<>();
 
     // Security UserDetails 메서드 재정의 //
 
@@ -109,14 +114,27 @@ public class Account implements UserDetails {
 
     // 연관 관계 설정 메서드 //
 
+    public void addHistory(History history) {
+        this.histories.add(history);
+        history.setAccount(this);
+    }
+
     public void addBookmark(Bookmark bookmark) {
         this.bookmarks.add(bookmark);
         bookmark.setAccount(this);
     }
 
-    public void addHistory(History history) {
-        this.histories.add(history);
-        history.setAccount(this);
+    public void removeBookmark(Bookmark bookmark) {
+        this.bookmarks.remove(bookmark);
+    }
+
+    public void addCar(Car car) {
+        this.myCars.add(car);
+        car.setAccount(this);
+    }
+
+    public void removeCar(Car car) {
+        this.myCars.remove(car);
     }
 
     // 비지니스 메서드 //

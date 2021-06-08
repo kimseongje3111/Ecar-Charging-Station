@@ -12,8 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 
-@Api(tags = {"(3) E_CAR SEARCH SERVICE"})
+
+@Api(tags = {"(4) E_CAR SEARCH SERVICE"})
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ecar")
@@ -29,7 +31,7 @@ public class ECarSearchApiController {
     @ApiOperation(value = "전기차 충전소 검색", notes = "입력 주소 및 검색 조건에 맞는 주변 전기차 충전소 정보 요청")
     @GetMapping("/find")
     public ListResult<Charger> searchECarChargingStation(
-            SearchCondition condition,
+            @Valid SearchCondition condition,
             @ApiParam(value = "페이지") @PageableDefault(size = 10) Pageable pageable) {
 
         return responseService.getListResult(eCarSearchService.getSearchResults(condition, pageable));
@@ -42,7 +44,7 @@ public class ECarSearchApiController {
     @ApiOperation(value = "전기차 충전소 검색", notes = "해당 위도/경도의 주변 전기차 충전소 정보 요청")
     @GetMapping("/find/location")
     public ListResult<Charger> searchECarChargingStationByLocation(
-            SearchLocation location,
+            @Valid SearchLocation location,
             @ApiParam(value = "페이지") @PageableDefault(size = 10) Pageable pageable) {
 
         return responseService.getListResult(eCarSearchService.getSearchResultsByLocation(location, pageable));

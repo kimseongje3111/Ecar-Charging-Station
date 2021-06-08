@@ -13,6 +13,8 @@ import com.ecar.servicestation.modules.user.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -30,6 +32,13 @@ public class ExceptionAdvice {
 
     private final ResponseService responseService;
     private final MessageSource messageSource;
+
+    // 요청 파라미터 예외 //
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(BAD_REQUEST)
+    protected CommonResult methodArgumentNotValid(HttpServletRequest request, MethodArgumentNotValidException e) {
+        return responseService.getFailedResult(parseInt(getMessage("methodArgumentNotValid.code")), getMessage("methodArgumentNotValid.msg"));
+    }
 
     // 서비스 예외 //
 
@@ -73,6 +82,12 @@ public class ExceptionAdvice {
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     protected CommonResult bookmarkNotFound(HttpServletRequest request, CBookmarkNotFoundException e) {
         return responseService.getFailedResult(parseInt(getMessage("bookmarkNotFound.code")), getMessage("bookmarkNotFound.msg"));
+    }
+
+    @ExceptionHandler(CCarNotFoundException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult carNotFound(HttpServletRequest request, CCarNotFoundException e) {
+        return responseService.getFailedResult(parseInt(getMessage("carNotFound.code")), getMessage("carNotFound.msg"));
     }
 
     // 외부 API 예외 //

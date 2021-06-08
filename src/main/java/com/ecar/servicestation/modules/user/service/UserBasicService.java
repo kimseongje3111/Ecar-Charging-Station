@@ -66,12 +66,14 @@ public class UserBasicService {
             throw new CBookmarkFailedException();
         }
 
-        bookmarkRepository.save(
-                Bookmark.builder()
-                        .account(account)
-                        .station(station)
-                        .registeredAt(LocalDateTime.now())
-                        .build()
+        account.addBookmark(
+                bookmarkRepository.save(
+                        Bookmark.builder()
+                                .account(account)
+                                .station(station)
+                                .registeredAt(LocalDateTime.now())
+                                .build()
+                )
         );
     }
 
@@ -99,6 +101,7 @@ public class UserBasicService {
             throw new CBookmarkNotFoundException();
         }
 
+        account.removeBookmark(bookmark);
         bookmarkRepository.delete(bookmark);
     }
 }

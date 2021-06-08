@@ -54,12 +54,14 @@ public class ECarBasicService {
         Account account = userRepository.findAccountByEmail(authentication.getName()).orElseThrow(CUserNotFoundException::new);
         Station station = stationRepository.findById(id).orElseThrow(CStationNotFoundException::new);
 
-        historyRepository.save(
-                History.builder()
-                        .account(account)
-                        .station(station)
-                        .searchedAt(LocalDateTime.now())
-                        .build()
+        account.addHistory(
+                historyRepository.save(
+                        History.builder()
+                                .account(account)
+                                .station(station)
+                                .searchedAt(LocalDateTime.now())
+                                .build()
+                )
         );
 
         return modelMapper.map(station, StationInfo.class);

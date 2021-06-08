@@ -85,23 +85,6 @@ class UserLoginAndSignUpApiControllerTest {
     }
 
     @Test
-    @DisplayName("[회원가입]실패 - 필수 요청 파라미터 부재")
-    public void signUp_failed_by_missing_required_request_parameters() throws Exception {
-        // Given
-        SignUpRequest signUpRequest = new SignUpRequest();
-        signUpRequest.setPassword("1234");
-        signUpRequest.setEmail("admin@test.com");
-
-        // When
-        // Then
-        assertThrows(NestedServletException.class, () -> mockMvc.perform(
-                post(USER + "/sign-up")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(signUpRequest))
-        ));
-    }
-
-    @Test
     @DisplayName("[회원가입]실패 - 이미 존재하는 계정(이메일 중복)")
     public void signUp_failed_by_duplicated_email() throws Exception {
         // Given

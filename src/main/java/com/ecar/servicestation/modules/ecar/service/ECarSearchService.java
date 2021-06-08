@@ -59,20 +59,12 @@ public class ECarSearchService {
 
     @Transactional
     public List<Charger> getSearchResults(SearchCondition condition, Pageable pageable) {
-        if (condition.getSearch() == null) {
-            throw new EVINfoNotFoundException();
-        }
+        Set<EVInfo> evInfos = new HashSet<>();
 
         // 주소(0) 또는 충전소명(1) 기반 검색 //
 
-        Set<EVInfo> evInfos = new HashSet<>();
-
         if (condition.getSearchType() == 0) {
             List<String> searchList = dataPreprocessing(condition.getSearch());
-
-            if (searchList.size() == 0) {
-                throw new EVINfoNotFoundException();
-            }
 
             for (int i = 0; i < searchList.size(); i++) {
                 if ((i + 1) % API_REQUEST_MAX_COUNT == 0) {
@@ -89,7 +81,7 @@ public class ECarSearchService {
                 evInfos.addAll(eCarChargingStationInfoProvider.getData(searchList.get(i), 1, 50));
             }
 
-        } else {
+        } else if (condition.getSearchType() == 1) {
             evInfos =
                     eCarChargingStationInfoProvider.getData(condition.getSearch(), 1, 50)
                             .stream()
@@ -102,20 +94,12 @@ public class ECarSearchService {
 
     @Transactional
     public List<Charger> getSearchResultsByLocation(SearchLocation location, Pageable pageable) {
-        if (location.getLatitude() == null || location.getLongitude() == null) {
-            throw new EVINfoNotFoundException();
-        }
-
         MapLocation mapLocation = new MapLocation();
         mapLocation.setLatitude(location.getLatitude());
         mapLocation.setLongitude(location.getLongitude());
 
         Set<EVInfo> evInfos = new HashSet<>();
         List<String> searchList = dataPreprocessing(mapService.reverseGeoCoding(mapLocation));
-
-        if (searchList.size() == 0) {
-            throw new EVINfoNotFoundException();
-        }
 
         for (int i = 0; i < searchList.size(); i++) {
             if ((i + 1) % API_REQUEST_MAX_COUNT == 0) {
@@ -155,10 +139,18 @@ public class ECarSearchService {
                     searchSet.addAll(values.stream().map(Address::getPrefixOfNewAddress).collect(Collectors.toList()));
                 });
 
+        if (searchSet.size() == 0) {
+            throw new EVINfoNotFoundException();
+        }
+
         return searchSet.stream().sorted().collect(Collectors.toList());
     }
 
     private List<Long> getUpdatedChargers(Set<EVInfo> evInfos) {
+        if (evInfos.size() == 0) {
+            throw new EVINfoNotFoundException();
+        }
+
         List<Long> chargerIds = new ArrayList<>();
 
         for (EVInfo evInfo : evInfos) {

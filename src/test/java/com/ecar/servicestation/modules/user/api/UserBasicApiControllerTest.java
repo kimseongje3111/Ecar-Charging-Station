@@ -3,7 +3,7 @@ package com.ecar.servicestation.modules.user.api;
 import com.ecar.servicestation.infra.MockMvcTest;
 import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.ecar.domain.Station;
-import com.ecar.servicestation.modules.ecar.factory.ECarFactory;
+import com.ecar.servicestation.modules.ecar.factory.ECarStationFactory;
 import com.ecar.servicestation.modules.user.domain.Bookmark;
 import com.ecar.servicestation.modules.user.domain.History;
 import com.ecar.servicestation.modules.user.factory.BookmarkFactory;
@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -35,7 +34,7 @@ class UserBasicApiControllerTest {
     WithLoginAccount withLoginAccount;
 
     @Autowired
-    ECarFactory eCarFactory;
+    ECarStationFactory eCarStationFactory;
 
     @Autowired
     HistoryFactory historyFactory;
@@ -95,7 +94,7 @@ class UserBasicApiControllerTest {
     @DisplayName("[최근 검색 목록 조회]정상 처리")
     public void find_histories_success() throws Exception {
         // Given
-        Station station = eCarFactory.createStationAndAddCharger();
+        Station station = eCarStationFactory.createStationAndAddCharger();
         History history = historyFactory.createHistory(withLoginAccount.getAccount(), station);
 
         // When
@@ -118,7 +117,7 @@ class UserBasicApiControllerTest {
     @DisplayName("[즐겨찾기 등록]정상 처리")
     public void save_bookmark_success() throws Exception {
         // Given
-        Station station = eCarFactory.createStationAndAddCharger();
+        Station station = eCarStationFactory.createStationAndAddCharger();
 
         // When
         ResultActions perform =
@@ -142,7 +141,7 @@ class UserBasicApiControllerTest {
     @DisplayName("[즐겨찾기 목록 조회]정상 처리")
     public void find_bookmark_success() throws Exception {
         // Given
-        Station station = eCarFactory.createStationAndAddCharger();
+        Station station = eCarStationFactory.createStationAndAddCharger();
         Bookmark bookmark = bookmarkFactory.createBookmark(withLoginAccount.getAccount(), station);
 
         // When
@@ -165,7 +164,7 @@ class UserBasicApiControllerTest {
     @DisplayName("[즐겨찾기 삭제]정상 처리")
     public void delete_bookmark_success() throws Exception {
         // Given
-        Station station = eCarFactory.createStationAndAddCharger();
+        Station station = eCarStationFactory.createStationAndAddCharger();
         Bookmark bookmark = bookmarkFactory.createBookmark(withLoginAccount.getAccount(), station);
 
         // When
@@ -190,7 +189,7 @@ class UserBasicApiControllerTest {
     @DisplayName("[즐겨찾기 삭제]실패 - 즐겨찾기 목록에 없는 삭제 요청")
     public void delete_bookmark_failed_by_not_found() throws Exception {
         // Given
-        Station station = eCarFactory.createStationAndAddCharger();
+        Station station = eCarStationFactory.createStationAndAddCharger();
         Bookmark bookmark = bookmarkFactory.createBookmark(withLoginAccount.getAccount(), station);
 
         // When

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
-public class ECarFactory {
+public class ECarStationFactory {
 
     private final StationRepository stationRepository;
     private final ChargerRepository chargerRepository;
