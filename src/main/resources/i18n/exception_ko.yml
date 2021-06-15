@@ -34,6 +34,18 @@ carNotFound:
   code: "-1007"
   msg: "해당 차량을 찾을 수 없습니다."
 
+reserveFailed:
+  code: "-1008"
+  msg: "해당 예약 API 요청을 처리할 수 없습니다."
+
+bankNotFound:
+  code: "-1009"
+  msg: "해당 계좌를 찾을 수 없습니다."
+
+bankAuthFailed:
+  code: "-1010"
+  msg: "해당 계좌 인증을 실패하였습니다."
+
 entryPoint:
   code: "-2000"
   msg: "해당 리소스에 접근하기 위한 권한이 없습니다."

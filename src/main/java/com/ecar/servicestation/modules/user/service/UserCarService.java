@@ -2,7 +2,7 @@ package com.ecar.servicestation.modules.user.service;
 
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Car;
-import com.ecar.servicestation.modules.user.dto.RegisterCarRequest;
+import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequest;
 import com.ecar.servicestation.modules.user.exception.CCarNotFoundException;
 import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
@@ -25,12 +25,6 @@ public class UserCarService {
     private final CarRepository carRepository;
     private final ModelMapper modelMapper;
 
-    public Account getUserBasicInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        return userRepository.findAccountByEmail(authentication.getName()).orElseThrow(CUserNotFoundException::new);
-    }
-
     @Transactional
     public void saveCar(RegisterCarRequest request) {
         Account account = getUserBasicInfo();
@@ -45,11 +39,17 @@ public class UserCarService {
     }
 
     @Transactional
-    public void deleteCar(Long id) {
+    public void deleteCar(long id) {
         Account account = getUserBasicInfo();
         Car car = carRepository.findById(id).orElseThrow(CCarNotFoundException::new);
 
         account.removeCar(car);
         carRepository.delete(car);
+    }
+
+    private Account getUserBasicInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        return userRepository.findAccountByEmail(authentication.getName()).orElseThrow(CUserNotFoundException::new);
     }
 }

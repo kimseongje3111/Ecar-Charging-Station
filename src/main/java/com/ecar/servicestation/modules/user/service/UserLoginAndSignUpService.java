@@ -5,8 +5,8 @@ import com.ecar.servicestation.infra.auth.AuthTokenProvider;
 import com.ecar.servicestation.infra.mail.EmailMessage;
 import com.ecar.servicestation.infra.mail.MailService;
 import com.ecar.servicestation.modules.user.domain.Account;
-import com.ecar.servicestation.modules.user.dto.LoginRequest;
-import com.ecar.servicestation.modules.user.dto.SignUpRequest;
+import com.ecar.servicestation.modules.user.dto.request.LoginRequest;
+import com.ecar.servicestation.modules.user.dto.request.SignUpRequest;
 import com.ecar.servicestation.modules.user.exception.CUserLoginFailedException;
 import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.exception.CUserSignUpFailedException;
@@ -34,12 +34,6 @@ public class UserLoginAndSignUpService {
     private final MailService mailService;
     private final TemplateEngine templateEngine;
     private final AppProperties appProperties;
-
-    public Account findByEmail(String email) {
-        Optional<Account> account = userRepository.findAccountByEmail(email);
-
-        return account.orElseThrow(CUserNotFoundException::new);
-    }
 
     public String login(LoginRequest request) {      // 로그인 성공시, 인증 token 발급
         Account account = findByEmail(request.getEmail());
@@ -88,6 +82,12 @@ public class UserLoginAndSignUpService {
         if (token.equals(account.getEmailAuthToken())) {
             account.successEmailAuthentication();
         }
+    }
+
+    private Account findByEmail(String email) {
+        Optional<Account> account = userRepository.findAccountByEmail(email);
+
+        return account.orElseThrow(CUserNotFoundException::new);
     }
 
     private String getContentOfAuthenticationEmail(Account account) {

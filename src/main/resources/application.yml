@@ -31,4 +31,6 @@ logging:
 
 app:
   host: http://localhost:8080
+  fastChargingFares: 250
+  slowChargingFares: 100
 

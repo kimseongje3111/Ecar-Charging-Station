@@ -24,6 +24,7 @@ public class Car {
 
     private String carType;
 
+    @Column(nullable = false, unique = true)
     private String carNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)

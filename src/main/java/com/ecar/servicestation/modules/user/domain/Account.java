@@ -30,7 +30,7 @@ public class Account implements UserDetails {
     @Column(name = "account_id")
     private Long id;
 
-    // 유저 기본 정보 //
+    // 유저 정보 //
 
     @Column(nullable = false, length = 100)
     private String userName;
@@ -44,7 +44,7 @@ public class Account implements UserDetails {
 
     private LocalDateTime joinedAt;
 
-    // 유저 인증 정보 //
+    // 인증 정보 //
 
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)
@@ -58,7 +58,7 @@ public class Account implements UserDetails {
     @JsonProperty(access = WRITE_ONLY)
     private LocalDateTime emailAuthTokenGeneratedAt;
 
-    // 개인화 서비스 //
+    // 유저 서비스 //
 
     @Builder.Default
     @JsonProperty(access = WRITE_ONLY)
@@ -74,6 +74,15 @@ public class Account implements UserDetails {
     @JsonProperty(access = WRITE_ONLY)
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Car> myCars = new ArrayList<>();
+
+    @Builder.Default
+    @JsonProperty(access = WRITE_ONLY)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<Bank> myBanks = new ArrayList<>();
+
+    private Integer cash;
+
+    private Integer cashPoint;
 
     // Security UserDetails 메서드 재정의 //
 
@@ -137,6 +146,19 @@ public class Account implements UserDetails {
         this.myCars.remove(car);
     }
 
+    public void addBank(Bank bank) {
+        if (this.myBanks.size() == 0) {
+            bank.setMainUsed(true);
+        }
+
+        this.myBanks.add(bank);
+        bank.setAccount(this);
+    }
+
+    public void removeBank(Bank bank) {
+        this.myBanks.remove(bank);
+    }
+
     // 비지니스 메서드 //
 
     public void generateEmailAuthToken() {
@@ -147,5 +169,6 @@ public class Account implements UserDetails {
     public void successEmailAuthentication() {
         this.emailAuthVerified = true;
         this.joinedAt = LocalDateTime.now();
+        this.cashPoint = 5000;
     }
 }

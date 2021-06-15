@@ -2,7 +2,7 @@ package com.ecar.servicestation.modules.ecar.service;
 
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.Station;
-import com.ecar.servicestation.modules.ecar.dto.StationInfo;
+import com.ecar.servicestation.modules.ecar.dto.response.StationInfo;
 import com.ecar.servicestation.modules.ecar.exception.CChargerNotFoundException;
 import com.ecar.servicestation.modules.ecar.exception.CStationNotFoundException;
 import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
@@ -32,7 +32,7 @@ public class ECarBasicService {
     private final HistoryRepository historyRepository;
     private final ModelMapper modelMapper;
 
-    public StationInfo getStationInfo(Long id) {
+    public StationInfo getStationInfo(long id) {
         Station station = stationRepository.findById(id).orElseThrow(CStationNotFoundException::new);
 
         return modelMapper.map(station, StationInfo.class);
@@ -49,7 +49,7 @@ public class ECarBasicService {
     }
 
     @Transactional
-    public StationInfo getChargerInfoAndSaveHistory(Long id) {
+    public StationInfo getChargerInfoAndSaveHistory(long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Account account = userRepository.findAccountByEmail(authentication.getName()).orElseThrow(CUserNotFoundException::new);
         Station station = stationRepository.findById(id).orElseThrow(CStationNotFoundException::new);

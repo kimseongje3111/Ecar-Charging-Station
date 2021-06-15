@@ -1,7 +1,7 @@
 package com.ecar.servicestation.modules.ecar.api;
 
 import com.ecar.servicestation.modules.ecar.domain.Charger;
-import com.ecar.servicestation.modules.ecar.dto.StationInfo;
+import com.ecar.servicestation.modules.ecar.dto.response.StationInfo;
 import com.ecar.servicestation.modules.ecar.service.ECarBasicService;
 import com.ecar.servicestation.modules.main.dto.SingleResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;

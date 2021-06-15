@@ -1,4 +1,4 @@
-package com.ecar.servicestation.modules.ecar.dto;
+package com.ecar.servicestation.modules.ecar.dto.request;
 
 import io.swagger.annotations.ApiParam;
 import lombok.Data;

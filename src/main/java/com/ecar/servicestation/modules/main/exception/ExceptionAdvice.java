@@ -6,6 +6,7 @@ import com.ecar.servicestation.infra.data.exception.EVINfoNotFoundException;
 import com.ecar.servicestation.infra.data.exception.EVInfoServiceException;
 import com.ecar.servicestation.infra.map.exception.MapServiceException;
 import com.ecar.servicestation.modules.ecar.exception.CChargerNotFoundException;
+import com.ecar.servicestation.modules.ecar.exception.CReserveFailedException;
 import com.ecar.servicestation.modules.ecar.exception.CStationNotFoundException;
 import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
@@ -13,7 +14,6 @@ import com.ecar.servicestation.modules.user.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -88,6 +88,24 @@ public class ExceptionAdvice {
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     protected CommonResult carNotFound(HttpServletRequest request, CCarNotFoundException e) {
         return responseService.getFailedResult(parseInt(getMessage("carNotFound.code")), getMessage("carNotFound.msg"));
+    }
+
+    @ExceptionHandler(CReserveFailedException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult reserveFailed(HttpServletRequest request, CReserveFailedException e) {
+        return responseService.getFailedResult(parseInt(getMessage("reserveFailed.code")), getMessage("reserveFailed.msg"));
+    }
+
+    @ExceptionHandler(CBankNotFoundException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult bankNotFound(HttpServletRequest request, CBankNotFoundException e) {
+        return responseService.getFailedResult(parseInt(getMessage("bankNotFound.code")), getMessage("bankNotFound.msg"));
+    }
+
+    @ExceptionHandler(CBankAuthFailedException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult bankAuthFailed(HttpServletRequest request, CBankAuthFailedException e) {
+        return responseService.getFailedResult(parseInt(getMessage("bankAuthFailed.code")), getMessage("bankAuthFailed.msg"));
     }
 
     // 외부 API 예외 //

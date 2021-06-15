@@ -6,8 +6,8 @@ import com.ecar.servicestation.modules.ecar.repository.StationRepository;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Bookmark;
 import com.ecar.servicestation.modules.user.domain.History;
-import com.ecar.servicestation.modules.user.dto.UserBookmark;
-import com.ecar.servicestation.modules.user.dto.UserHistory;
+import com.ecar.servicestation.modules.user.dto.response.UserBookmark;
+import com.ecar.servicestation.modules.user.dto.response.UserHistory;
 import com.ecar.servicestation.modules.user.exception.CBookmarkFailedException;
 import com.ecar.servicestation.modules.user.exception.CBookmarkNotFoundException;
 import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
@@ -58,7 +58,7 @@ public class UserBasicService {
     }
 
     @Transactional
-    public void saveBookmark(Long id) {
+    public void saveBookmark(long id) {
         Account account = getUserBasicInfo();
         Station station = stationRepository.findById(id).orElseThrow(CStationNotFoundException::new);
 
@@ -92,7 +92,7 @@ public class UserBasicService {
     }
 
     @Transactional
-    public void deleteBookmark(Long id) {
+    public void deleteBookmark(long id) {
         Account account = getUserBasicInfo();
         Station station = stationRepository.findById(id).orElseThrow(CStationNotFoundException::new);
         Bookmark bookmark = bookmarkRepository.findBookmarkByAccountAndStation(account, station);

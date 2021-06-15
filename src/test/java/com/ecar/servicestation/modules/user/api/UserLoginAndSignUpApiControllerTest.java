@@ -5,8 +5,8 @@ import com.ecar.servicestation.infra.mail.EmailMessage;
 import com.ecar.servicestation.infra.mail.MailService;
 import com.ecar.servicestation.modules.user.factory.UserFactory;
 import com.ecar.servicestation.modules.user.domain.Account;
-import com.ecar.servicestation.modules.user.dto.LoginRequest;
-import com.ecar.servicestation.modules.user.dto.SignUpRequest;
+import com.ecar.servicestation.modules.user.dto.request.LoginRequest;
+import com.ecar.servicestation.modules.user.dto.request.SignUpRequest;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import com.ecar.servicestation.modules.user.service.UserLoginAndSignUpService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,12 +17,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.util.NestedServletException;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

@@ -3,7 +3,7 @@ package com.ecar.servicestation.modules.ecar.repository.custom;
 
 import com.ecar.servicestation.infra.querydsl.Querydsl4RepositorySupport;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
-import com.ecar.servicestation.modules.ecar.dto.SearchCondition;
+import com.ecar.servicestation.modules.ecar.dto.request.SearchCondition;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -4,7 +4,7 @@ import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.dto.ListResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
 import com.ecar.servicestation.modules.user.domain.Car;
-import com.ecar.servicestation.modules.user.dto.RegisterCarRequest;
+import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequest;
 import com.ecar.servicestation.modules.user.service.UserCarService;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;

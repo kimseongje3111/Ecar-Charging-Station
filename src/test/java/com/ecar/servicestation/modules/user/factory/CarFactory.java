@@ -2,7 +2,7 @@ package com.ecar.servicestation.modules.user.factory;
 
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Car;
-import com.ecar.servicestation.modules.user.dto.RegisterCarRequest;
+import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequest;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

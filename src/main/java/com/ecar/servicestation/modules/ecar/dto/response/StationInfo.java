@@ -1,4 +1,4 @@
-package com.ecar.servicestation.modules.ecar.dto;
+package com.ecar.servicestation.modules.ecar.dto.response;
 
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import lombok.Data;

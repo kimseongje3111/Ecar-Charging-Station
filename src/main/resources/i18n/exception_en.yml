@@ -34,6 +34,18 @@ carNotFound:
   code: "-1007"
   msg: "The car not found."
 
+reserveFailed:
+  code: "-1008"
+  msg: "Processing of the reservation API request failed."
+
+bankNotFound:
+  code: "-1009"
+  msg: "The bank account not found."
+
+bankAuthFailed:
+  code: "-1010"
+  msg: "The bank account authentication failed."
+
 entryPoint:
   code: "-2000"
   msg: "You do not have permission to access this resources."

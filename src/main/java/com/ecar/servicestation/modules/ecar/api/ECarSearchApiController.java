@@ -1,8 +1,8 @@
 package com.ecar.servicestation.modules.ecar.api;
 
 import com.ecar.servicestation.modules.ecar.domain.Charger;
-import com.ecar.servicestation.modules.ecar.dto.SearchLocation;
-import com.ecar.servicestation.modules.ecar.dto.SearchCondition;
+import com.ecar.servicestation.modules.ecar.dto.request.SearchLocation;
+import com.ecar.servicestation.modules.ecar.dto.request.SearchCondition;
 import com.ecar.servicestation.modules.ecar.service.ECarSearchService;
 import com.ecar.servicestation.modules.main.dto.ListResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 
-@Api(tags = {"(4) E_CAR SEARCH SERVICE"})
+@Api(tags = {"(6) E_CAR SEARCH SERVICE"})
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ecar")

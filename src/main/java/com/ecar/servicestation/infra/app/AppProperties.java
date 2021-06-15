@@ -10,4 +10,8 @@ import org.springframework.stereotype.Component;
 public class AppProperties {
 
     private String host;
+
+    private int fastChargingFares;
+
+    private int slowChargingFares;
 }
