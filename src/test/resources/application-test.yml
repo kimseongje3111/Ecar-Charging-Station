@@ -6,7 +6,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
     properties:
       hibernate:
         default_batch_fetch_size: 1000
@@ -24,6 +24,8 @@ logging:
 
 app:
   host: http://localhost:8080
+  fastChargingFares: 250
+  slowChargingFares: 100
 
 ecarapi:
   url: http://openapi.kepco.co.kr/service/EvInfoServiceV2/getEvSearchList

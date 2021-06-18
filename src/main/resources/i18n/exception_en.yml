@@ -46,6 +46,10 @@ bankAuthFailed:
   code: "-1010"
   msg: "The bank account authentication failed."
 
+userCashFailed:
+  code: "-1011"
+  msg: "The payment or cash refund failed."
+
 entryPoint:
   code: "-2000"
   msg: "You do not have permission to access this resources."

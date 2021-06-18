@@ -108,6 +108,12 @@ public class ExceptionAdvice {
         return responseService.getFailedResult(parseInt(getMessage("bankAuthFailed.code")), getMessage("bankAuthFailed.msg"));
     }
 
+    @ExceptionHandler(CUserCashFailedException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult userCashFailed(HttpServletRequest request, CUserCashFailedException e) {
+        return responseService.getFailedResult(parseInt(getMessage("userCashFailed.code")), getMessage("userCashFailed.msg"));
+    }
+
     // 외부 API 예외 //
 
     @ExceptionHandler(EVINfoNotFoundException.class)

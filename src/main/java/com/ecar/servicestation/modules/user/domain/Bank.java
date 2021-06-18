@@ -1,5 +1,6 @@
 package com.ecar.servicestation.modules.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -10,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 
 @Entity
 @Getter
@@ -34,18 +37,23 @@ public class Bank {
     @Column(nullable = false)
     private String bankAccountOwner;
 
-    private String bankAccountPassword;
-
+    @JsonProperty(access = WRITE_ONLY)
     private String paymentPassword;
 
+    @JsonProperty(access = WRITE_ONLY)
     private String bankAccountAuthMsg;
 
+    @JsonProperty(access = WRITE_ONLY)
+    private String bankAccountAccessToken;
+
+    @JsonProperty(access = WRITE_ONLY)
     private boolean bankAccountVerified;
 
     private boolean mainUsed;
 
     private LocalDateTime registeredAt;
 
+    @JsonProperty(access = WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
@@ -68,13 +76,13 @@ public class Bank {
         }
     }
 
-    public void setPasswords(String bankAccountPassword, String paymentPassword) {
-        this.bankAccountPassword = bankAccountPassword;
-        this.paymentPassword = paymentPassword;
-    }
-
     public void successBankAccountAuthentication() {
         this.bankAccountVerified = true;
         this.registeredAt = LocalDateTime.now();
+    }
+
+    public void setPaymentPasswordAndAccessToken(String password, String token) {
+        this.paymentPassword = password;
+        this.bankAccountAccessToken = token;
     }
 }

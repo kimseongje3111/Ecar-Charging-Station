@@ -101,7 +101,6 @@ public class UserBasicService {
             throw new CBookmarkNotFoundException();
         }
 
-        account.removeBookmark(bookmark);
-        bookmarkRepository.delete(bookmark);
+        bookmarkRepository.delete(account.removeBookmark(bookmark));
     }
 }

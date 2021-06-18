@@ -7,6 +7,7 @@ import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequest;
 import com.ecar.servicestation.modules.user.factory.CarFactory;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+
+import javax.annotation.PostConstruct;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -23,10 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @MockMvcTest
 class UserCarApiControllerTest {
-
-    private final String USER_CAR = "/user/car";
-
-    private RegisterCarRequest registerCarRequest;
 
     @Autowired
     MockMvc mockMvc;
@@ -43,13 +42,23 @@ class UserCarApiControllerTest {
     @Autowired
     CarRepository carRepository;
 
-    @BeforeEach
-    void beforeEach() {
+    private final String USER_CAR = "/user/car";
+
+    private RegisterCarRequest registerCarRequest;
+
+    @PostConstruct
+    void init() {
         this.registerCarRequest = new RegisterCarRequest();
         registerCarRequest.setCarModel("TEST MODEL");
         registerCarRequest.setCarModelYear("2021");
         registerCarRequest.setCarType("중형");
         registerCarRequest.setCarNumber("12T 3456");
+    }
+
+    @AfterEach
+    void afterEach() {
+        withLoginAccount.getAccount().getMyCars().clear();
+        carRepository.deleteAll();
     }
 
     @Test
@@ -116,6 +125,7 @@ class UserCarApiControllerTest {
                 .andExpect(jsonPath("responseCode").value(0))
                 .andExpect(jsonPath("message").value("성공하였습니다."));
 
+        // Then(2)
         assertThat(carRepository.findAllByAccount(withLoginAccount.getAccount())).isEmpty();
     }
 }

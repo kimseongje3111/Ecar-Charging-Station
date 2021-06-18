@@ -28,23 +28,25 @@ public class UserCarService {
     @Transactional
     public void saveCar(RegisterCarRequest request) {
         Account account = getUserBasicInfo();
-        Car car = modelMapper.map(request, Car.class);
+        Car car = carRepository.save(modelMapper.map(request, Car.class));
 
         account.addCar(car);
-        carRepository.save(car);
     }
 
     public List<Car> getMyCarInfo() {
-        return carRepository.findAllByAccount(getUserBasicInfo());
+        return getUserBasicInfo().getMyCars();
     }
 
     @Transactional
     public void deleteCar(long id) {
         Account account = getUserBasicInfo();
-        Car car = carRepository.findById(id).orElseThrow(CCarNotFoundException::new);
+        Car car = carRepository.findCarByIdAndAccount(id, account);
 
-        account.removeCar(car);
-        carRepository.delete(car);
+        if (car == null) {
+            throw new CCarNotFoundException();
+        }
+
+        carRepository.delete(account.removeCar(car));
     }
 
     private Account getUserBasicInfo() {

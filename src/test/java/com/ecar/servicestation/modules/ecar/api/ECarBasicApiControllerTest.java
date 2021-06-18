@@ -5,8 +5,11 @@ import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.Station;
 import com.ecar.servicestation.modules.ecar.factory.ECarStationFactory;
+import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
+import com.ecar.servicestation.modules.ecar.repository.StationRepository;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.repository.HistoryRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,10 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockMvcTest
 class ECarBasicApiControllerTest {
 
-    private final String E_CAR = "/ecar";
-
-    private Station station;
-
     @Autowired
     MockMvc mockMvc;
 
@@ -41,9 +40,21 @@ class ECarBasicApiControllerTest {
     @Autowired
     HistoryRepository historyRepository;
 
+    @Autowired
+    StationRepository stationRepository;
+
+    private final String E_CAR = "/ecar";
+
+    private Station station;
+
     @BeforeEach
     void beforeEach() {
         this.station = eCarStationFactory.createStationAndAddCharger();
+    }
+
+    @AfterEach
+    void afterEach() {
+        stationRepository.deleteAll();
     }
 
     @Test

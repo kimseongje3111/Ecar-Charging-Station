@@ -4,11 +4,14 @@ import com.ecar.servicestation.infra.MockMvcTest;
 import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.ecar.domain.Station;
 import com.ecar.servicestation.modules.ecar.factory.ECarStationFactory;
+import com.ecar.servicestation.modules.ecar.repository.StationRepository;
 import com.ecar.servicestation.modules.user.domain.Bookmark;
 import com.ecar.servicestation.modules.user.domain.History;
 import com.ecar.servicestation.modules.user.factory.BookmarkFactory;
 import com.ecar.servicestation.modules.user.factory.HistoryFactory;
 import com.ecar.servicestation.modules.user.repository.BookmarkRepository;
+import com.ecar.servicestation.modules.user.repository.HistoryRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @MockMvcTest
 class UserBasicApiControllerTest {
-
-    private static final String USER = "/user";
 
     @Autowired
     MockMvc mockMvc;
@@ -43,7 +44,24 @@ class UserBasicApiControllerTest {
     BookmarkFactory bookmarkFactory;
 
     @Autowired
+    StationRepository stationRepository;
+
+    @Autowired
+    HistoryRepository historyRepository;
+
+    @Autowired
     BookmarkRepository bookmarkRepository;
+
+    private final String USER = "/user";
+
+    @AfterEach
+    void afterEach() {
+        withLoginAccount.getAccount().getHistories().clear();
+        withLoginAccount.getAccount().getBookmarks().clear();
+        stationRepository.deleteAll();
+        historyRepository.deleteAll();
+        bookmarkRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("[회원 정보 조회]정상 처리")

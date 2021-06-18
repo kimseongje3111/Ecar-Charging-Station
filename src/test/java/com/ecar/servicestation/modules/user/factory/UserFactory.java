@@ -1,6 +1,7 @@
 package com.ecar.servicestation.modules.user.factory;
 
 import com.ecar.servicestation.modules.user.domain.Account;
+import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,9 +36,14 @@ public class UserFactory {
     @Transactional
     public Account createVerifiedAccount(String userName, String password, String email) {
         Account account = createSimpleAccount(userName, password, email);
-        account.setEmailAuthVerified(true);
-        account.setJoinedAt(LocalDateTime.now());
+        account.successEmailAuthentication();
 
         return account;
+    }
+
+    @Transactional
+    public void cashInit(Account account, int amount) {
+        account = userRepository.findAccountByEmail(account.getEmail()).orElseThrow(CUserNotFoundException::new);
+        account.setCash(amount);
     }
 }

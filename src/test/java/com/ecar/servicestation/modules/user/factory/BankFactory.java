@@ -1,0 +1,59 @@
+package com.ecar.servicestation.modules.user.factory;
+
+import com.ecar.servicestation.infra.bank.BankService;
+import com.ecar.servicestation.modules.user.domain.Account;
+import com.ecar.servicestation.modules.user.domain.Bank;
+import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.repository.BankRepository;
+import com.ecar.servicestation.modules.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+@Component
+@RequiredArgsConstructor
+public class BankFactory {
+
+    private final BankRepository bankRepository;
+    private final UserRepository userRepository;
+    private final BankService bankService;
+    private final PasswordEncoder passwordEncoder;
+
+    @Transactional
+    public Bank createBank(String bankName, String accountNumber, Account account) {
+        account = userRepository.findAccountByEmail(account.getEmail()).orElseThrow(CUserNotFoundException::new);
+
+        Bank bank =
+                bankRepository.save(
+                        Bank.builder()
+                                .bankName(bankName)
+                                .bankAccountNumber(accountNumber)
+                                .bankAccountOwner("ADMIN")
+                                .build()
+                );
+
+        bank.generateAuthMsg();
+        account.addBank(bank);
+
+        return bank;
+    }
+
+    @Transactional
+    public Bank createVerifiedBank(String bankName, String accountNumber, Account account) {
+        Bank bank = createBank(bankName, accountNumber, account);
+
+        String accessToken =
+                bankService.bankAccountUserAuthentication(
+                        bank.getBankName(),
+                        bank.getBankAccountNumber(),
+                        1,
+                        "123456789"
+                );
+
+        bank.successBankAccountAuthentication();
+        bank.setPaymentPasswordAndAccessToken(passwordEncoder.encode("12341234"), accessToken);
+
+        return bank;
+    }
+}

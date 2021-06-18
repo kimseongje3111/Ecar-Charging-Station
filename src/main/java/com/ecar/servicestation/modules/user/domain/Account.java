@@ -133,8 +133,10 @@ public class Account implements UserDetails {
         bookmark.setAccount(this);
     }
 
-    public void removeBookmark(Bookmark bookmark) {
+    public Bookmark removeBookmark(Bookmark bookmark) {
         this.bookmarks.remove(bookmark);
+
+        return bookmark;
     }
 
     public void addCar(Car car) {
@@ -142,8 +144,10 @@ public class Account implements UserDetails {
         car.setAccount(this);
     }
 
-    public void removeCar(Car car) {
+    public Car removeCar(Car car) {
         this.myCars.remove(car);
+
+        return car;
     }
 
     public void addBank(Bank bank) {
@@ -155,8 +159,14 @@ public class Account implements UserDetails {
         bank.setAccount(this);
     }
 
-    public void removeBank(Bank bank) {
+    public Bank removeBank(Bank bank) {
         this.myBanks.remove(bank);
+
+        if (bank.isMainUsed() && this.myBanks.size() != 0) {
+            this.myBanks.get(0).setMainUsed(true);
+        }
+
+        return bank;
     }
 
     // 비지니스 메서드 //
@@ -169,6 +179,25 @@ public class Account implements UserDetails {
     public void successEmailAuthentication() {
         this.emailAuthVerified = true;
         this.joinedAt = LocalDateTime.now();
+        this.cash = 0;
         this.cashPoint = 5000;
+    }
+
+    public Bank getMyMainUsedBank() {
+        for (Bank myBank : this.myBanks) {
+            if (myBank.isMainUsed() && myBank.isBankAccountVerified()) {
+                return myBank;
+            }
+        }
+
+        return null;
+    }
+
+    public void chargeCash(int amount) {
+        this.cash += amount;
+    }
+
+    public void paymentOrRefundCash(int amount) {
+        this.cash -= amount;
     }
 }

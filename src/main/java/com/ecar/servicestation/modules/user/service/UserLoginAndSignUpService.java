@@ -20,7 +20,6 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.util.Collections;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +35,7 @@ public class UserLoginAndSignUpService {
     private final AppProperties appProperties;
 
     public String login(LoginRequest request) {      // 로그인 성공시, 인증 token 발급
-        Account account = findByEmail(request.getEmail());
+        Account account = findAccountByEmail(request.getEmail());
 
         if (!passwordEncoder.matches(request.getPassword(), account.getPassword()) || !account.isEmailAuthVerified()) {
             throw new CUserLoginFailedException();
@@ -77,17 +76,15 @@ public class UserLoginAndSignUpService {
 
     @Transactional
     public void validateEmailAuthToken(String email, String token) {
-        Account account = findByEmail(email);
+        Account account = findAccountByEmail(email);
 
         if (token.equals(account.getEmailAuthToken())) {
             account.successEmailAuthentication();
         }
     }
 
-    private Account findByEmail(String email) {
-        Optional<Account> account = userRepository.findAccountByEmail(email);
-
-        return account.orElseThrow(CUserNotFoundException::new);
+    private Account findAccountByEmail(String email) {
+        return userRepository.findAccountByEmail(email).orElseThrow(CUserNotFoundException::new);
     }
 
     private String getContentOfAuthenticationEmail(Account account) {

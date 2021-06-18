@@ -2,17 +2,18 @@ package com.ecar.servicestation.modules.ecar.api;
 
 import com.ecar.servicestation.infra.MockMvcTest;
 import com.ecar.servicestation.infra.auth.WithLoginAccount;
-import com.ecar.servicestation.infra.data.ECarChargingStationInfoProvider;
-import com.ecar.servicestation.infra.map.MapService;
 import com.ecar.servicestation.modules.ecar.dto.request.SearchCondition;
 import com.ecar.servicestation.modules.ecar.dto.request.SearchLocation;
-import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
+import com.ecar.servicestation.modules.ecar.repository.StationRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+
+import javax.annotation.PostConstruct;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -21,11 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockMvcTest
 class ECarSearchApiControllerTest {
 
-    private final String E_CAR = "/ecar";
-
-    private SearchCondition condition;
-    private SearchLocation location;
-
     @Autowired
     MockMvc mockMvc;
 
@@ -33,16 +29,15 @@ class ECarSearchApiControllerTest {
     WithLoginAccount withLoginAccount;
 
     @Autowired
-    ChargerRepository chargerRepository;
+    StationRepository stationRepository;
 
-    @Autowired
-    ECarChargingStationInfoProvider eCarChargingStationInfoProvider;
+    private final String E_CAR = "/ecar";
 
-    @Autowired
-    MapService mapService;
+    private SearchCondition condition;
+    private SearchLocation location;
 
-    @BeforeEach
-    void beforeEach() {
+    @PostConstruct
+    void init() {
         this.condition = new SearchCondition();
         condition.setSearch("대전 서구");
         condition.setCpStat(1);     // 충전 가능
@@ -51,6 +46,11 @@ class ECarSearchApiControllerTest {
         this.location = new SearchLocation();
         location.setLatitude(Double.valueOf("36.357692"));
         location.setLongitude(Double.valueOf("127.381050"));
+    }
+
+    @AfterEach
+    void afterEach() {
+        stationRepository.deleteAll();
     }
 
     @Test

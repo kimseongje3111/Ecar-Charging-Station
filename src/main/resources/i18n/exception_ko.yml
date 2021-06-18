@@ -46,6 +46,10 @@ bankAuthFailed:
   code: "-1010"
   msg: "해당 계좌 인증을 실패하였습니다."
 
+userCashFailed:
+  code: "-1011"
+  msg: "현금 환불 또는 결제를 처리할 수 없습니다."
+
 entryPoint:
   code: "-2000"
   msg: "해당 리소스에 접근하기 위한 권한이 없습니다."

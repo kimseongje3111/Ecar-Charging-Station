@@ -37,8 +37,8 @@ public class Station {
     private Double longitude;
 
     @Builder.Default
-    @OneToMany(mappedBy = "station", cascade = CascadeType.ALL)
     @JsonProperty(access = WRITE_ONLY)
+    @OneToMany(mappedBy = "station", cascade = CascadeType.ALL)
     private Set<Charger> chargers = new HashSet<>();
 
     // 연관 관계 설정 메서드 //

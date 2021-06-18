@@ -41,7 +41,7 @@ public class ReservationTable {
     @Enumerated(EnumType.STRING)
     private PaymentType paymentType;
 
-    private Integer usedPoint;
+    private Integer usedCashPoint;
 
     private boolean isNotificationSet;
 

@@ -29,16 +29,13 @@ public class UserLoginAndSignUpApiController {
     @ApiOperation(value = "로그인", notes = "로그인 요청, 로그인 성공 시 인증 토큰(JWT) 발급")
     @PostMapping("/login")
     public SingleResult<String> login(@RequestBody @Valid LoginRequest request) {
-        String token = userLoginAndSignUpService.login(request);
-
-        return responseService.getSingleResult(token);
+        return responseService.getSingleResult(userLoginAndSignUpService.login(request));
     }
 
     @ApiOperation(value = "회원가입", notes = "회원가입 요청")
     @PostMapping("/sign-up")
     public CommonResult signUp(@RequestBody @Valid SignUpRequest request) {
         Account account = userLoginAndSignUpService.signUp(request);
-
         userLoginAndSignUpService.sendEmailForAuthentication(account);
 
         return responseService.getSuccessResult();

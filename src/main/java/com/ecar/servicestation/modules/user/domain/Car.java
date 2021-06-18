@@ -1,8 +1,11 @@
 package com.ecar.servicestation.modules.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.*;
+
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 
 @Entity
 @Getter
@@ -27,6 +30,7 @@ public class Car {
     @Column(nullable = false, unique = true)
     private String carNumber;
 
+    @JsonProperty(access = WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
