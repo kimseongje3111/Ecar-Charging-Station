@@ -2,7 +2,8 @@ package com.ecar.servicestation.modules.ecar.service;
 
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.Station;
-import com.ecar.servicestation.modules.ecar.dto.response.StationInfo;
+import com.ecar.servicestation.modules.ecar.dto.response.ChargerInfoDto;
+import com.ecar.servicestation.modules.ecar.dto.response.StationInfoDto;
 import com.ecar.servicestation.modules.ecar.exception.CChargerNotFoundException;
 import com.ecar.servicestation.modules.ecar.exception.CStationNotFoundException;
 import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
@@ -26,32 +27,36 @@ import java.time.LocalDateTime;
 @Transactional(readOnly = true)
 public class ECarBasicService {
 
-    private final StationRepository stationRepository;
-    private final ChargerRepository chargerRepository;
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
+    private final StationRepository stationRepository;
+    private final ChargerRepository chargerRepository;
     private final ModelMapper modelMapper;
 
-    public StationInfo getStationInfo(long id) {
+    public StationInfoDto getStationInfo(long id) {
         Station station = stationRepository.findById(id).orElseThrow(CStationNotFoundException::new);
+        StationInfoDto stationInfo = modelMapper.map(station, StationInfoDto.class);
+        stationInfo.setStationId(station.getId());
 
-        return modelMapper.map(station, StationInfo.class);
+        return stationInfo;
     }
 
-    public Charger getChargerInfo(Long id) {
+    public ChargerInfoDto getChargerInfo(Long id) {
         Charger charger = chargerRepository.findChargerWithStationById(id);
 
         if (charger == null) {
             throw new CChargerNotFoundException();
         }
 
-        return charger;
+        ChargerInfoDto chargerInfo = modelMapper.map(charger, ChargerInfoDto.class);
+        chargerInfo.setChargerId(charger.getId());
+
+        return chargerInfo;
     }
 
     @Transactional
-    public StationInfo getChargerInfoAndSaveHistory(long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Account account = userRepository.findAccountByEmail(authentication.getName()).orElseThrow(CUserNotFoundException::new);
+    public StationInfoDto getChargerInfoAndSaveHistory(long id) {
+        Account account = getUserBasicInfo();
         Station station = stationRepository.findById(id).orElseThrow(CStationNotFoundException::new);
 
         account.addHistory(
@@ -64,6 +69,15 @@ public class ECarBasicService {
                 )
         );
 
-        return modelMapper.map(station, StationInfo.class);
+        StationInfoDto stationInfo = modelMapper.map(station, StationInfoDto.class);
+        stationInfo.setStationId(station.getId());
+
+        return stationInfo;
+    }
+
+    private Account getUserBasicInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        return userRepository.findAccountByEmail(authentication.getName()).orElseThrow(CUserNotFoundException::new);
     }
 }

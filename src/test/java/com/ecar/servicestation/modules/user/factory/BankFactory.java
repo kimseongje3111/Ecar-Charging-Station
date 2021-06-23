@@ -1,6 +1,6 @@
 package com.ecar.servicestation.modules.user.factory;
 
-import com.ecar.servicestation.infra.bank.BankService;
+import com.ecar.servicestation.infra.bank.service.BankService;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Bank;
 import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class BankFactory {
 
-    private final BankRepository bankRepository;
     private final UserRepository userRepository;
+    private final BankRepository bankRepository;
     private final BankService bankService;
     private final PasswordEncoder passwordEncoder;
 

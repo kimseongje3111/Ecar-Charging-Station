@@ -1,20 +1,21 @@
 package com.ecar.servicestation.modules.ecar.service;
 
-import com.ecar.servicestation.infra.address.AddressService;
-import com.ecar.servicestation.infra.address.dto.Address;
-import com.ecar.servicestation.infra.data.ECarChargingStationInfoProvider;
-import com.ecar.servicestation.infra.data.dto.EVInfo;
+import com.ecar.servicestation.infra.address.service.AddressService;
+import com.ecar.servicestation.infra.address.dto.AddressDto;
+import com.ecar.servicestation.infra.data.service.ECarChargingStationInfoProvider;
+import com.ecar.servicestation.infra.data.dto.EVInfoDto;
 import com.ecar.servicestation.infra.data.exception.EVINfoNotFoundException;
-import com.ecar.servicestation.infra.map.MapService;
-import com.ecar.servicestation.infra.map.dto.MapLocation;
+import com.ecar.servicestation.infra.map.service.MapService;
+import com.ecar.servicestation.infra.map.dto.MapLocationDto;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.Station;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchCondition;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchLocation;
+import com.ecar.servicestation.modules.ecar.dto.request.SearchConditionDto;
+import com.ecar.servicestation.modules.ecar.dto.request.SearchLocationDto;
 import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
 import com.ecar.servicestation.modules.ecar.repository.StationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
@@ -34,19 +35,20 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ECarSearchService {
 
+    private static final Map<String, String> zoneMap = new HashMap<>();
+    private static final String SEARCH_TYPE_ADDRESS = "0";
+    private static final String SEARCH_TYPE_CHARGER_NAME = "1";
+    private static final int API_REQUEST_COUNT = 30;
+
     private final StationRepository stationRepository;
     private final ChargerRepository chargerRepository;
     private final AddressService addressService;
-    private final ECarChargingStationInfoProvider eCarChargingStationInfoProvider;
     private final MapService mapService;
-    private final int API_REQUEST_MAX_COUNT = 30;
-
-    private Map<String, String> zoneMap;
+    private final ECarChargingStationInfoProvider eCarChargingStationInfoProvider;
+    private final ModelMapper modelMapper;
 
     @PostConstruct
     protected void init() throws IOException {
-        zoneMap = new HashMap<>();
-
         Resource resource = new ClassPathResource("zones_kr.csv");
         List<String> lines = Files.readAllLines(resource.getFile().toPath(), StandardCharsets.UTF_8);
 
@@ -57,16 +59,16 @@ public class ECarSearchService {
     }
 
     @Transactional
-    public List<Charger> getSearchResults(SearchCondition condition, Pageable pageable) {
-        Set<EVInfo> evInfos = new HashSet<>();
+    public List<Charger> getSearchResults(SearchConditionDto condition, Pageable pageable) {
+        Set<EVInfoDto> evInfos = new HashSet<>();
 
         // 주소(0) 또는 충전소명(1) 기반 검색 //
 
-        if (condition.getSearchType() == 0) {
+        if (condition.getSearchType().equals(SEARCH_TYPE_ADDRESS)) {
             List<String> searchList = dataPreprocessing(condition.getSearch());
 
             for (int i = 0; i < searchList.size(); i++) {
-                if ((i + 1) % API_REQUEST_MAX_COUNT == 0) {
+                if ((i + 1) % API_REQUEST_COUNT == 0) {
                     try {
                         Thread.sleep(1000);
 
@@ -80,28 +82,23 @@ public class ECarSearchService {
                 evInfos.addAll(eCarChargingStationInfoProvider.getData(searchList.get(i), 1, 50));
             }
 
-        } else if (condition.getSearchType() == 1) {
-            evInfos =
-                    eCarChargingStationInfoProvider.getData(condition.getSearch(), 1, 50)
-                            .stream()
-                            .filter(evInfo -> evInfo.getStationName().contains(condition.getSearch()))
-                            .collect(Collectors.toSet());
+        } else if (condition.getSearchType().equals(SEARCH_TYPE_CHARGER_NAME)) {
+            evInfos = eCarChargingStationInfoProvider.getData(condition.getSearch(), 1, 50)
+                    .stream()
+                    .filter(evInfo -> evInfo.getStationName().contains(condition.getSearch()))
+                    .collect(Collectors.toSet());
         }
 
         return chargerRepository.findAllWithStationBySearchConditionAndPaging(getUpdatedChargers(evInfos), condition, pageable).getContent();
     }
 
     @Transactional
-    public List<Charger> getSearchResultsByLocation(SearchLocation location, Pageable pageable) {
-        MapLocation mapLocation = new MapLocation();
-        mapLocation.setLatitude(location.getLatitude());
-        mapLocation.setLongitude(location.getLongitude());
-
-        Set<EVInfo> evInfos = new HashSet<>();
-        List<String> searchList = dataPreprocessing(mapService.reverseGeoCoding(mapLocation));
+    public List<Charger> getSearchResultsByLocation(SearchLocationDto location, Pageable pageable) {
+        Set<EVInfoDto> evInfos = new HashSet<>();
+        List<String> searchList = dataPreprocessing(mapService.reverseGeoCoding(modelMapper.map(location, MapLocationDto.class)));
 
         for (int i = 0; i < searchList.size(); i++) {
-            if ((i + 1) % API_REQUEST_MAX_COUNT == 0) {
+            if ((i + 1) % API_REQUEST_COUNT == 0) {
                 try {
                     Thread.sleep(1000);
 
@@ -119,11 +116,11 @@ public class ECarSearchService {
     }
 
     private List<String> dataPreprocessing(String search) {
-        Set<Address> addresses = addressService.convertRoadAddress(search, 1, 100);
+        Set<AddressDto> addresses = addressService.convertRoadAddress(search, 1, 100);
         Set<String> searchSet = new HashSet<>();
 
         addresses.stream()
-                .collect(Collectors.groupingBy(Address::getOldAddress))
+                .collect(Collectors.groupingBy(AddressDto::getOldAddress))
                 .forEach((oldAddress, values) -> {
                     String[] split = oldAddress.split(" ");
                     String siNm = split[0];
@@ -135,7 +132,7 @@ public class ECarSearchService {
                     }
 
                     searchSet.add(siNm + " " + sggNm + " " + emdNmOrRn.charAt(0));
-                    searchSet.addAll(values.stream().map(Address::getPrefixOfNewAddress).collect(Collectors.toList()));
+                    searchSet.addAll(values.stream().map(AddressDto::getPrefixOfNewAddress).collect(Collectors.toList()));
                 });
 
         if (searchSet.size() == 0) {
@@ -145,14 +142,14 @@ public class ECarSearchService {
         return searchSet.stream().sorted().collect(Collectors.toList());
     }
 
-    private List<Long> getUpdatedChargers(Set<EVInfo> evInfos) {
+    private List<Long> getUpdatedChargers(Set<EVInfoDto> evInfos) {
         if (evInfos.size() == 0) {
             throw new EVINfoNotFoundException();
         }
 
         List<Long> chargerIds = new ArrayList<>();
 
-        for (EVInfo evInfo : evInfos) {
+        for (EVInfoDto evInfo : evInfos) {
             Station station = stationRepository.findStationByStationNumber(evInfo.getStationNumber());
             Charger charger = chargerRepository.findChargerByChargerNumber(evInfo.getChargerNumber());
 

@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class BookmarkFactory {
 
-    private final BookmarkRepository bookmarkRepository;
     private final UserRepository userRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Transactional
     public Bookmark createBookmark(Account account, Station station) {

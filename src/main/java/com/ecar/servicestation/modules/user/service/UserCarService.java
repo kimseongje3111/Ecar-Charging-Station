@@ -2,7 +2,8 @@ package com.ecar.servicestation.modules.user.service;
 
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Car;
-import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequest;
+import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequestDto;
+import com.ecar.servicestation.modules.user.dto.response.UserCarDto;
 import com.ecar.servicestation.modules.user.exception.CCarNotFoundException;
 import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,15 +28,23 @@ public class UserCarService {
     private final ModelMapper modelMapper;
 
     @Transactional
-    public void saveCar(RegisterCarRequest request) {
+    public void saveCar(RegisterCarRequestDto request) {
         Account account = getUserBasicInfo();
         Car car = carRepository.save(modelMapper.map(request, Car.class));
 
         account.addCar(car);
     }
 
-    public List<Car> getMyCarInfo() {
-        return getUserBasicInfo().getMyCars();
+    public List<UserCarDto> getMyCarInfo() {
+        return getUserBasicInfo().getMyCars()
+                .stream()
+                .map(myCar -> {
+                    UserCarDto userCar = modelMapper.map(myCar, UserCarDto.class);
+                    userCar.setCarId(myCar.getId());
+
+                    return userCar;
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional

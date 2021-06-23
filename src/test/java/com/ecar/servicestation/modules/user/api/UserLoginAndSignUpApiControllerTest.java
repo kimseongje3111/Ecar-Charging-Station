@@ -4,8 +4,8 @@ import com.ecar.servicestation.infra.MockMvcTest;
 import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.factory.UserFactory;
 import com.ecar.servicestation.modules.user.domain.Account;
-import com.ecar.servicestation.modules.user.dto.request.LoginRequest;
-import com.ecar.servicestation.modules.user.dto.request.SignUpRequest;
+import com.ecar.servicestation.modules.user.dto.request.LoginRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.SignUpRequestDto;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockMvcTest
 class UserLoginAndSignUpApiControllerTest {
 
+    private static final String USER = "/user";
+
     @Autowired
     MockMvc mockMvc;
 
@@ -33,12 +35,10 @@ class UserLoginAndSignUpApiControllerTest {
     ObjectMapper objectMapper;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
     UserFactory userFactory;
 
-    private final String USER = "/user";
+    @Autowired
+    UserRepository userRepository;
 
     @AfterEach
     void afterEach() {
@@ -49,7 +49,7 @@ class UserLoginAndSignUpApiControllerTest {
     @DisplayName("[회원가입]정상 처리")
     public void signUp_success() throws Exception {
         // Given
-        SignUpRequest signUpRequest = new SignUpRequest();
+        SignUpRequestDto signUpRequest = new SignUpRequestDto();
         signUpRequest.setUserName("user1");
         signUpRequest.setPassword("1234");
         signUpRequest.setEmail("user1@test.com");
@@ -81,7 +81,7 @@ class UserLoginAndSignUpApiControllerTest {
         // Given
         Account account = userFactory.createSimpleAccount("user1", "1234", "user1@test.com");
 
-        SignUpRequest signUpRequest = new SignUpRequest();
+        SignUpRequestDto signUpRequest = new SignUpRequestDto();
         signUpRequest.setUserName("user1");
         signUpRequest.setPassword("1234");
         signUpRequest.setEmail("user1@test.com");
@@ -135,7 +135,7 @@ class UserLoginAndSignUpApiControllerTest {
         // Given
         Account account = userFactory.createVerifiedAccount("user1", "1234", "user1@test.com");
 
-        LoginRequest loginRequestDto = new LoginRequest();
+        LoginRequestDto loginRequestDto = new LoginRequestDto();
         loginRequestDto.setEmail("user1@test.com");
         loginRequestDto.setPassword("1234");
 
@@ -162,7 +162,7 @@ class UserLoginAndSignUpApiControllerTest {
         // Given
         Account account = userFactory.createVerifiedAccount("user1", "1234", "user1@test.com");
 
-        LoginRequest loginRequestDto = new LoginRequest();
+        LoginRequestDto loginRequestDto = new LoginRequestDto();
         loginRequestDto.setEmail("user2@test.com");
         loginRequestDto.setPassword("1234");
 
@@ -187,7 +187,7 @@ class UserLoginAndSignUpApiControllerTest {
         // Given
         Account account = userFactory.createVerifiedAccount("user1", "1234", "user1@test.com");
 
-        LoginRequest loginRequestDto = new LoginRequest();
+        LoginRequestDto loginRequestDto = new LoginRequestDto();
         loginRequestDto.setEmail("user1@test.com");
         loginRequestDto.setPassword("4321");
 

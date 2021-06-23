@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ChargerRepository extends JpaRepository<Charger, Long>, ChargerRepositoryCustom {
 
-    Charger findChargerByChargerNumber(Long chargerNumber);
+    Charger findChargerByChargerNumber(long chargerNumber);
 }

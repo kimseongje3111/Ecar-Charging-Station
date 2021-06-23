@@ -4,7 +4,8 @@ import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.dto.ListResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
 import com.ecar.servicestation.modules.user.domain.Car;
-import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequest;
+import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequestDto;
+import com.ecar.servicestation.modules.user.dto.response.UserCarDto;
 import com.ecar.servicestation.modules.user.service.UserCarService;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class UserCarApiController {
     })
     @ApiOperation(value = "사용자 차량 등록", notes = "사용자 차랑 등록 요청")
     @PostMapping("/register")
-    public CommonResult registerMyCar(@RequestBody @Valid RegisterCarRequest request) {
+    public CommonResult registerMyCar(@RequestBody @Valid RegisterCarRequestDto request) {
         userCarService.saveCar(request);
 
         return responseService.getSuccessResult();
@@ -39,7 +40,7 @@ public class UserCarApiController {
     })
     @ApiOperation(value = "사용자 차량 조회", notes = "사용자 차랑 조회 요청")
     @GetMapping("")
-    public ListResult<Car> getMyCarInfo() {
+    public ListResult<UserCarDto> getMyCarInfo() {
         return responseService.getListResult(userCarService.getMyCarInfo());
     }
 

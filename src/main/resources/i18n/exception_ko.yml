@@ -50,6 +50,10 @@ userCashFailed:
   code: "-1011"
   msg: "현금 환불 또는 결제를 처리할 수 없습니다."
 
+reservationCancelFailed:
+  code: "-1012"
+  msg: "예약 취소 가능한 시간을 초과했습니다. 자동 취소시 20% 수수료가 부과됩니다."
+
 entryPoint:
   code: "-2000"
   msg: "해당 리소스에 접근하기 위한 권한이 없습니다."

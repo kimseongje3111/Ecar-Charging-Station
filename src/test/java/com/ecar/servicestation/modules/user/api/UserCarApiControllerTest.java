@@ -3,12 +3,11 @@ package com.ecar.servicestation.modules.user.api;
 import com.ecar.servicestation.infra.MockMvcTest;
 import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.user.domain.Car;
-import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequest;
+import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequestDto;
 import com.ecar.servicestation.modules.user.factory.CarFactory;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @MockMvcTest
 class UserCarApiControllerTest {
 
+    private static final String USER_CAR = "/user/car";
+
     @Autowired
     MockMvc mockMvc;
 
@@ -42,13 +43,11 @@ class UserCarApiControllerTest {
     @Autowired
     CarRepository carRepository;
 
-    private final String USER_CAR = "/user/car";
-
-    private RegisterCarRequest registerCarRequest;
+    private RegisterCarRequestDto registerCarRequest;
 
     @PostConstruct
     void init() {
-        this.registerCarRequest = new RegisterCarRequest();
+        this.registerCarRequest = new RegisterCarRequestDto();
         registerCarRequest.setCarModel("TEST MODEL");
         registerCarRequest.setCarModelYear("2021");
         registerCarRequest.setCarType("중형");

@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface BankRepository extends JpaRepository<Bank, Long> {
 
-    Bank findBankByIdAndAccount(Long bankId, Account account);
+    Bank findBankByIdAndAccount(long bankId, Account account);
 
     List<Bank> findAllByAccount(Account account);
 }

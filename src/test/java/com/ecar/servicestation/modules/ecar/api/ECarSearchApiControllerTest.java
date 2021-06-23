@@ -2,11 +2,10 @@ package com.ecar.servicestation.modules.ecar.api;
 
 import com.ecar.servicestation.infra.MockMvcTest;
 import com.ecar.servicestation.infra.auth.WithLoginAccount;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchCondition;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchLocation;
+import com.ecar.servicestation.modules.ecar.dto.request.SearchConditionDto;
+import com.ecar.servicestation.modules.ecar.dto.request.SearchLocationDto;
 import com.ecar.servicestation.modules.ecar.repository.StationRepository;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockMvcTest
 class ECarSearchApiControllerTest {
 
+    private static final String E_CAR = "/ecar";
+
     @Autowired
     MockMvc mockMvc;
 
@@ -31,19 +32,17 @@ class ECarSearchApiControllerTest {
     @Autowired
     StationRepository stationRepository;
 
-    private final String E_CAR = "/ecar";
-
-    private SearchCondition condition;
-    private SearchLocation location;
+    private SearchConditionDto condition;
+    private SearchLocationDto location;
 
     @PostConstruct
     void init() {
-        this.condition = new SearchCondition();
+        this.condition = new SearchConditionDto();
         condition.setSearch("대전 서구");
         condition.setCpStat(1);     // 충전 가능
         condition.setChargerTp(2);  // 급속
 
-        this.location = new SearchLocation();
+        this.location = new SearchLocationDto();
         location.setLatitude(Double.valueOf("36.357692"));
         location.setLongitude(Double.valueOf("127.381050"));
     }
@@ -144,6 +143,7 @@ class ECarSearchApiControllerTest {
         ResultActions perform =
                 mockMvc.perform(
                         get(E_CAR + "/find")
+                                .param("search", "")
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -151,6 +151,6 @@ class ECarSearchApiControllerTest {
         perform
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("success").value(false))
-                .andExpect(jsonPath("responseCode").value(-3000));
+                .andExpect(jsonPath("responseCode").value(-3003));
     }
 }

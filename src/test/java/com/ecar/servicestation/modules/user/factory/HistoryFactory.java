@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class HistoryFactory {
 
-    private final HistoryRepository historyRepository;
     private final UserRepository userRepository;
+    private final HistoryRepository historyRepository;
 
     @Transactional
     public History createHistory(Account account, Station station) {

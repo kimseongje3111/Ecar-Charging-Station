@@ -18,7 +18,7 @@ public class BookmarkRepositoryImpl extends Querydsl4RepositorySupport implement
     }
 
     @Override
-    public Page<Bookmark> findAllWithStationByAccountAndPaging(Long accountId, Pageable pageable) {
+    public Page<Bookmark> findAllWithStationByAccountAndPaging(long accountId, Pageable pageable) {
         List<Bookmark> fetch =
                 selectFrom(bookmark)
                         .join(bookmark.account, account)

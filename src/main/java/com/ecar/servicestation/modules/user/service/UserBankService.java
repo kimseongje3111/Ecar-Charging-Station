@@ -1,14 +1,14 @@
 package com.ecar.servicestation.modules.user.service;
 
-import com.ecar.servicestation.infra.bank.BankService;
-import com.ecar.servicestation.infra.bank.ConsoleBankService;
+import com.ecar.servicestation.infra.bank.service.BankService;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Bank;
-import com.ecar.servicestation.modules.user.dto.request.CashIn;
-import com.ecar.servicestation.modules.user.dto.request.CashOut;
-import com.ecar.servicestation.modules.user.dto.request.ConfirmBankRequest;
-import com.ecar.servicestation.modules.user.dto.request.RegisterBankRequest;
-import com.ecar.servicestation.modules.user.dto.response.RegisterBankResponse;
+import com.ecar.servicestation.modules.user.dto.request.CashInDto;
+import com.ecar.servicestation.modules.user.dto.request.CashOutDto;
+import com.ecar.servicestation.modules.user.dto.request.ConfirmBankRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.RegisterBankRequestDto;
+import com.ecar.servicestation.modules.user.dto.response.RegisterBankResponseDto;
+import com.ecar.servicestation.modules.user.dto.response.UserBankDto;
 import com.ecar.servicestation.modules.user.exception.CBankAuthFailedException;
 import com.ecar.servicestation.modules.user.exception.CBankNotFoundException;
 import com.ecar.servicestation.modules.user.exception.CUserCashFailedException;
@@ -31,14 +31,14 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class UserBankService {
 
-    private final BankRepository bankRepository;
     private final UserRepository userRepository;
+    private final BankRepository bankRepository;
+    private final BankService bankService;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
-    private final BankService bankService;
 
     @Transactional
-    public RegisterBankResponse saveBank(RegisterBankRequest request) {
+    public RegisterBankResponseDto saveBank(RegisterBankRequestDto request) {
         Account account = getUserBasicInfo();
         Bank bank = bankRepository.save(modelMapper.map(request, Bank.class));
 
@@ -49,7 +49,7 @@ public class UserBankService {
     }
 
     @Transactional
-    public void validateAuthAndConfirmBank(ConfirmBankRequest request) {
+    public void validateAuthAndConfirmBank(ConfirmBankRequestDto request) {
         Account account = getUserBasicInfo();
         Bank bank = bankRepository.findBankByIdAndAccount(request.getBankId(), account);
 
@@ -73,10 +73,16 @@ public class UserBankService {
         bank.setPaymentPasswordAndAccessToken(passwordEncoder.encode(request.getPaymentPassword()), accessToken);
     }
 
-    public List<Bank> getMyBanks() {
+    public List<UserBankDto> getMyBanks() {
         return getUserBasicInfo().getMyBanks()
                 .stream()
                 .filter(Bank::isBankAccountVerified)
+                .map(myBank -> {
+                    UserBankDto userBank = modelMapper.map(myBank, UserBankDto.class);
+                    userBank.setBankId(myBank.getId());
+
+                    return userBank;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -106,7 +112,7 @@ public class UserBankService {
     }
 
     @Transactional
-    public void chargeCash(CashIn cashIn) {
+    public void chargeCash(CashInDto cashIn) {
         Account account = getUserBasicInfo();
         Bank mainUsedBank = account.getMyMainUsedBank();
 
@@ -119,11 +125,11 @@ public class UserBankService {
         }
 
         bankService.withdrawFrom(mainUsedBank.getBankName(), mainUsedBank.getBankAccountNumber(), mainUsedBank.getBankAccountAccessToken(), cashIn.getAmount());
-        account.chargeCash(cashIn.getAmount().intValue());
+        account.chargingCash(cashIn.getAmount().intValue());
     }
 
     @Transactional
-    public void refundCash(CashOut cashOut) {
+    public void refundCash(CashOutDto cashOut) {
         Account account = getUserBasicInfo();
         Bank mainUsedBank = account.getMyMainUsedBank();
 
@@ -139,14 +145,14 @@ public class UserBankService {
         account.paymentOrRefundCash(cashOut.getAmount().intValue());
     }
 
-    private RegisterBankResponse getRegisterBankResponse(Bank bank) {
-        RegisterBankResponse registerBankResponse = new RegisterBankResponse();
-        registerBankResponse.setBankId(bank.getId());
-        registerBankResponse.setBankName(bank.getBankName());
-        registerBankResponse.setBankAccountNumber(bank.getBankAccountNumber());
-        registerBankResponse.setMsg(bank.getBankAccountAuthMsg());      // only console
+    private RegisterBankResponseDto getRegisterBankResponse(Bank bank) {
+        RegisterBankResponseDto response = new RegisterBankResponseDto();
+        response.setBankId(bank.getId());
+        response.setBankName(bank.getBankName());
+        response.setBankAccountNumber(bank.getBankAccountNumber());
+        response.setMsg(bank.getBankAccountAuthMsg());      // only console
 
-        return registerBankResponse;
+        return response;
     }
 
     private Account getUserBasicInfo() {

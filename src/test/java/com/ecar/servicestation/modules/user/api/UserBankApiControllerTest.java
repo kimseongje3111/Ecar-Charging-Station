@@ -4,10 +4,10 @@ import com.ecar.servicestation.infra.MockMvcTest;
 import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Bank;
-import com.ecar.servicestation.modules.user.dto.request.CashIn;
-import com.ecar.servicestation.modules.user.dto.request.CashOut;
-import com.ecar.servicestation.modules.user.dto.request.ConfirmBankRequest;
-import com.ecar.servicestation.modules.user.dto.request.RegisterBankRequest;
+import com.ecar.servicestation.modules.user.dto.request.CashInDto;
+import com.ecar.servicestation.modules.user.dto.request.CashOutDto;
+import com.ecar.servicestation.modules.user.dto.request.ConfirmBankRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.RegisterBankRequestDto;
 import com.ecar.servicestation.modules.user.exception.CBankNotFoundException;
 import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.factory.BankFactory;
@@ -34,6 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @MockMvcTest
 class UserBankApiControllerTest {
 
+    private static final String USER_BANK = "/user/bank";
+
     @Autowired
     MockMvc mockMvc;
 
@@ -44,7 +46,7 @@ class UserBankApiControllerTest {
     ObjectMapper objectMapper;
 
     @Autowired
-    BankRepository bankRepository;
+    UserFactory userFactory;
 
     @Autowired
     BankFactory bankFactory;
@@ -53,9 +55,7 @@ class UserBankApiControllerTest {
     UserRepository userRepository;
 
     @Autowired
-    UserFactory userFactory;
-
-    private final String USER_BANK = "/user/bank";
+    BankRepository bankRepository;
 
     @AfterEach
     void afterEach() {
@@ -67,7 +67,7 @@ class UserBankApiControllerTest {
     @DisplayName("[사용자 계좌 등록]정상 처리")
     public void save_user_bank_account_success() throws Exception {
         // Given
-        RegisterBankRequest registerBankRequest = new RegisterBankRequest();
+        RegisterBankRequestDto registerBankRequest = new RegisterBankRequestDto();
         registerBankRequest.setBankName("농협");
         registerBankRequest.setBankAccountNumber("99999999999");
         registerBankRequest.setBankAccountOwner("ADMIN");
@@ -103,7 +103,7 @@ class UserBankApiControllerTest {
         Account account = withLoginAccount.getAccount();
         Bank bank = bankFactory.createBank("농협", "99999999999", account);
 
-        ConfirmBankRequest confirmBankRequest = new ConfirmBankRequest();
+        ConfirmBankRequestDto confirmBankRequest = new ConfirmBankRequestDto();
         confirmBankRequest.setBankId(bank.getId());
         confirmBankRequest.setPaymentPassword("12341234");
         confirmBankRequest.setAuthMsg(bank.getBankAccountAuthMsg());
@@ -141,7 +141,7 @@ class UserBankApiControllerTest {
         Account account = withLoginAccount.getAccount();
         Bank bank = bankFactory.createBank("농협", "99999999999", account);
 
-        ConfirmBankRequest confirmBankRequest = new ConfirmBankRequest();
+        ConfirmBankRequestDto confirmBankRequest = new ConfirmBankRequestDto();
         confirmBankRequest.setBankId(bank.getId());
         confirmBankRequest.setPaymentPassword("12341234");
         confirmBankRequest.setAuthMsg("INVALID_AUTH_MESSAGE");
@@ -266,7 +266,7 @@ class UserBankApiControllerTest {
         Account account = withLoginAccount.getAccount();
         Bank bank = bankFactory.createVerifiedBank("농협", "99999999999", account);
 
-        CashIn cashIn = new CashIn();
+        CashInDto cashIn = new CashInDto();
         cashIn.setAmount(10000L);
         cashIn.setPaymentPassword("12341234");
 
@@ -297,7 +297,7 @@ class UserBankApiControllerTest {
         Account account = withLoginAccount.getAccount();
         Bank bank = bankFactory.createVerifiedBank("농협", "99999999999", account);
 
-        CashIn cashIn = new CashIn();
+        CashInDto cashIn = new CashInDto();
         cashIn.setAmount(10000L);
         cashIn.setPaymentPassword("1234");
 
@@ -324,7 +324,7 @@ class UserBankApiControllerTest {
         Account account = withLoginAccount.getAccount();
         Bank bank = bankFactory.createVerifiedBank("농협", "99999999999", account);
 
-        CashOut cashOut = new CashOut();
+        CashOutDto cashOut = new CashOutDto();
         cashOut.setAmount(10000L);
 
         // When
@@ -356,7 +356,7 @@ class UserBankApiControllerTest {
         Account account = withLoginAccount.getAccount();
         Bank bank = bankFactory.createVerifiedBank("농협", "99999999999", account);
 
-        CashOut cashOut = new CashOut();
+        CashOutDto cashOut = new CashOutDto();
         cashOut.setAmount(60000L);
 
         // When

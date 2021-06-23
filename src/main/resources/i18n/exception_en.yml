@@ -50,6 +50,10 @@ userCashFailed:
   code: "-1011"
   msg: "The payment or cash refund failed."
 
+reservationCancelFailed:
+  code: "-1012"
+  msg: "You have exceeded the available time to cancel your reservation. There will be a 20% fee for automatic cancellation."
+
 entryPoint:
   code: "-2000"
   msg: "You do not have permission to access this resources."

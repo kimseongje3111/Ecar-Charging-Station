@@ -18,11 +18,11 @@ public class ECarStationFactory {
     private final ChargerRepository chargerRepository;
 
     @Transactional
-    public Station createStationAndAddCharger() {
+    public Station createStationAndAddCharger(long stationNumber, long chargerNumber) {
         Station station =
                 stationRepository.save(
                         Station.builder()
-                                .stationNumber(1L)
+                                .stationNumber(stationNumber)
                                 .stationAddress("TEST ADDRESS")
                                 .stationName("TEST STATION")
                                 .latitude(Double.valueOf("36.357692"))
@@ -32,7 +32,7 @@ public class ECarStationFactory {
 
         Charger charger = chargerRepository.save(
                 Charger.builder()
-                        .chargerNumber(1L)
+                        .chargerNumber(chargerNumber)
                         .chargerName("TEST CHARGER")
                         .type(2)
                         .mode(1)

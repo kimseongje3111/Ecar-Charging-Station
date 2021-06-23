@@ -6,6 +6,7 @@ import com.ecar.servicestation.infra.data.exception.EVINfoNotFoundException;
 import com.ecar.servicestation.infra.data.exception.EVInfoServiceException;
 import com.ecar.servicestation.infra.map.exception.MapServiceException;
 import com.ecar.servicestation.modules.ecar.exception.CChargerNotFoundException;
+import com.ecar.servicestation.modules.ecar.exception.CReservationCancelFailedException;
 import com.ecar.servicestation.modules.ecar.exception.CReserveFailedException;
 import com.ecar.servicestation.modules.ecar.exception.CStationNotFoundException;
 import com.ecar.servicestation.modules.main.dto.CommonResult;
@@ -112,6 +113,12 @@ public class ExceptionAdvice {
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     protected CommonResult userCashFailed(HttpServletRequest request, CUserCashFailedException e) {
         return responseService.getFailedResult(parseInt(getMessage("userCashFailed.code")), getMessage("userCashFailed.msg"));
+    }
+
+    @ExceptionHandler(CReservationCancelFailedException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult reservationCancelFailed(HttpServletRequest request, CReservationCancelFailedException e) {
+        return responseService.getFailedResult(parseInt(getMessage("reservationCancelFailed.code")), getMessage("reservationCancelFailed.msg"));
     }
 
     // 외부 API 예외 //

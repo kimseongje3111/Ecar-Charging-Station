@@ -1,12 +1,14 @@
 package com.ecar.servicestation.modules.ecar.domain;
 
 import com.ecar.servicestation.modules.user.domain.Account;
+import com.ecar.servicestation.modules.user.domain.Car;
 import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Getter
@@ -52,6 +54,10 @@ public class ReservationTable {
     private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "car_id")
+    private Car car;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "charger_id")
     private Charger charger;
 
@@ -69,8 +75,28 @@ public class ReservationTable {
         this.stateLastChangedAt = LocalDateTime.now();
     }
 
-    public void confirmReservation() {
+    public void confirmReservation(int usedCashPoint) {
+        this.paymentType = usedCashPoint > 0 ? PaymentType.CASH_AND_POINT : PaymentType.CASH;
+        this.usedCashPoint = usedCashPoint;
         this.reserveState = ReservationState.PAYMENT;
         this.stateLastChangedAt = LocalDateTime.now();
+        this.reserveTitle = makeReserveTitle();
+    }
+
+    public void cancelReservation() {
+        this.reserveState = ReservationState.CANCEL;
+        this.stateLastChangedAt = LocalDateTime.now();
+    }
+
+    private String makeReserveTitle() {
+        StringBuilder stringBuilder = new StringBuilder();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HH:mm");
+
+        return stringBuilder
+                .append("CH#").append(this.charger.getId())
+                .append("S#").append(this.chargeStartDateTime.format(dateTimeFormatter))
+                .append("E#").append(this.chargeEndDateTime.format(dateTimeFormatter))
+                .append("CN#").append(this.car.get4DigitsOfCarNumber())
+                .toString();
     }
 }

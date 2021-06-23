@@ -30,8 +30,11 @@ public class Car {
     @Column(nullable = false, unique = true)
     private String carNumber;
 
-    @JsonProperty(access = WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
+
+    public String get4DigitsOfCarNumber() {
+        return this.carNumber.replaceAll(" ", "").split("[가-힣]")[1];
+    }
 }

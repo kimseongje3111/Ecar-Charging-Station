@@ -1,8 +1,8 @@
 package com.ecar.servicestation.modules.ecar.api;
 
 import com.ecar.servicestation.modules.ecar.domain.Charger;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchLocation;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchCondition;
+import com.ecar.servicestation.modules.ecar.dto.request.SearchLocationDto;
+import com.ecar.servicestation.modules.ecar.dto.request.SearchConditionDto;
 import com.ecar.servicestation.modules.ecar.service.ECarSearchService;
 import com.ecar.servicestation.modules.main.dto.ListResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
@@ -31,7 +31,7 @@ public class ECarSearchApiController {
     @ApiOperation(value = "전기차 충전소 검색", notes = "입력 주소 및 검색 조건에 맞는 주변 전기차 충전소 정보 요청")
     @GetMapping("/find")
     public ListResult<Charger> searchECarChargingStation(
-            @Valid SearchCondition condition,
+            @Valid SearchConditionDto condition,
             @ApiParam(value = "페이지") @PageableDefault(size = 10) Pageable pageable) {
 
         return responseService.getListResult(eCarSearchService.getSearchResults(condition, pageable));
@@ -44,7 +44,7 @@ public class ECarSearchApiController {
     @ApiOperation(value = "전기차 충전소 검색", notes = "해당 위도/경도의 주변 전기차 충전소 정보 요청")
     @GetMapping("/find/location")
     public ListResult<Charger> searchECarChargingStationByLocation(
-            @Valid SearchLocation location,
+            @Valid SearchLocationDto location,
             @ApiParam(value = "페이지") @PageableDefault(size = 10) Pageable pageable) {
 
         return responseService.getListResult(eCarSearchService.getSearchResultsByLocation(location, pageable));

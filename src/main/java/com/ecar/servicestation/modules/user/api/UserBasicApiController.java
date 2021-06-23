@@ -5,7 +5,7 @@ import com.ecar.servicestation.modules.main.dto.ListResult;
 import com.ecar.servicestation.modules.main.dto.SingleResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
 import com.ecar.servicestation.modules.user.domain.Account;
-import com.ecar.servicestation.modules.user.dto.response.UserBookmark;
+import com.ecar.servicestation.modules.user.dto.response.UserBookmarkDto;
 import com.ecar.servicestation.modules.user.dto.response.UserHistory;
 import com.ecar.servicestation.modules.user.service.UserBasicService;
 import io.swagger.annotations.*;
@@ -65,7 +65,7 @@ public class UserBasicApiController {
     })
     @ApiOperation(value = "즐겨찾기(충전소) 목록 조회", notes = "즐겨찾기(충전소) 목록 조회 요청")
     @GetMapping("/bookmark")
-    public ListResult<UserBookmark> getUserBookmark(
+    public ListResult<UserBookmarkDto> getUserBookmark(
             @ApiParam(value = "페이지") @PageableDefault(value = 10, sort = "registeredAt", direction = DESC) Pageable pageable) {
 
         return responseService.getListResult(userBasicService.getUserBookmark(pageable));
@@ -83,5 +83,6 @@ public class UserBasicApiController {
         return responseService.getSuccessResult();
     }
 
-    // TODO : 내 예약 목록 조회
+    // TODO : 내 예약 목록(상태에 따른 -> 결제됨, 충전중, 완료됨) 조회
+
 }

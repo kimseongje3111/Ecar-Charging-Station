@@ -6,7 +6,7 @@ import com.ecar.servicestation.modules.ecar.repository.StationRepository;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Bookmark;
 import com.ecar.servicestation.modules.user.domain.History;
-import com.ecar.servicestation.modules.user.dto.response.UserBookmark;
+import com.ecar.servicestation.modules.user.dto.response.UserBookmarkDto;
 import com.ecar.servicestation.modules.user.dto.response.UserHistory;
 import com.ecar.servicestation.modules.user.exception.CBookmarkFailedException;
 import com.ecar.servicestation.modules.user.exception.CBookmarkNotFoundException;
@@ -77,13 +77,13 @@ public class UserBasicService {
         );
     }
 
-    public List<UserBookmark> getUserBookmark(Pageable pageable) {
+    public List<UserBookmarkDto> getUserBookmark(Pageable pageable) {
         Account account = getUserBasicInfo();
         List<Bookmark> bookmarks = bookmarkRepository.findAllWithStationByAccountAndPaging(account.getId(), pageable).getContent();
 
         return bookmarks.stream()
                 .map(bookmark -> {
-                    UserBookmark userBookmark = modelMapper.map(bookmark, UserBookmark.class);
+                    UserBookmarkDto userBookmark = modelMapper.map(bookmark, UserBookmarkDto.class);
                     userBookmark.setChargerCount(bookmark.getStation().getChargers().size());
 
                     return userBookmark;

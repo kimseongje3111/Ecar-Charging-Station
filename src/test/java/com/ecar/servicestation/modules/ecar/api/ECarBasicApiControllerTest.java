@@ -5,7 +5,6 @@ import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.Station;
 import com.ecar.servicestation.modules.ecar.factory.ECarStationFactory;
-import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
 import com.ecar.servicestation.modules.ecar.repository.StationRepository;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.repository.HistoryRepository;
@@ -28,6 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockMvcTest
 class ECarBasicApiControllerTest {
 
+    private static final String E_CAR = "/ecar";
+
     @Autowired
     MockMvc mockMvc;
 
@@ -43,13 +44,11 @@ class ECarBasicApiControllerTest {
     @Autowired
     StationRepository stationRepository;
 
-    private final String E_CAR = "/ecar";
-
     private Station station;
 
     @BeforeEach
     void beforeEach() {
-        this.station = eCarStationFactory.createStationAndAddCharger();
+        this.station = eCarStationFactory.createStationAndAddCharger(1, 1);
     }
 
     @AfterEach

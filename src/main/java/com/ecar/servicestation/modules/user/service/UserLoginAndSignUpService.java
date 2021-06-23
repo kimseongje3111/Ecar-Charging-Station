@@ -2,11 +2,11 @@ package com.ecar.servicestation.modules.user.service;
 
 import com.ecar.servicestation.infra.app.AppProperties;
 import com.ecar.servicestation.infra.auth.AuthTokenProvider;
-import com.ecar.servicestation.infra.mail.EmailMessage;
-import com.ecar.servicestation.infra.mail.MailService;
+import com.ecar.servicestation.infra.mail.dto.EmailMessageDto;
+import com.ecar.servicestation.infra.mail.service.MailService;
 import com.ecar.servicestation.modules.user.domain.Account;
-import com.ecar.servicestation.modules.user.dto.request.LoginRequest;
-import com.ecar.servicestation.modules.user.dto.request.SignUpRequest;
+import com.ecar.servicestation.modules.user.dto.request.LoginRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.SignUpRequestDto;
 import com.ecar.servicestation.modules.user.exception.CUserLoginFailedException;
 import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.exception.CUserSignUpFailedException;
@@ -29,12 +29,12 @@ public class UserLoginAndSignUpService {
 
     private final UserRepository userRepository;
     private final AuthTokenProvider authTokenProvider;
-    private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
+    private final PasswordEncoder passwordEncoder;
     private final TemplateEngine templateEngine;
     private final AppProperties appProperties;
 
-    public String login(LoginRequest request) {      // 로그인 성공시, 인증 token 발급
+    public String login(LoginRequestDto request) {      // 로그인 성공시, 인증 token 발급
         Account account = findAccountByEmail(request.getEmail());
 
         if (!passwordEncoder.matches(request.getPassword(), account.getPassword()) || !account.isEmailAuthVerified()) {
@@ -45,7 +45,7 @@ public class UserLoginAndSignUpService {
     }
 
     @Transactional
-    public Account signUp(SignUpRequest request) {
+    public Account signUp(SignUpRequestDto request) {
         if (userRepository.existsAccountByEmail(request.getEmail())) {
             throw new CUserSignUpFailedException();
         }
@@ -64,8 +64,8 @@ public class UserLoginAndSignUpService {
     }
 
     public void sendEmailForAuthentication(Account account) {
-        EmailMessage emailMessage =
-                EmailMessage.builder()
+        EmailMessageDto emailMessage =
+                EmailMessageDto.builder()
                         .to(account.getEmail())
                         .subject("[전기차 충전소 알림 앱] 회원 가입 완료를 위한 계정 인증 메일입니다.")
                         .text(getContentOfAuthenticationEmail(account))

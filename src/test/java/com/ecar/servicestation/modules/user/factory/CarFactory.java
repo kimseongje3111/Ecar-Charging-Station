@@ -2,7 +2,7 @@ package com.ecar.servicestation.modules.user.factory;
 
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Car;
-import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequest;
+import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequestDto;
 import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
@@ -14,11 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CarFactory {
 
-    private final CarRepository carRepository;
     private final UserRepository userRepository;
+    private final CarRepository carRepository;
 
     @Transactional
-    public Car createCar(Account account, RegisterCarRequest request) {
+    public Car createCar(Account account, RegisterCarRequestDto request) {
         account = userRepository.findAccountByEmail(account.getEmail()).orElseThrow(CUserNotFoundException::new);
 
         Car car =

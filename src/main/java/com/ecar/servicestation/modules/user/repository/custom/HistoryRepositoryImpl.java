@@ -18,7 +18,7 @@ public class HistoryRepositoryImpl extends Querydsl4RepositorySupport implements
     }
 
     @Override
-    public Page<History> findAllWithStationByAccountAndPaging(Long accountId, Pageable pageable) {
+    public Page<History> findAllWithStationByAccountAndPaging(long accountId, Pageable pageable) {
         List<History> fetch =
                 selectFrom(history)
                         .join(history.account, account)

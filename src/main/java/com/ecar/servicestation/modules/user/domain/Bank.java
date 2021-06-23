@@ -37,23 +37,18 @@ public class Bank {
     @Column(nullable = false)
     private String bankAccountOwner;
 
-    @JsonProperty(access = WRITE_ONLY)
     private String paymentPassword;
 
-    @JsonProperty(access = WRITE_ONLY)
     private String bankAccountAuthMsg;
 
-    @JsonProperty(access = WRITE_ONLY)
     private String bankAccountAccessToken;
 
-    @JsonProperty(access = WRITE_ONLY)
     private boolean bankAccountVerified;
 
     private boolean mainUsed;
 
     private LocalDateTime registeredAt;
 
-    @JsonProperty(access = WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;

@@ -5,6 +5,7 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.jpa.impl.JPAUpdateClause;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -81,6 +82,10 @@ public abstract class Querydsl4RepositorySupport {
 
     protected <T> JPAQuery<T> selectFrom(EntityPath<T> from) {
         return getQueryFactory().selectFrom(from);
+    }
+
+    protected <T> JPAUpdateClause update(EntityPath<T> to) {
+        return getQueryFactory().update(to);
     }
 
     protected <T> Page<T> applyPagination(Pageable pageable, Function<JPAQueryFactory, JPAQuery> contentQuery) {

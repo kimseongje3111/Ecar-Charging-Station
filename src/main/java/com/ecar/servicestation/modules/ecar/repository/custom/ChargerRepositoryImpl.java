@@ -3,7 +3,7 @@ package com.ecar.servicestation.modules.ecar.repository.custom;
 
 import com.ecar.servicestation.infra.querydsl.Querydsl4RepositorySupport;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchCondition;
+import com.ecar.servicestation.modules.ecar.dto.request.SearchConditionDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +20,7 @@ public class ChargerRepositoryImpl extends Querydsl4RepositorySupport implements
     }
 
     @Override
-    public Charger findChargerWithStationById(Long id) {
+    public Charger findChargerWithStationById(long id) {
         return selectFrom(charger)
                 .join(charger.station, station).fetchJoin()
                 .where(charger.id.eq(id))
@@ -28,7 +28,7 @@ public class ChargerRepositoryImpl extends Querydsl4RepositorySupport implements
     }
 
     @Override
-    public Page<Charger> findAllWithStationBySearchConditionAndPaging(List<Long> ids, SearchCondition condition, Pageable pageable) {
+    public Page<Charger> findAllWithStationBySearchConditionAndPaging(List<Long> ids, SearchConditionDto condition, Pageable pageable) {
         List<Charger> fetch =
                 selectFrom(charger)
                         .join(charger.station, station).fetchJoin()
@@ -55,7 +55,7 @@ public class ChargerRepositoryImpl extends Querydsl4RepositorySupport implements
     }
 
     @Override
-    public List<Charger> findAllByChargerNumberAndSearchCondition(List<Long> numbers, SearchCondition condition) {
+    public List<Charger> findAllByChargerNumberAndSearchCondition(List<Long> numbers, SearchConditionDto condition) {
         return selectFrom(charger)
                 .where(
                         charger.chargerNumber.in(numbers),

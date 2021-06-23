@@ -2,19 +2,26 @@ package com.ecar.servicestation.modules.ecar.service;
 
 import com.ecar.servicestation.infra.app.AppProperties;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
-import com.ecar.servicestation.modules.ecar.domain.ReservationState;
 import com.ecar.servicestation.modules.ecar.domain.ReservationTable;
-import com.ecar.servicestation.modules.ecar.dto.request.ReserveRequest;
-import com.ecar.servicestation.modules.ecar.dto.response.ChargerTimeTable;
-import com.ecar.servicestation.modules.ecar.dto.response.ReserveResponse;
+import com.ecar.servicestation.modules.ecar.dto.request.PaymentRequestDto;
+import com.ecar.servicestation.modules.ecar.dto.request.ReserveRequestDto;
+import com.ecar.servicestation.modules.ecar.dto.response.ChargerTimeTableDto;
+import com.ecar.servicestation.modules.ecar.dto.response.ReservationStatementDto;
+import com.ecar.servicestation.modules.ecar.dto.response.ReserveResponseDto;
 import com.ecar.servicestation.modules.ecar.exception.CChargerNotFoundException;
+import com.ecar.servicestation.modules.ecar.exception.CReservationCancelFailedException;
+import com.ecar.servicestation.modules.ecar.exception.CReservationNotFoundException;
 import com.ecar.servicestation.modules.ecar.exception.CReserveFailedException;
 import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
 import com.ecar.servicestation.modules.ecar.repository.ReservationTableRepository;
 import com.ecar.servicestation.modules.user.domain.Account;
+import com.ecar.servicestation.modules.user.domain.Car;
+import com.ecar.servicestation.modules.user.exception.CCarNotFoundException;
+import com.ecar.servicestation.modules.user.exception.CUserCashFailedException;
 import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,26 +33,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.ecar.servicestation.modules.ecar.domain.ReservationState.*;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ECarReservationService {
 
-    private final ReservationTableRepository reservationTableRepository;
+    private static final int CHARGER_TYPE_SLOW = 1;
+    private static final int CHARGER_TYPE_FAST = 2;
+    private static final int CHARGER_TYPE_SLOW_KW = 7;
+    private static final int CHARGER_TYPE_FAST_KW = 50;
+
     private final UserRepository userRepository;
     private final ChargerRepository chargerRepository;
+    private final ReservationTableRepository reservationRepository;
     private final AppProperties properties;
+    private final ModelMapper modelMapper;
 
-    private final int CHARGER_TYPE_SLOW = 1;
-    private final int CHARGER_TYPE_FAST = 2;
+    public ChargerTimeTableDto getChargerTimeTable(long id, int day) {
+        if (!chargerRepository.existsById(id)) {
+            throw new CChargerNotFoundException();
+        }
 
-    public ChargerTimeTable getChargerTimeTable(long id, int day) {
         LocalDateTime target = getTargetDateTime(day);
         LocalDateTime targetEnd = LocalDateTime.of(target.toLocalDate(), LocalTime.MAX);
-        Map<LocalDateTime, Boolean> timeTableOfDay = makeTimeTable(target);
 
-        List<ReservationTable> confirmed =
-                reservationTableRepository.findAllByChargerAndStateAndBetweenDateTime(id, ReservationState.PAYMENT, target, targetEnd);
+        Map<LocalDateTime, Boolean> timeTableOfDay = makeTimeTable(target);
+        List<ReservationTable> confirmed = reservationRepository.findAllByChargerAndStateAndBetweenDateTime(id, PAYMENT, target, targetEnd);
 
         for (ReservationTable current : confirmed) {
             LocalDateTime start = current.getChargeStartDateTime();
@@ -61,73 +76,165 @@ public class ECarReservationService {
     }
 
     @Transactional
-    public ReserveResponse reserveCharger(ReserveRequest request) {
-        LocalDateTime start = request.getStart();
-        LocalDateTime end = request.getEnd();
-
-        if (!start.isBefore(end) || start.getMinute() % 30 != 0 || end.getMinute() % 30 != 0) {
+    public ReserveResponseDto reserveCharger(ReserveRequestDto request) {
+        if (!isValidReserveRequest(request)) {
             throw new CReserveFailedException();
         }
 
-        List<ReservationTable> standBy =
-                reservationTableRepository.findAllByChargerAndStateAndBetweenDateTime(request.getChargerId(), ReservationState.STAND_BY, start, end);
+        // 예약 테이블 확인 //
 
-        List<ReservationTable> confirmed =
-                reservationTableRepository.findAllByChargerAndStateAndBetweenDateTime(request.getChargerId(), ReservationState.PAYMENT, start, end);
+        LocalDateTime start = request.getStart();
+        LocalDateTime end = request.getEnd();
 
-        if (standBy.size() == 0 && confirmed.size() == 0) {
-            Account account = getUserBasicInfo();
-            Charger charger = chargerRepository.findById(request.getChargerId()).orElseThrow(CChargerNotFoundException::new);
+        List<ReservationTable> standBy = reservationRepository.findAllByChargerAndStateAndBetweenDateTime(request.getChargerId(), STAND_BY, start, end);
+        List<ReservationTable> confirmed = reservationRepository.findAllByChargerAndStateAndBetweenDateTime(request.getChargerId(), PAYMENT, start, end);
 
-            ReservationTable reserveItem =
-                    reservationTableRepository.save(
-                            ReservationTable.builder()
-                                    .reservedAt(LocalDateTime.now())
-                                    .chargeStartDateTime(start)
-                                    .chargeEndDateTime(end)
-                                    .account(account)
-                                    .charger(charger)
-                                    .build()
-                    );
-
-            if (charger.getType() == CHARGER_TYPE_SLOW) {
-                reserveItem.applyReservation(properties.getSlowChargingFares());
-
-            } else if (charger.getType() == CHARGER_TYPE_FAST) {
-                reserveItem.applyReservation(properties.getFastChargingFares());
-            }
-
-            return getReserveResponse(request, account, reserveItem);
+        if (standBy.size() != 0 || confirmed.size() != 0) {
+            throw new CReserveFailedException();
         }
 
-        throw new CReserveFailedException();
+        // 예약 생성 //
+
+        Account account = getUserBasicInfo();
+        Charger charger = chargerRepository.findById(request.getChargerId()).orElseThrow(CChargerNotFoundException::new);
+        Car car = account.getMyCars().stream().filter(myCar -> myCar.getId().equals(request.getCarId())).findAny().orElseThrow(CCarNotFoundException::new);
+
+        ReservationTable reserveItem =
+                reservationRepository.save(
+                        ReservationTable.builder()
+                                .reservedAt(LocalDateTime.now())
+                                .chargeStartDateTime(start)
+                                .chargeEndDateTime(end)
+                                .account(account)
+                                .car(car)
+                                .charger(charger)
+                                .build()
+                );
+
+        // 요금 계산 //
+
+        if (charger.getType() == CHARGER_TYPE_SLOW) {
+            reserveItem.applyReservation(properties.getSlowChargingFares() * CHARGER_TYPE_SLOW_KW);
+
+        } else if (charger.getType() == CHARGER_TYPE_FAST) {
+            reserveItem.applyReservation(properties.getFastChargingFares() * CHARGER_TYPE_FAST_KW);
+        }
+
+        return getReserveResponse(account.getUsername(), reserveItem);
     }
 
-    private Account getUserBasicInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    @Transactional
+    public ReservationStatementDto paymentIn(PaymentRequestDto request) {
+        Account account = getUserBasicInfo();
+        ReservationTable reserveItem = reservationRepository.findReservationWithChargerAndCarById(request.getReservationId());
 
-        return userRepository.findAccountByEmail(authentication.getName()).orElseThrow(CUserNotFoundException::new);
+        if (reserveItem == null) {
+            throw new CReservationNotFoundException();
+        }
+
+        if (!canPayment(account, reserveItem, request)) {
+            throw new CUserCashFailedException();
+        }
+
+        int fares = reserveItem.getReserveFares();
+        int usedCashPoint = request.getUsedCashPoint();
+
+        if (usedCashPoint > 0) {
+            account.paymentCashPoint(usedCashPoint);
+            fares -= usedCashPoint;
+        }
+
+        account.paymentOrRefundCash(fares);
+        reserveItem.confirmReservation(usedCashPoint);
+
+        return getReservationStatement(account.getUsername(), reserveItem, 0);
     }
 
-    private ReserveResponse getReserveResponse(ReserveRequest request, Account account, ReservationTable reserveItem) {
-        ReserveResponse reserveResponse = new ReserveResponse();
-        reserveResponse.setChargerId(request.getChargerId());
-        reserveResponse.setUserName(account.getUsername());
-        reserveResponse.setReservationId(reserveItem.getId());
-        reserveResponse.setReservedAt(reserveItem.getReservedAt());
-        reserveResponse.setState(reserveItem.getReserveState().name());
-        reserveResponse.setFares(reserveItem.getReserveFares());
+    @Transactional
+    public ReservationStatementDto cancelReservation(String reserveTitle) {
+        Account account = getUserBasicInfo();
+        ReservationTable reserveItem = reservationRepository.findReservationWithChargerAndCarByReserveTitle(reserveTitle);
 
-        return reserveResponse;
+        if (reserveItem == null) {
+            throw new CReservationNotFoundException();
+        }
+
+        if (reserveItem.getChargeStartDateTime().isBefore(LocalDateTime.now())) {
+            throw new CReservationCancelFailedException();
+        }
+
+        int usedCashPoint = reserveItem.getUsedCashPoint();
+        int fares = reserveItem.getReserveFares();
+        int cancellationFee = calCancellationFee(reserveItem);
+
+        if (usedCashPoint > 0) {
+            account.chargingCashPoint(usedCashPoint);
+            fares -= usedCashPoint;
+        }
+
+        account.chargingCash(fares - cancellationFee);
+        reserveItem.cancelReservation();
+
+        return getReservationStatement(account.getUsername(), reserveItem, cancellationFee);
     }
 
-    private ChargerTimeTable getChargerTimeTable(long id, LocalDateTime target, Map<LocalDateTime, Boolean> timeTableOfDay) {
-        ChargerTimeTable chargerTimeTable = new ChargerTimeTable();
-        chargerTimeTable.setChargerId(id);
-        chargerTimeTable.setTargetDate(target.toLocalDate());
-        chargerTimeTable.setTimeTable(timeTableOfDay);
+    private int calCancellationFee(ReservationTable reserveItem) {
+        // 취소 수수료 계산 //
 
-        return chargerTimeTable;
+        LocalDateTime start = reserveItem.getChargeStartDateTime();
+        LocalDateTime now = LocalDateTime.now();
+
+        return start.minusMinutes(30).isAfter(now) ? 0 : (int) (reserveItem.getReserveFares() * 0.2);
+    }
+
+    private ReservationStatementDto getReservationStatement(String username, ReservationTable reserveItem, int cancellationFee) {
+        ReservationStatementDto statement = modelMapper.map(reserveItem, ReservationStatementDto.class);
+        statement.setUserName(username);
+        statement.setCarNumber(reserveItem.getCar().getCarNumber());
+        statement.setState(reserveItem.getReserveState().name());
+        statement.setPaidCash(reserveItem.getReserveFares() - reserveItem.getUsedCashPoint());
+        statement.setCancellationFee(cancellationFee);
+
+        return statement;
+    }
+
+    private boolean canPayment(Account account, ReservationTable reservation, PaymentRequestDto request) {
+        return request.getUsedCashPoint() <= account.getCashPoint()
+                && request.getUsedCashPoint() <= reservation.getReserveFares()
+                && reservation.getReserveFares() - request.getUsedCashPoint() <= account.getCash();
+    }
+
+    private ReserveResponseDto getReserveResponse(String userName, ReservationTable reserveItem) {
+        ReserveResponseDto response = new ReserveResponseDto();
+        response.setReservationId(reserveItem.getId());
+        response.setUserName(userName);
+        response.setCarNumber(reserveItem.getCar().getCarNumber());
+        response.setChargerId(reserveItem.getCharger().getId());
+        response.setReservedAt(reserveItem.getReservedAt());
+        response.setState(reserveItem.getReserveState().name());
+        response.setFares(reserveItem.getReserveFares());
+
+        return response;
+    }
+
+    private boolean isValidReserveRequest(ReserveRequestDto request) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start = request.getStart();
+        LocalDateTime end = request.getEnd();
+
+        return start.isBefore(end)
+                && start.getMinute() % 30 == 0
+                && end.getMinute() % 30 == 0
+                && start.minusHours(1).isAfter(now);        // 1시간 전
+    }
+
+    private ChargerTimeTableDto getChargerTimeTable(long id, LocalDateTime target, Map<LocalDateTime, Boolean> timeTableOfDay) {
+        ChargerTimeTableDto timeTable = new ChargerTimeTableDto();
+        timeTable.setChargerId(id);
+        timeTable.setTargetDate(target.toLocalDate());
+        timeTable.setTimeTable(timeTableOfDay);
+
+        return timeTable;
     }
 
     private Map<LocalDateTime, Boolean> makeTimeTable(LocalDateTime now) {
@@ -145,7 +252,6 @@ public class ECarReservationService {
     private LocalDateTime getTargetDateTime(int day) {
         LocalDateTime now = LocalDateTime.now();
         now = now.getMinute() < 30 ? now.plusMinutes(30 - now.getMinute()) : now.plusMinutes(60 - now.getMinute());
-        ;
         now = LocalDateTime.of(now.toLocalDate(), LocalTime.of(now.getHour(), now.getMinute(), 0));
 
         if (day != 0) {
@@ -153,5 +259,11 @@ public class ECarReservationService {
         }
 
         return now;
+    }
+
+    private Account getUserBasicInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        return userRepository.findAccountByEmail(authentication.getName()).orElseThrow(CUserNotFoundException::new);
     }
 }

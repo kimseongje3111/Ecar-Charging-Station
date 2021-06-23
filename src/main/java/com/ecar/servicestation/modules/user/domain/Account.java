@@ -193,11 +193,19 @@ public class Account implements UserDetails {
         return null;
     }
 
-    public void chargeCash(int amount) {
+    public void chargingCash(int amount) {
         this.cash += amount;
     }
 
     public void paymentOrRefundCash(int amount) {
         this.cash -= amount;
+    }
+
+    public void chargingCashPoint(int amount) {
+        this.cashPoint += amount;
+    }
+
+    public void paymentCashPoint(int amount) {
+        this.cashPoint -= amount;
     }
 }

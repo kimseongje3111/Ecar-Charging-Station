@@ -28,14 +28,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockMvcTest
 class UserBasicApiControllerTest {
 
+    private static final String USER = "/user";
+
     @Autowired
     MockMvc mockMvc;
 
     @Autowired
     WithLoginAccount withLoginAccount;
-
-    @Autowired
-    ECarStationFactory eCarStationFactory;
 
     @Autowired
     HistoryFactory historyFactory;
@@ -44,7 +43,7 @@ class UserBasicApiControllerTest {
     BookmarkFactory bookmarkFactory;
 
     @Autowired
-    StationRepository stationRepository;
+    ECarStationFactory eCarStationFactory;
 
     @Autowired
     HistoryRepository historyRepository;
@@ -52,7 +51,8 @@ class UserBasicApiControllerTest {
     @Autowired
     BookmarkRepository bookmarkRepository;
 
-    private final String USER = "/user";
+    @Autowired
+    StationRepository stationRepository;
 
     @AfterEach
     void afterEach() {
@@ -112,7 +112,7 @@ class UserBasicApiControllerTest {
     @DisplayName("[최근 검색 목록 조회]정상 처리")
     public void find_histories_success() throws Exception {
         // Given
-        Station station = eCarStationFactory.createStationAndAddCharger();
+        Station station = eCarStationFactory.createStationAndAddCharger(1, 1);
         History history = historyFactory.createHistory(withLoginAccount.getAccount(), station);
 
         // When
@@ -135,7 +135,7 @@ class UserBasicApiControllerTest {
     @DisplayName("[즐겨찾기 등록]정상 처리")
     public void save_bookmark_success() throws Exception {
         // Given
-        Station station = eCarStationFactory.createStationAndAddCharger();
+        Station station = eCarStationFactory.createStationAndAddCharger(1, 1);
 
         // When
         ResultActions perform =
@@ -159,7 +159,7 @@ class UserBasicApiControllerTest {
     @DisplayName("[즐겨찾기 목록 조회]정상 처리")
     public void find_bookmark_success() throws Exception {
         // Given
-        Station station = eCarStationFactory.createStationAndAddCharger();
+        Station station = eCarStationFactory.createStationAndAddCharger(1, 1);
         Bookmark bookmark = bookmarkFactory.createBookmark(withLoginAccount.getAccount(), station);
 
         // When
@@ -182,7 +182,7 @@ class UserBasicApiControllerTest {
     @DisplayName("[즐겨찾기 삭제]정상 처리")
     public void delete_bookmark_success() throws Exception {
         // Given
-        Station station = eCarStationFactory.createStationAndAddCharger();
+        Station station = eCarStationFactory.createStationAndAddCharger(1, 1);
         Bookmark bookmark = bookmarkFactory.createBookmark(withLoginAccount.getAccount(), station);
 
         // When
@@ -207,7 +207,7 @@ class UserBasicApiControllerTest {
     @DisplayName("[즐겨찾기 삭제]실패 - 즐겨찾기 목록에 없는 삭제 요청")
     public void delete_bookmark_failed_by_not_found() throws Exception {
         // Given
-        Station station = eCarStationFactory.createStationAndAddCharger();
+        Station station = eCarStationFactory.createStationAndAddCharger(1, 1);
         Bookmark bookmark = bookmarkFactory.createBookmark(withLoginAccount.getAccount(), station);
 
         // When
