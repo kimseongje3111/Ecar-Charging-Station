@@ -1,5 +1,6 @@
 package com.ecar.servicestation.modules.ecar.dto.response;
 
+import com.ecar.servicestation.modules.ecar.domain.Charger;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,8 @@ public class ReservationStatementDto {
     private String userName;
 
     private String carNumber;
+
+    private Charger charger;
 
     private LocalDateTime reservedAt;
 

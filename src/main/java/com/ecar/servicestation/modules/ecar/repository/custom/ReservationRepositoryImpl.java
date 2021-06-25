@@ -3,7 +3,10 @@ package com.ecar.servicestation.modules.ecar.repository.custom;
 import com.ecar.servicestation.infra.querydsl.Querydsl4RepositorySupport;
 import com.ecar.servicestation.modules.ecar.domain.ReservationState;
 import com.ecar.servicestation.modules.ecar.domain.ReservationTable;
+import com.ecar.servicestation.modules.user.domain.Account;
+import com.ecar.servicestation.modules.user.domain.QAccount;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,11 +14,12 @@ import java.util.List;
 import static com.ecar.servicestation.modules.ecar.domain.QCharger.*;
 import static com.ecar.servicestation.modules.ecar.domain.QReservationTable.*;
 import static com.ecar.servicestation.modules.ecar.domain.ReservationState.*;
+import static com.ecar.servicestation.modules.user.domain.QAccount.*;
 import static com.ecar.servicestation.modules.user.domain.QCar.*;
 
-public class ReservationTableRepositoryImpl extends Querydsl4RepositorySupport implements ReservationTableRepositoryCustom {
+public class ReservationRepositoryImpl extends Querydsl4RepositorySupport implements ReservationRepositoryCustom {
 
-    public ReservationTableRepositoryImpl() {
+    public ReservationRepositoryImpl() {
         super(ReservationTable.class);
     }
 
@@ -68,6 +72,33 @@ public class ReservationTableRepositoryImpl extends Querydsl4RepositorySupport i
                 .join(reservationTable.car, car).fetchJoin()
                 .where(reservationTable.reserveTitle.eq(reserveTitle))
                 .fetchOne();
+    }
+
+    @Override
+    public List<ReservationTable> findAllWithChargerAndCarByAccountAndState(long accountId, ReservationState state) {
+        JPAQuery<ReservationTable> query =
+                selectFrom(reservationTable)
+                        .join(reservationTable.account, account)
+                        .join(reservationTable.charger, charger).fetchJoin()
+                        .join(reservationTable.car, car).fetchJoin();
+
+        if (state.equals(PAYMENT)) {
+            return query
+                    .where(
+                            account.id.eq(accountId),
+                            reservationTable.reserveState.eq(state)
+                                    .or(reservationTable.reserveState.eq(STAND_BY))
+                    )
+                    .fetch();
+
+        } else {
+            return query
+                    .where(
+                            account.id.eq(accountId),
+                            reservationTable.reserveState.eq(state)
+                    )
+                    .fetch();
+        }
     }
 
     private BooleanExpression isOverOutstandingTime(int outstandingTimeMinutes) {

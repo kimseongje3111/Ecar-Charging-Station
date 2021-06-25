@@ -4,7 +4,7 @@ import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.ReservationTable;
 import com.ecar.servicestation.modules.ecar.exception.CChargerNotFoundException;
 import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
-import com.ecar.servicestation.modules.ecar.repository.ReservationTableRepository;
+import com.ecar.servicestation.modules.ecar.repository.ReservationRepository;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Car;
 import com.ecar.servicestation.modules.user.exception.CCarNotFoundException;
@@ -24,7 +24,7 @@ public class ReservationFactory {
     private final UserRepository userRepository;
     private final CarRepository carRepository;
     private final ChargerRepository chargerRepository;
-    private final ReservationTableRepository reservationRepository;
+    private final ReservationRepository reservationRepository;
 
     @Transactional
     public ReservationTable createReservation(Account account, long carId, long chargerId, LocalDateTime start, LocalDateTime end) {

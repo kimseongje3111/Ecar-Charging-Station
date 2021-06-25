@@ -1,5 +1,6 @@
 package com.ecar.servicestation.modules.user.api;
 
+import com.ecar.servicestation.modules.ecar.dto.response.ReservationStatementDto;
 import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.dto.ListResult;
 import com.ecar.servicestation.modules.main.dto.SingleResult;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.constraints.Pattern;
 
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
@@ -83,6 +86,15 @@ public class UserBasicApiController {
         return responseService.getSuccessResult();
     }
 
-    // TODO : 내 예약 목록(상태에 따른 -> 결제됨, 충전중, 완료됨) 조회
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급된 ACCESS_TOKEN",
+                    required = true, dataType = "String", paramType = "header")
+    })
+    @ApiOperation(value = "사용자 예약/충전 목록 조회", notes = "사용자 예약/충전 목록 조회 요청")
+    @GetMapping("/reservation-statements")
+    public ListResult<ReservationStatementDto> getUserReservationStatements(
+            @ApiParam(value = "예약 상태(예약됨[0], 충전중[1], 완료됨[2])") @RequestParam @Pattern(regexp = "^[012]$") String state) {
 
+        return responseService.getListResult(userBasicService.getUserReservationStatements(state));
+    }
 }

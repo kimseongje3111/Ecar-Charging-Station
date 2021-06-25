@@ -1,7 +1,11 @@
 package com.ecar.servicestation.modules.user.service;
 
+import com.ecar.servicestation.modules.ecar.domain.ReservationState;
+import com.ecar.servicestation.modules.ecar.domain.ReservationTable;
 import com.ecar.servicestation.modules.ecar.domain.Station;
+import com.ecar.servicestation.modules.ecar.dto.response.ReservationStatementDto;
 import com.ecar.servicestation.modules.ecar.exception.CStationNotFoundException;
+import com.ecar.servicestation.modules.ecar.repository.ReservationRepository;
 import com.ecar.servicestation.modules.ecar.repository.StationRepository;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Bookmark;
@@ -35,6 +39,7 @@ public class UserBasicService {
     private final StationRepository stationRepository;
     private final HistoryRepository historyRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final ReservationRepository reservationRepository;
     private final ModelMapper modelMapper;
 
     public Account getUserBasicInfo() {
@@ -102,5 +107,36 @@ public class UserBasicService {
         }
 
         bookmarkRepository.delete(account.removeBookmark(bookmark));
+    }
+
+    public List<ReservationStatementDto> getUserReservationStatements(String state) {
+        Account account = getUserBasicInfo();
+        List<ReservationTable> myReserveItems = reservationRepository.findAllWithChargerAndCarByAccountAndState(account.getId(), convertToReservationState(state));
+
+        return myReserveItems.stream()
+                .map(reserveItem -> convertToReservationStatement(account.getUsername(), reserveItem))
+                .collect(Collectors.toList());
+    }
+
+    private ReservationStatementDto convertToReservationStatement(String userName, ReservationTable reserveItem) {
+        ReservationStatementDto statement = modelMapper.map(reserveItem, ReservationStatementDto.class);
+        statement.setUserName(userName);
+        statement.setCarNumber(reserveItem.getCar().getCarNumber());
+        statement.setCharger(reserveItem.getCharger());
+        statement.setState(reserveItem.getReserveState().name());
+
+        return statement;
+    }
+
+    private ReservationState convertToReservationState(String state) {
+        if (state.equals("0")) {
+            return ReservationState.PAYMENT;
+
+        } else if (state.equals("1")) {
+            return ReservationState.CHARGING;
+
+        } else {
+            return ReservationState.COMPLETE;
+        }
     }
 }

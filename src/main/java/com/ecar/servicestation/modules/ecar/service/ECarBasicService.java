@@ -55,7 +55,7 @@ public class ECarBasicService {
     }
 
     @Transactional
-    public StationInfoDto getChargerInfoAndSaveHistory(long id) {
+    public StationInfoDto getStationInfoAndSaveHistory(long id) {
         Account account = getUserBasicInfo();
         Station station = stationRepository.findById(id).orElseThrow(CStationNotFoundException::new);
 
@@ -73,6 +73,27 @@ public class ECarBasicService {
         stationInfo.setStationId(station.getId());
 
         return stationInfo;
+    }
+
+    @Transactional
+    public ChargerInfoDto getChargerInfoAndSaveHistory(Long id) {
+        Account account = getUserBasicInfo();
+        Charger charger = chargerRepository.findChargerWithStationById(id);
+
+        account.addHistory(
+                historyRepository.save(
+                        History.builder()
+                        .account(account)
+                        .station(charger.getStation())
+                        .searchedAt(LocalDateTime.now())
+                        .build()
+                )
+        );
+
+        ChargerInfoDto chargerInfo = modelMapper.map(charger, ChargerInfoDto.class);
+        chargerInfo.setChargerId(charger.getId());
+
+        return chargerInfo;
     }
 
     private Account getUserBasicInfo() {

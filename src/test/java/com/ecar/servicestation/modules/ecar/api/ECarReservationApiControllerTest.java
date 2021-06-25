@@ -12,7 +12,7 @@ import com.ecar.servicestation.modules.ecar.exception.CReservationNotFoundExcept
 import com.ecar.servicestation.modules.ecar.factory.ECarStationFactory;
 import com.ecar.servicestation.modules.ecar.factory.ReservationFactory;
 import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
-import com.ecar.servicestation.modules.ecar.repository.ReservationTableRepository;
+import com.ecar.servicestation.modules.ecar.repository.ReservationRepository;
 import com.ecar.servicestation.modules.ecar.repository.StationRepository;
 import com.ecar.servicestation.modules.ecar.service.ECarReservationService;
 import com.ecar.servicestation.modules.user.domain.Account;
@@ -81,7 +81,7 @@ class ECarReservationApiControllerTest {
     ChargerRepository chargerRepository;
 
     @Autowired
-    ReservationTableRepository reservationRepository;
+    ReservationRepository reservationRepository;
 
     @Autowired
     ECarReservationService eCarReservationService;

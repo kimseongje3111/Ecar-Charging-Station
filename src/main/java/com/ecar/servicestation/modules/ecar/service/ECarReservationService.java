@@ -13,7 +13,7 @@ import com.ecar.servicestation.modules.ecar.exception.CReservationCancelFailedEx
 import com.ecar.servicestation.modules.ecar.exception.CReservationNotFoundException;
 import com.ecar.servicestation.modules.ecar.exception.CReserveFailedException;
 import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
-import com.ecar.servicestation.modules.ecar.repository.ReservationTableRepository;
+import com.ecar.servicestation.modules.ecar.repository.ReservationRepository;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Car;
 import com.ecar.servicestation.modules.user.exception.CCarNotFoundException;
@@ -47,7 +47,7 @@ public class ECarReservationService {
 
     private final UserRepository userRepository;
     private final ChargerRepository chargerRepository;
-    private final ReservationTableRepository reservationRepository;
+    private final ReservationRepository reservationRepository;
     private final AppProperties properties;
     private final ModelMapper modelMapper;
 
@@ -191,6 +191,7 @@ public class ECarReservationService {
         ReservationStatementDto statement = modelMapper.map(reserveItem, ReservationStatementDto.class);
         statement.setUserName(username);
         statement.setCarNumber(reserveItem.getCar().getCarNumber());
+        statement.setCharger(reserveItem.getCharger());
         statement.setState(reserveItem.getReserveState().name());
         statement.setPaidCash(reserveItem.getReserveFares() - reserveItem.getUsedCashPoint());
         statement.setCancellationFee(cancellationFee);

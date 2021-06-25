@@ -1,6 +1,6 @@
 package com.ecar.servicestation.modules.main.service;
 
-import com.ecar.servicestation.modules.ecar.repository.ReservationTableRepository;
+import com.ecar.servicestation.modules.ecar.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile("dev")
 public class SchedulingService {
 
-    private final ReservationTableRepository reservationRepository;
+    private final ReservationRepository reservationRepository;
 
     private static final int OUTSTANDING_TIME_MINUTES = 15;
 
