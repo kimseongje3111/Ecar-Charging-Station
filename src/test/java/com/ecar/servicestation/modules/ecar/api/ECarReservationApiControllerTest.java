@@ -5,6 +5,7 @@ import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.ReservationState;
 import com.ecar.servicestation.modules.ecar.domain.ReservationTable;
+import com.ecar.servicestation.modules.ecar.dto.request.NotificationRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.request.PaymentRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.request.ReserveRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.response.ChargerTimeTableDto;
@@ -318,6 +319,48 @@ class ECarReservationApiControllerTest {
 
         assertThat(reservation.getReserveState()).isEqualTo(ReservationState.CANCEL);
         assertThat(account.getCash()).isEqualTo(10000 + (reservation.getReserveFares() - reservation.getUsedCashPoint()));
+    }
+
+    @Test
+    @DisplayName("[충전 종료 알림 설정]정상 처리")
+    public void set_notification_end_of_charging_success() throws Exception {
+        // Given
+        Account account = withLoginAccount.getAccount();
+        Charger charger = chargerRepository.findChargerByChargerNumber(2);
+        LocalDateTime start = getDataTimeAfter2HourFromNow(charger.getId());
+        LocalDateTime end = start.plusHours(2);
+
+        // Given(2)
+        ReservationTable reservation = reservationFactory.confirmReservation(
+                reservationFactory.createReservation(account, car.getId(), charger.getId(), start, end)
+        );
+
+        // Given(3)
+        NotificationRequestDto notificationRequestDto = new NotificationRequestDto();
+        notificationRequestDto.setReserveTitle(reservation.getReserveTitle());
+        notificationRequestDto.setIsOn(true);
+        notificationRequestDto.setMinutes(30);
+
+        // When
+        ResultActions perform =
+                mockMvc.perform(
+                        post(RESERVE + "/notification")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(notificationRequestDto))
+                                .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
+                );
+
+        // Then
+        perform
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("success").value(true))
+                .andExpect(jsonPath("responseCode").value(0))
+                .andExpect(jsonPath("message").value("성공하였습니다."));
+
+        // Then(2)
+        reservation = reservationRepository.findReservationTableByReserveTitle(reservation.getReserveTitle());
+        assertThat(reservation.isNotificationSet()).isTrue();
+        assertThat(reservation.getNotificationScheduledAt()).isEqualTo(reservation.getChargeEndDateTime().minusMinutes(30));
     }
 
     private LocalDateTime getDataTimeAfter2HourFromNow(long chargerId) {

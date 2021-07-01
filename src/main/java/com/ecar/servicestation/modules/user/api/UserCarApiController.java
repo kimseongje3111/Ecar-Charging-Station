@@ -44,7 +44,6 @@ public class UserCarApiController {
         return responseService.getListResult(userCarService.getMyCarInfo());
     }
 
-    // 차량 삭제 DELETE
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급된 ACCESS_TOKEN",
                     required = true, dataType = "String", paramType = "header")

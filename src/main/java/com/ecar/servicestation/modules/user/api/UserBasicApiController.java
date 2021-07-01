@@ -93,7 +93,7 @@ public class UserBasicApiController {
     @ApiOperation(value = "사용자 예약/충전 목록 조회", notes = "사용자 예약/충전 목록 조회 요청")
     @GetMapping("/reservation-statements")
     public ListResult<ReservationStatementDto> getUserReservationStatements(
-            @ApiParam(value = "예약 상태(예약됨[0], 충전중[1], 완료됨[2])") @RequestParam @Pattern(regexp = "^[012]$") String state) {
+            @ApiParam(value = "상태(예약됨[0], 충전중[1], 완료됨[2])", required = true) @RequestParam @Pattern(regexp = "^[012]$") String state) {
 
         return responseService.getListResult(userBasicService.getUserReservationStatements(state));
     }

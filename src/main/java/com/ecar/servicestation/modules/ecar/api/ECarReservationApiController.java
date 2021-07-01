@@ -1,11 +1,13 @@
 package com.ecar.servicestation.modules.ecar.api;
 
+import com.ecar.servicestation.modules.ecar.dto.request.NotificationRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.request.PaymentRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.request.ReserveRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.response.ChargerTimeTableDto;
 import com.ecar.servicestation.modules.ecar.dto.response.ReservationStatementDto;
 import com.ecar.servicestation.modules.ecar.dto.response.ReserveResponseDto;
 import com.ecar.servicestation.modules.ecar.service.ECarReservationService;
+import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.dto.SingleResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
 import io.swagger.annotations.*;
@@ -65,11 +67,20 @@ public class ECarReservationApiController {
     @ApiOperation(value = "충전기 예약 취소", notes = "충전기 예약 취소 요청")
     @DeleteMapping("")
     public SingleResult<ReservationStatementDto> cancelReservation(
-            @ApiParam(value = "예약명") @RequestParam @NotBlank String reserveTitle) {
+            @ApiParam(value = "예약명", required = true) @RequestParam @NotBlank String reserveTitle) {
 
         return responseService.getSingleResult(eCarReservationService.cancelReservation(reserveTitle));
     }
 
-    // TODO: 종료 알림 여부 및 종료 알림 시간 설정
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급된 ACCESS_TOKEN",
+                    required = true, dataType = "String", paramType = "header")
+    })
+    @ApiOperation(value = "충전 종료 알림 여부 설정", notes = "충전 종료 알림 여부 설정 요청")
+    @PostMapping("/notification")
+    public CommonResult setNotificationEndOfCharging(@RequestBody @Valid NotificationRequestDto notificationRequestDto) {
+        eCarReservationService.setNotification(notificationRequestDto);
 
+        return responseService.getSuccessResult();
+    }
 }

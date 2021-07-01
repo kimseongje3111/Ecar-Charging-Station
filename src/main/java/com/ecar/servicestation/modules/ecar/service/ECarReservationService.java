@@ -3,6 +3,7 @@ package com.ecar.servicestation.modules.ecar.service;
 import com.ecar.servicestation.infra.app.AppProperties;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.ReservationTable;
+import com.ecar.servicestation.modules.ecar.dto.request.NotificationRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.request.PaymentRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.request.ReserveRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.response.ChargerTimeTableDto;
@@ -29,9 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.ecar.servicestation.modules.ecar.domain.ReservationState.*;
 
@@ -176,6 +175,21 @@ public class ECarReservationService {
         reserveItem.cancelReservation();
 
         return getReservationStatement(account.getUsername(), reserveItem, cancellationFee);
+    }
+
+    @Transactional
+    public void setNotification(NotificationRequestDto request) {
+        ReservationTable reserveItem = reservationRepository.findReservationTableByReserveTitle(request.getReserveTitle());
+
+        if (reserveItem == null) {
+            throw new CReservationNotFoundException();
+        }
+
+        if (request.getIsOn()) {
+            reserveItem.setOnNotification(request.getMinutes());
+        } else {
+            reserveItem.setOffNotification();
+        }
     }
 
     private int calCancellationFee(ReservationTable reserveItem) {

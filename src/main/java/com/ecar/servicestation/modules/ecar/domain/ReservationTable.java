@@ -88,6 +88,15 @@ public class ReservationTable {
         this.stateLastChangedAt = LocalDateTime.now();
     }
 
+    public void setOnNotification(int minutes) {
+        this.isNotificationSet = true;
+        this.notificationScheduledAt = this.chargeEndDateTime.minusMinutes(minutes);
+    }
+
+    public void setOffNotification() {
+        this.isNotificationSet = false;
+    }
+
     private String makeReserveTitle() {
         StringBuilder stringBuilder = new StringBuilder();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HH:mm");
