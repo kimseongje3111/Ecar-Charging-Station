@@ -5,6 +5,7 @@ import com.ecar.servicestation.infra.auth.AuthTokenProvider;
 import com.ecar.servicestation.infra.mail.dto.EmailMessageDto;
 import com.ecar.servicestation.infra.mail.service.MailService;
 import com.ecar.servicestation.modules.user.domain.Account;
+import com.ecar.servicestation.modules.user.dto.request.EmailAuthRequestDto;
 import com.ecar.servicestation.modules.user.dto.request.LoginRequestDto;
 import com.ecar.servicestation.modules.user.dto.request.SignUpRequestDto;
 import com.ecar.servicestation.modules.user.exception.CUserLoginFailedException;
@@ -52,9 +53,10 @@ public class UserLoginAndSignUpService {
 
         Account newAccount =
                 Account.builder()
-                        .userName(request.getUserName())
+                        .name(request.getUserName())
                         .password(passwordEncoder.encode(request.getPassword()))
                         .email(request.getEmail())
+                        .phoneNumber(request.getPhoneNumber())
                         .roles(Collections.singletonList("ROLE_USER"))
                         .build();
 
@@ -75,10 +77,10 @@ public class UserLoginAndSignUpService {
     }
 
     @Transactional
-    public void validateEmailAuthToken(String email, String token) {
-        Account account = findAccountByEmail(email);
+    public void validateEmailAuthToken(EmailAuthRequestDto request) {
+        Account account = findAccountByEmail(request.getEmail());
 
-        if (token.equals(account.getEmailAuthToken())) {
+        if (request.getToken().equals(account.getEmailAuthToken())) {
             account.successEmailAuthentication();
         }
     }
@@ -91,7 +93,7 @@ public class UserLoginAndSignUpService {
         Context context = new Context();
         context.setVariable("messageTitle", "서비스 이용을 위해 아래 링크를 클릭하여 인증을 완료해주세요.");
         context.setVariable("messageContent", "계정 인증을 완료했다면 이제 로그인 할 수 있습니다.");
-        context.setVariable("userName", account.getUsername());
+        context.setVariable("userName", account.getName());
         context.setVariable("email", account.getEmail());
         context.setVariable("token", account.getEmailAuthToken());
         context.setVariable("link", appProperties.getHost() + "/user/email-auth-token");

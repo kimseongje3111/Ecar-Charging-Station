@@ -26,5 +26,8 @@ public class SignUpRequestDto {
     @Length(max = 30)
     private String email;
 
+    @ApiParam(value = "휴대폰 번호", required = true)
+    @NotBlank
+    private String phoneNumber;
 }
 

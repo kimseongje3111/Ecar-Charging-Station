@@ -114,7 +114,7 @@ public class UserBasicService {
         List<ReservationTable> myReserveItems = reservationRepository.findAllWithChargerAndCarByAccountAndState(account.getId(), convertToReservationState(state));
 
         return myReserveItems.stream()
-                .map(reserveItem -> convertToReservationStatement(account.getUsername(), reserveItem))
+                .map(reserveItem -> convertToReservationStatement(account.getName(), reserveItem))
                 .collect(Collectors.toList());
     }
 

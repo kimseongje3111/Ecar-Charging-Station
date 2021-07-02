@@ -4,6 +4,7 @@ import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.dto.SingleResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
 import com.ecar.servicestation.modules.user.domain.Account;
+import com.ecar.servicestation.modules.user.dto.request.EmailAuthRequestDto;
 import com.ecar.servicestation.modules.user.dto.request.LoginRequestDto;
 import com.ecar.servicestation.modules.user.dto.request.SignUpRequestDto;
 import com.ecar.servicestation.modules.user.service.UserLoginAndSignUpService;
@@ -43,11 +44,8 @@ public class UserLoginAndSignUpApiController {
 
     @ApiOperation(value = "이메일 계정 인증", notes = "회원가입 후 이메일 계정 인증 요청")
     @PostMapping("/email-auth-token")
-    public CommonResult emailAuthentication(
-            @ApiParam(value = "회원 이메일", required = true) @RequestParam @NotBlank @Email String email,
-            @ApiParam(value = "이메일 계정 인증 토큰", required = true) @RequestParam @NotBlank String token) {
-
-        userLoginAndSignUpService.validateEmailAuthToken(email, token);
+    public CommonResult emailAuthentication(@Valid EmailAuthRequestDto emailAuthRequestDto) {
+        userLoginAndSignUpService.validateEmailAuthToken(emailAuthRequestDto);
 
         return responseService.getSuccessResult();
     }

@@ -22,9 +22,10 @@ public class UserFactory {
     public Account createSimpleAccount(String userName, String password, String email) {
         Account account =
                 Account.builder()
-                        .userName(userName)
+                        .name(userName)
                         .password(passwordEncoder.encode(password))
                         .email(email)
+                        .phoneNumber("01012345678")
                         .roles(Collections.singletonList("ROLE_USER"))
                         .build();
 

@@ -119,7 +119,7 @@ public class ECarReservationService {
             reserveItem.applyReservation(properties.getFastChargingFares() * CHARGER_TYPE_FAST_KW);
         }
 
-        return getReserveResponse(account.getUsername(), reserveItem);
+        return getReserveResponse(account.getName(), reserveItem);
     }
 
     @Transactional
@@ -146,7 +146,7 @@ public class ECarReservationService {
         account.paymentOrRefundCash(fares);
         reserveItem.confirmReservation(usedCashPoint);
 
-        return getReservationStatement(account.getUsername(), reserveItem, 0);
+        return getReservationStatement(account.getName(), reserveItem, 0);
     }
 
     @Transactional
@@ -174,7 +174,7 @@ public class ECarReservationService {
         account.chargingCash(fares - cancellationFee);
         reserveItem.cancelReservation();
 
-        return getReservationStatement(account.getUsername(), reserveItem, cancellationFee);
+        return getReservationStatement(account.getName(), reserveItem, cancellationFee);
     }
 
     @Transactional

@@ -33,7 +33,7 @@ public class Account implements UserDetails {
     // 유저 정보 //
 
     @Column(nullable = false, length = 100)
-    private String userName;
+    private String name;
 
     @Column(nullable = false, length = 100)
     @JsonProperty(access = WRITE_ONLY)
@@ -41,6 +41,8 @@ public class Account implements UserDetails {
 
     @Column(nullable = false, unique = true, length = 30)
     private String email;
+
+    private String phoneNumber;
 
     private LocalDateTime joinedAt;
 

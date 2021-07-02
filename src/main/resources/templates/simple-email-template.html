@@ -27,8 +27,8 @@
 
     <div>
         <form th:action="${link}" method="post">
-            <input id="email" type="text" th:value="${email}">
-            <input id="token" type="text" th:value="${token}">
+            <input id="email" type="text" name="email" th:value="${email}">
+            <input id="token" type="text" name="token" th:value="${token}">
             <button type="submit">계정 인증 완료</button>
         </form>
     </div>
