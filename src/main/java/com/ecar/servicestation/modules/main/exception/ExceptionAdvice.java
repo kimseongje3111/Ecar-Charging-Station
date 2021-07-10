@@ -1,9 +1,11 @@
 package com.ecar.servicestation.modules.main.exception;
 
+import com.ecar.servicestation.infra.address.exception.AddressExceededException;
 import com.ecar.servicestation.infra.address.exception.AddressServiceException;
 import com.ecar.servicestation.infra.auth.exception.CAuthenticationEntryPointException;
 import com.ecar.servicestation.infra.data.exception.EVINfoNotFoundException;
 import com.ecar.servicestation.infra.data.exception.EVInfoServiceException;
+import com.ecar.servicestation.infra.map.exception.MapNotFoundException;
 import com.ecar.servicestation.infra.map.exception.MapServiceException;
 import com.ecar.servicestation.modules.ecar.exception.CChargerNotFoundException;
 import com.ecar.servicestation.modules.ecar.exception.CReservationCancelFailedException;
@@ -35,6 +37,7 @@ public class ExceptionAdvice {
     private final MessageSource messageSource;
 
     // 요청 파라미터 예외 //
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(BAD_REQUEST)
     protected CommonResult methodArgumentNotValid(HttpServletRequest request, MethodArgumentNotValidException e) {
@@ -135,6 +138,12 @@ public class ExceptionAdvice {
         return responseService.getFailedResult(parseInt(getMessage("evInfoServiceFailed.code")), getMessage("evInfoServiceFailed.msg"));
     }
 
+    @ExceptionHandler(MapNotFoundException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    public CommonResult mapNotFound(HttpServletRequest request, MapNotFoundException e) {
+        return responseService.getFailedResult(parseInt(getMessage("mapNotFound.code")), getMessage("mapNotFound.msg"));
+    }
+
     @ExceptionHandler(MapServiceException.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     public CommonResult mapServiceFailed(HttpServletRequest request, MapServiceException e) {
@@ -145,6 +154,12 @@ public class ExceptionAdvice {
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     public CommonResult addressServiceFailed(HttpServletRequest request, AddressServiceException e) {
         return responseService.getFailedResult(parseInt(getMessage("addressServiceFailed.code")), getMessage("addressServiceFailed.msg"));
+    }
+
+    @ExceptionHandler(AddressExceededException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    public CommonResult addressExceeded(HttpServletRequest request, AddressExceededException e) {
+        return responseService.getFailedResult(parseInt(getMessage("addressExceeded.code")), getMessage("addressExceeded.msg"));
     }
 
     // 인증 예외 //

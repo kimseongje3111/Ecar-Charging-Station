@@ -1,8 +1,10 @@
 package com.ecar.servicestation.infra.address.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(of = {"siNm", "sggNm", "rn"})
 public class AddressDto {
 
     private String siNm;
@@ -17,7 +19,7 @@ public class AddressDto {
         return siNm + " " + sggNm + " " + emdNm;
     }
 
-    public String getPrefixOfNewAddress() {
-        return siNm + " " + sggNm + " " + rn.replaceAll("[0-9]+[가-힣]*","").charAt(0);
+    public String getNewAddress() {
+        return siNm + " " + sggNm + " " + rn;
     }
 }

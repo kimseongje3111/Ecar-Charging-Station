@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 @Slf4j
@@ -14,9 +14,9 @@ import java.util.List;
 public class ConsoleEVInfoService implements ECarChargingStationInfoProvider {
 
     @Override
-    public List<EVInfoDto> getData(String search, int page, int numberOfRows) {
+    public Set<EVInfoDto> getData(String search, int page, int numberOfRows) {
         log.info("Data request is successful.");
 
-        return new ArrayList<>();
+        return new HashSet<>();
     }
 }

@@ -13,7 +13,7 @@ import java.util.Set;
 public class ConsoleAddressService implements AddressService {
 
     @Override
-    public Set<AddressDto> convertRoadAddress(String search, int page, int numberOfRows) {
+    public Set<AddressDto> convertToAddressDto(String search, int page, int numberOfRows) {
         return null;
     }
 }

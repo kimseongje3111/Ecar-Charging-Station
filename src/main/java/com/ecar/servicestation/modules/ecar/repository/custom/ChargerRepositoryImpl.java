@@ -4,6 +4,7 @@ package com.ecar.servicestation.modules.ecar.repository.custom;
 import com.ecar.servicestation.infra.querydsl.Querydsl4RepositorySupport;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.dto.request.SearchConditionDto;
+import com.ecar.servicestation.modules.ecar.dto.request.SearchLocationDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +35,6 @@ public class ChargerRepositoryImpl extends Querydsl4RepositorySupport implements
                         .join(charger.station, station).fetchJoin()
                         .where(
                                 charger.id.in(ids),
-                                cpStatEq(condition.getCpStat()),
                                 chargerTpEq(condition.getChargerTp()),
                                 cpTpEq(condition.getCpTp())
                         )
@@ -44,37 +44,18 @@ public class ChargerRepositoryImpl extends Querydsl4RepositorySupport implements
     }
 
     @Override
-    public Page<Charger> findAllWithStationByPaging(List<Long> ids, Pageable pageable) {
+    public Page<Charger> findAllWithStationBySearchLocationAndPaging(List<Long> ids, SearchLocationDto location, Pageable pageable) {
         List<Charger> fetch =
                 selectFrom(charger)
                         .join(charger.station, station).fetchJoin()
-                        .where(charger.id.in(ids))
+                        .where(
+                                charger.id.in(ids),
+                                chargerTpEq(location.getChargerTp()),
+                                cpTpEq(location.getCpTp())
+                        )
                         .fetch();
 
         return applyPagination(pageable, countQuery -> countQuery.selectFrom(charger).where(charger.in(fetch)));
-    }
-
-    @Override
-    public List<Charger> findAllByChargerNumberAndSearchCondition(List<Long> numbers, SearchConditionDto condition) {
-        return selectFrom(charger)
-                .where(
-                        charger.chargerNumber.in(numbers),
-                        cpStatEq(condition.getCpStat()),
-                        chargerTpEq(condition.getChargerTp()),
-                        cpTpEq(condition.getCpTp())
-                )
-                .fetch();
-    }
-
-    @Override
-    public List<Charger> findAllByChargerNumber(List<Long> numbers) {
-        return selectFrom(charger)
-                .where(charger.chargerNumber.in(numbers))
-                .fetch();
-    }
-
-    private BooleanExpression cpStatEq(Integer cpStat) {
-        return cpStat != null ? charger.state.eq(cpStat) : null;
     }
 
     private BooleanExpression chargerTpEq(Integer chargerTp) {

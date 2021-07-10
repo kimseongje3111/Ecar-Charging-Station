@@ -2,10 +2,10 @@ package com.ecar.servicestation.infra.data.service;
 
 import com.ecar.servicestation.infra.data.dto.EVInfoDto;
 
-import java.util.List;
+import java.util.Set;
 
 public interface ECarChargingStationInfoProvider {
 
-    List<EVInfoDto> getData(String search, int page, int numberOfRows);
+    Set<EVInfoDto> getData(String search, int page, int numberOfRows);
 
 }

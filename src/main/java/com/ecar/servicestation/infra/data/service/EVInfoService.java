@@ -4,55 +4,95 @@ import com.ecar.servicestation.infra.data.dto.EVInfoDto;
 import com.ecar.servicestation.infra.data.dto.EVInfoBodyDto;
 import com.ecar.servicestation.infra.data.dto.EVInfoHeaderDto;
 import com.ecar.servicestation.infra.data.dto.EVInfoResponseDto;
+import com.ecar.servicestation.infra.data.exception.EVINfoNotFoundException;
 import com.ecar.servicestation.infra.data.exception.EVInfoServiceException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
-@Profile({"dev","test"})
+@RequiredArgsConstructor
+@Profile({"dev", "test"})
 public class EVInfoService implements ECarChargingStationInfoProvider {
 
     private static final String RESPONSE_SUCCESS = "00";
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final WebClient webClient;
 
-    @Value("${ecarapi.servicekey.encoding}")
-    private String SERVICE_KEY_ENCODING;
-
-    @Value("${ecarapi.servicekey.decoding}")
+    @Value("${external_api.ecar.servicekey.decoding}")
     private String SERVICE_KEY_DECODING;
 
-    @Value("${ecarapi.url}")
-    private String URL;
+    @Value("${external_api.ecar.base_url}")
+    private String BASE_URL;
 
     @Override
-    public List<EVInfoDto> getData(String search, int page, int numberOfRows) {
-        String uri = getURI(search, page, numberOfRows, SERVICE_KEY_DECODING);
-        EVInfoResponseDto response = restTemplate.getForObject(uri, EVInfoResponseDto.class);
+    public Set<EVInfoDto> getData(String search, int page, int numberOfRows) {
+        EVInfoResponseDto response =
+                webClient
+                        .get()
+                        .uri(makeServiceUri(search, page, numberOfRows))
+                        .retrieve()
+                        .bodyToMono(EVInfoResponseDto.class)
+                        .block();
+
         EVInfoHeaderDto header = Objects.requireNonNull(response).getHeader();
-        EVInfoBodyDto body = Objects.requireNonNull(response).getBody();
+        EVInfoBodyDto body = response.getBody();
 
         if (!header.getResultCode().equals(RESPONSE_SUCCESS) || body == null) {
             throw new EVInfoServiceException();
         }
 
-        return body.getItems();
+        if (body.getItems().size() == 0) {
+            throw new EVINfoNotFoundException();
+        }
+
+        Set<EVInfoDto> results = new HashSet<>(body.getItems());
+        List<Mono<EVInfoResponseDto>> responseMonoes = new ArrayList<>();
+
+        while (page * numberOfRows < body.getTotalCount()) {
+            responseMonoes.add(
+                    webClient
+                            .get()
+                            .uri(makeServiceUri(search, ++page, numberOfRows))
+                            .retrieve()
+                            .bodyToMono(EVInfoResponseDto.class)
+            );
+        }
+
+        if (responseMonoes.size() != 0) {
+            List<EVInfoResponseDto> responses =
+                    Mono.zip(responseMonoes, responseMono ->
+                            Arrays.stream(responseMono)
+                                    .filter(o -> o instanceof EVInfoResponseDto)
+                                    .map(o -> (EVInfoResponseDto) o)
+                                    .collect(Collectors.toList())
+                    ).block();
+
+            if (responses != null) {
+                responses.stream()
+                        .map(result -> result.getBody().getItems())
+                        .forEach(results::addAll);
+            }
+        }
+
+        return results;
     }
 
-    private String getURI(String search, int page, int numberOfRows, String serviceKeyType) {
+    private String makeServiceUri(String search, int page, int numberOfRows) {
         StringBuilder stringBuilder = new StringBuilder();
 
         return stringBuilder
-                .append(URL)
+                .append(BASE_URL)
                 .append("?addr=").append(search)
                 .append("&pageNo=").append(page)
                 .append("&numOfRows=").append(numberOfRows)
-                .append("&ServiceKey=").append(serviceKeyType)
+                .append("&ServiceKey=").append(SERVICE_KEY_DECODING)
                 .toString();
     }
 }

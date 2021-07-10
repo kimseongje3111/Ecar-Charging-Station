@@ -13,7 +13,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-
+import java.util.concurrent.CompletableFuture;
 
 @Api(tags = {"(6) E_CAR SEARCH SERVICE"})
 @RestController
@@ -34,7 +34,7 @@ public class ECarSearchApiController {
             @Valid SearchConditionDto condition,
             @ApiParam(value = "페이지") @PageableDefault(size = 10) Pageable pageable) {
 
-        return responseService.getListResult(eCarSearchService.getSearchResults(condition, pageable));
+        return responseService.getListResult(eCarSearchService.getSearchResultsBy(condition, pageable));
     }
 
     @ApiImplicitParams({
@@ -47,6 +47,6 @@ public class ECarSearchApiController {
             @Valid SearchLocationDto location,
             @ApiParam(value = "페이지") @PageableDefault(size = 10) Pageable pageable) {
 
-        return responseService.getListResult(eCarSearchService.getSearchResultsByLocation(location, pageable));
+        return responseService.getListResult(eCarSearchService.getSearchResultsBy(location, pageable));
     }
 }

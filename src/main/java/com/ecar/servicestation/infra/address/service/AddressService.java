@@ -6,5 +6,5 @@ import java.util.Set;
 
 public interface AddressService {
 
-    Set<AddressDto> convertRoadAddress(String search, int page, int numberOfRows);
+    Set<AddressDto> convertToAddressDto(String search, int page, int numberOfRows);
 }

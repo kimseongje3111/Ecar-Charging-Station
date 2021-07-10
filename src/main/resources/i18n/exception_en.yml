@@ -1,7 +1,11 @@
+#### Validation error ###################################################
+#########################################################################
 methodArgumentNotValid:
   code: "-1"
   msg: "The request parameter format is invalid."
 
+#### Service error ######################################################
+#########################################################################
 userNotFound:
   code: "-1000"
   msg: "This account does not exist."
@@ -54,6 +58,8 @@ reservationCancelFailed:
   code: "-1012"
   msg: "You have exceeded the available time to cancel your reservation. There will be a 20% fee for automatic cancellation."
 
+#### Security error #####################################################
+#########################################################################
 entryPoint:
   code: "-2000"
   msg: "You do not have permission to access this resources."
@@ -62,18 +68,28 @@ accessDenied:
   code: "-2001"
   msg: "Resources not accessible with that privilege."
 
+#### External API error #################################################
+#########################################################################
 evInfoNotFound:
   code: "-3000"
   msg: "The requested data could not be found."
 
 evInfoServiceFailed:
   code: "-3001"
-  msg: "Provider service failure or request restricted."
+  msg: "The provider service failure or request restricted."
+
+mapNotFound:
+  code: "-3002"
+  msg: "The translated address not found."
 
 mapServiceFailed:
-  code: "-3002"
-  msg: "The address could not be found."
+  code: "-3003"
+  msg: "Invalid request format or provider service restricted."
 
 addressServiceFailed:
-  code: "-3003"
-  msg: "Invalid address format or provider service restricted."
+  code: "-3004"
+  msg: "The provider service restricted."
+
+addressExceeded:
+  code: "-3005"
+  msg: "Too many address search results. Please enter your address in detail."

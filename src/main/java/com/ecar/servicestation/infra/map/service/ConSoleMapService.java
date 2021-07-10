@@ -11,13 +11,6 @@ import org.springframework.stereotype.Component;
 public class ConSoleMapService implements MapService {
 
     @Override
-    public MapLocationDto geoCoding(String address) {
-        log.info("This address has been converted to location.");
-
-        return new MapLocationDto();
-    }
-
-    @Override
     public String reverseGeoCoding(MapLocationDto location) {
         log.info("This latitude/longitude has been converted to an address.");
 

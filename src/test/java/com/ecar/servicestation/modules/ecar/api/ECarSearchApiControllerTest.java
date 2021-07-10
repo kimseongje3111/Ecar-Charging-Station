@@ -38,11 +38,13 @@ class ECarSearchApiControllerTest {
     @PostConstruct
     void init() {
         this.condition = new SearchConditionDto();
-        condition.setSearch("대전 서구");
-        condition.setCpStat(1);     // 충전 가능
+        condition.setSearch("대전 서구 둔산동");
         condition.setChargerTp(2);  // 급속
+        condition.setLatitude(Double.valueOf("36.357692"));
+        condition.setLongitude(Double.valueOf("127.381050"));
 
         this.location = new SearchLocationDto();
+        condition.setChargerTp(2);
         location.setLatitude(Double.valueOf("36.357692"));
         location.setLongitude(Double.valueOf("127.381050"));
     }
@@ -60,6 +62,8 @@ class ECarSearchApiControllerTest {
                 mockMvc.perform(
                         get(E_CAR + "/find")
                                 .param("search", condition.getSearch())
+                                .param("latitude", String.valueOf(condition.getLatitude()))
+                                .param("longitude", String.valueOf(condition.getLongitude()))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -73,35 +77,15 @@ class ECarSearchApiControllerTest {
     }
 
     @Test
-    @DisplayName("[전기차 충전소 조회]정상 처리 - 충전소명")
-    public void search_ecar_charging_station_with_station_name_and_success() throws Exception {
-        // When
-        ResultActions perform =
-                mockMvc.perform(
-                        get(E_CAR + "/find")
-                                .param("searchType", "1")
-                                .param("search", "시청")
-                                .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
-                );
-
-        // Then
-        perform
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("success").value(true))
-                .andExpect(jsonPath("responseCode").value(0))
-                .andExpect(jsonPath("message").value("성공하였습니다."))
-                .andExpect(jsonPath("dataList").isNotEmpty());
-    }
-
-    @Test
-    @DisplayName("[전기차 충전소 조회]정상 처리 - 주소 및 검색 조건")
+    @DisplayName("[전기차 충전소 조회]정상 처리 - 검색 조건을 포함한 주소")
     public void search_ecar_charging_station_with_address_and_condition_success() throws Exception {
         // When
         ResultActions perform =
                 mockMvc.perform(
                         get(E_CAR + "/find")
                                 .param("search", condition.getSearch())
-                                .param("cpStat", String.valueOf(condition.getCpStat()))
+                                .param("latitude", String.valueOf(condition.getLatitude()))
+                                .param("longitude", String.valueOf(condition.getLongitude()))
                                 .param("chargerTp", String.valueOf(condition.getChargerTp()))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
@@ -116,7 +100,7 @@ class ECarSearchApiControllerTest {
     }
 
     @Test
-    @DisplayName("[전기차 충전소 조회]정상 처리 - 위도/경도")
+    @DisplayName("[전기차 충전소 조회]정상 처리 - 현위치(위도/경도)")
     public void search_ecar_charging_station_with_latitude_and_longitude_success() throws Exception {
         // When
         ResultActions perform =
@@ -143,7 +127,9 @@ class ECarSearchApiControllerTest {
         ResultActions perform =
                 mockMvc.perform(
                         get(E_CAR + "/find")
-                                .param("search", "")
+                                .param("search", "데이터 없음")
+                                .param("latitude", String.valueOf(condition.getLatitude()))
+                                .param("longitude", String.valueOf(condition.getLongitude()))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -151,6 +137,6 @@ class ECarSearchApiControllerTest {
         perform
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("success").value(false))
-                .andExpect(jsonPath("responseCode").value(-3003));
+                .andExpect(jsonPath("responseCode").value(-3000));
     }
 }

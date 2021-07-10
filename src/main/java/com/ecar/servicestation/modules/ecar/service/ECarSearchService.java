@@ -2,31 +2,27 @@ package com.ecar.servicestation.modules.ecar.service;
 
 import com.ecar.servicestation.infra.address.service.AddressService;
 import com.ecar.servicestation.infra.address.dto.AddressDto;
-import com.ecar.servicestation.infra.data.service.ECarChargingStationInfoProvider;
 import com.ecar.servicestation.infra.data.dto.EVInfoDto;
 import com.ecar.servicestation.infra.data.exception.EVINfoNotFoundException;
-import com.ecar.servicestation.infra.map.service.MapService;
 import com.ecar.servicestation.infra.map.dto.MapLocationDto;
+import com.ecar.servicestation.infra.map.service.MapService;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.Station;
 import com.ecar.servicestation.modules.ecar.dto.request.SearchConditionDto;
 import com.ecar.servicestation.modules.ecar.dto.request.SearchLocationDto;
 import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
 import com.ecar.servicestation.modules.ecar.repository.StationRepository;
+import com.ecar.servicestation.modules.ecar.service.SearchMapConverter.Node;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,121 +31,101 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ECarSearchService {
 
-    private static final Map<String, String> zoneMap = new HashMap<>();
-    private static final String SEARCH_TYPE_ADDRESS = "0";
-    private static final String SEARCH_TYPE_CHARGER_NAME = "1";
-    private static final int API_REQUEST_COUNT = 30;
+    private static final String SORT_TYPE_NAME = "0";
+    private static final String SORT_TYPE_DISTANCE = "1";
 
     private final StationRepository stationRepository;
     private final ChargerRepository chargerRepository;
+    private final ECarSearchAsyncService eCarSearchAsyncService;
     private final AddressService addressService;
     private final MapService mapService;
-    private final ECarChargingStationInfoProvider eCarChargingStationInfoProvider;
     private final ModelMapper modelMapper;
+    private final SearchMapConverter searchMapConverter;
 
-    @PostConstruct
-    protected void init() throws IOException {
-        Resource resource = new ClassPathResource("zones_kr.csv");
-        List<String> lines = Files.readAllLines(resource.getFile().toPath(), StandardCharsets.UTF_8);
+    @Transactional
+    public List<Charger> getSearchResultsBy(SearchConditionDto condition, Pageable pageable) {
+        List<CompletableFuture<Set<EVInfoDto>>> futures = new ArrayList<>();
+        futures.add(eCarSearchAsyncService.getSearchResult(condition.getSearch(), 0));      // 충전소명 검색 키워드
 
-        for (String line : lines) {
-            String[] split = line.split(",");
-            zoneMap.put(split[0], split[1]);
-        }
+        Node searchKeywordMap = preProcessingAndExtractSearchKeywords(condition.getSearch());
+        searchAsAsyncByLongestPrefixes(futures, searchKeywordMap, 0);
+
+        // 결과 병합 //
+
+        Set<EVInfoDto> evInfoSet = new HashSet<>();
+
+        CompletableFuture
+                .allOf(futures.toArray(new CompletableFuture[futures.size()]))
+                .thenApply(result -> futures.stream().map(CompletableFuture::join).collect(Collectors.toList()))
+                .join()
+                .forEach(evInfoSet::addAll);
+
+        return chargerRepository
+                .findAllWithStationBySearchConditionAndPaging(
+                        getUpdatedChargers(evInfoSet, condition.getSortType(), condition.getLatitude(), condition.getLongitude()),
+                        condition,
+                        pageable
+                )
+                .getContent();
     }
 
     @Transactional
-    public List<Charger> getSearchResults(SearchConditionDto condition, Pageable pageable) {
-        Set<EVInfoDto> evInfos = new HashSet<>();
+    public List<Charger> getSearchResultsBy(SearchLocationDto location, Pageable pageable) {
+        Set<EVInfoDto> evInfoSet = new HashSet<>();
+        String search = mapService.reverseGeoCoding(modelMapper.map(location, MapLocationDto.class));
 
-        // 주소(0) 또는 충전소명(1) 기반 검색 //
+        try {
+            evInfoSet.addAll(eCarSearchAsyncService.getSearchResult(search,0).get());
 
-        if (condition.getSearchType().equals(SEARCH_TYPE_ADDRESS)) {
-            List<String> searchList = dataPreprocessing(condition.getSearch());
+        } catch (InterruptedException e) {
+            log.error("Interrupted error.");
 
-            for (int i = 0; i < searchList.size(); i++) {
-                if ((i + 1) % API_REQUEST_COUNT == 0) {
-                    try {
-                        Thread.sleep(1000);
-
-                    } catch (InterruptedException e) {
-                        log.error("thread error");
-
-                        throw new RuntimeException(e);
-                    }
-                }
-
-                evInfos.addAll(eCarChargingStationInfoProvider.getData(searchList.get(i), 1, 50));
-            }
-
-        } else if (condition.getSearchType().equals(SEARCH_TYPE_CHARGER_NAME)) {
-            evInfos = eCarChargingStationInfoProvider.getData(condition.getSearch(), 1, 50)
-                    .stream()
-                    .filter(evInfo -> evInfo.getStationName().contains(condition.getSearch()))
-                    .collect(Collectors.toSet());
+        } catch (ExecutionException e) {
+            log.error("Execution error.");
         }
 
-        return chargerRepository.findAllWithStationBySearchConditionAndPaging(getUpdatedChargers(evInfos), condition, pageable).getContent();
+        return chargerRepository
+                .findAllWithStationBySearchLocationAndPaging(
+                        getUpdatedChargers(evInfoSet, SORT_TYPE_DISTANCE, location.getLatitude(), location.getLongitude()),
+                        location,
+                        pageable
+                )
+                .getContent();
     }
 
-    @Transactional
-    public List<Charger> getSearchResultsByLocation(SearchLocationDto location, Pageable pageable) {
-        Set<EVInfoDto> evInfos = new HashSet<>();
-        List<String> searchList = dataPreprocessing(mapService.reverseGeoCoding(modelMapper.map(location, MapLocationDto.class)));
+    private Node preProcessingAndExtractSearchKeywords(String search) {
+        Set<AddressDto> address = addressService.convertToAddressDto(search, 1, 100);
 
-        for (int i = 0; i < searchList.size(); i++) {
-            if ((i + 1) % API_REQUEST_COUNT == 0) {
-                try {
-                    Thread.sleep(1000);
-
-                } catch (InterruptedException e) {
-                    log.error("thread error");
-
-                    throw new RuntimeException(e);
-                }
-            }
-
-            evInfos.addAll(eCarChargingStationInfoProvider.getData(searchList.get(i), 1, 50));
-        }
-
-        return chargerRepository.findAllWithStationByPaging(getUpdatedChargers(evInfos), pageable).getContent();
-    }
-
-    private List<String> dataPreprocessing(String search) {
-        Set<AddressDto> addresses = addressService.convertRoadAddress(search, 1, 100);
-        Set<String> searchSet = new HashSet<>();
-
-        addresses.stream()
+        address.stream()
                 .collect(Collectors.groupingBy(AddressDto::getOldAddress))
                 .forEach((oldAddress, values) -> {
-                    String[] split = oldAddress.split(" ");
-                    String siNm = split[0];
-                    String sggNm = split[1];
-                    String emdNmOrRn = split[2];
-
-                    if (zoneMap.containsKey(siNm)) {
-                        searchSet.add(zoneMap.get(siNm) + " " + sggNm + " " + emdNmOrRn.charAt(0));
-                    }
-
-                    searchSet.add(siNm + " " + sggNm + " " + emdNmOrRn.charAt(0));
-                    searchSet.addAll(values.stream().map(AddressDto::getPrefixOfNewAddress).collect(Collectors.toList()));
+                    searchMapConverter.insert(oldAddress);
+                    values.stream().map(AddressDto::getNewAddress).forEach(searchMapConverter::insert);
                 });
 
-        if (searchSet.size() == 0) {
-            throw new EVINfoNotFoundException();
-        }
-
-        return searchSet.stream().sorted().collect(Collectors.toList());
+        return searchMapConverter.getRoot();
     }
 
-    private List<Long> getUpdatedChargers(Set<EVInfoDto> evInfos) {
-        if (evInfos.size() == 0) {
-            throw new EVINfoNotFoundException();
+    private void searchAsAsyncByLongestPrefixes(List<CompletableFuture<Set<EVInfoDto>>> futures, Node node, int depth) {
+        if (depth >= 3) {
+            if (node.isLeafNode() || node.getNodeMap().size() >= 2) {
+
+                // 비동기 이벤트 //
+
+                futures.add(eCarSearchAsyncService.getSearchResult(node.getTResult(), 0));
+            }
+
+        } else {
+            for (String key : node.getNodeMap().keySet()) {
+                searchAsAsyncByLongestPrefixes(futures, node.getNodeMap().get(key), ++depth);
+            }
         }
+    }
 
-        List<Long> chargerIds = new ArrayList<>();
+    private List<Long> getUpdatedChargers(Set<EVInfoDto> evInfoSet, String sortType, Double myLat, Double myLongi) {
+        List<Charger> chargers = new ArrayList<>();
 
-        for (EVInfoDto evInfo : evInfos) {
+        evInfoSet.forEach(evInfo -> {
             Station station = stationRepository.findStationByStationNumber(evInfo.getStationNumber());
             Charger charger = chargerRepository.findChargerByChargerNumber(evInfo.getChargerNumber());
 
@@ -167,9 +143,49 @@ public class ECarSearchService {
             }
 
             station.addCharger(charger);
-            chargerIds.add(charger.getId());
-        }
+            chargers.add(charger);
+        });
 
-        return chargerIds;
+        if (sortType.equals(SORT_TYPE_NAME)) {
+            return chargers.stream()
+                    .sorted(Comparator.comparing(charger -> charger.getStation().getStationAddress()))
+                    .map(Charger::getId)
+                    .collect(Collectors.toList());
+
+        } else {
+            return chargers.stream()
+                    .sorted(
+                            Comparator.comparingDouble(charger -> {
+                                Station station = charger.getStation();
+                                return calDistance(myLat, myLongi, station.getLatitude(), station.getLongitude());
+                            })
+                    )
+                    .map(Charger::getId)
+                    .collect(Collectors.toList());
+        }
+    }
+
+    /**
+     * @source 과일가게 개발자
+     * @link https://fruitdev.tistory.com/189
+     */
+    private double calDistance(double srcLat, double srcLongi, double dstLat, double dstLongi) {
+        double theta = srcLongi - dstLongi;
+        double distance = Math.sin(degreeToRadian(srcLat)) * Math.sin(degreeToRadian(dstLat))
+                + Math.cos(degreeToRadian(srcLat)) * Math.cos(degreeToRadian(dstLat)) * Math.cos(degreeToRadian(theta));
+
+        distance = Math.acos(distance);
+        distance = radianToDegree(distance);
+        distance = distance * 60 * 1.1515 * 1.609344;
+
+        return Math.abs(distance);
+    }
+
+    private double degreeToRadian(double degree) {
+        return (degree * Math.PI / 180.0);
+    }
+
+    private double radianToDegree(double radian) {
+        return (radian * 180 / Math.PI);
     }
 }
