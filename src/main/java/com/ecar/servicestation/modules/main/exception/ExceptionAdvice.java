@@ -7,10 +7,7 @@ import com.ecar.servicestation.infra.data.exception.EVINfoNotFoundException;
 import com.ecar.servicestation.infra.data.exception.EVInfoServiceException;
 import com.ecar.servicestation.infra.map.exception.MapNotFoundException;
 import com.ecar.servicestation.infra.map.exception.MapServiceException;
-import com.ecar.servicestation.modules.ecar.exception.CChargerNotFoundException;
-import com.ecar.servicestation.modules.ecar.exception.CReservationCancelFailedException;
-import com.ecar.servicestation.modules.ecar.exception.CReserveFailedException;
-import com.ecar.servicestation.modules.ecar.exception.CStationNotFoundException;
+import com.ecar.servicestation.modules.ecar.exception.*;
 import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
 import com.ecar.servicestation.modules.user.exception.*;
@@ -124,6 +121,18 @@ public class ExceptionAdvice {
         return responseService.getFailedResult(parseInt(getMessage("reservationCancelFailed.code")), getMessage("reservationCancelFailed.msg"));
     }
 
+    @ExceptionHandler(CReservationStartFailedException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult reservationStartFailed(HttpServletRequest request, CReservationStartFailedException e) {
+        return responseService.getFailedResult(parseInt(getMessage("reservationStartFailed.code")), getMessage("reservationStartFailed.msg"));
+    }
+
+    @ExceptionHandler(CReservationEndFailedException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    protected CommonResult reservationEndFailed(HttpServletRequest request, CReservationEndFailedException e) {
+        return responseService.getFailedResult(parseInt(getMessage("reservationEndFailed.code")), getMessage("reservationEndFailed.msg"));
+    }
+
     // 외부 API 예외 //
 
     @ExceptionHandler(EVINfoNotFoundException.class)
@@ -161,6 +170,7 @@ public class ExceptionAdvice {
     public CommonResult addressExceeded(HttpServletRequest request, AddressExceededException e) {
         return responseService.getFailedResult(parseInt(getMessage("addressExceeded.code")), getMessage("addressExceeded.msg"));
     }
+
 
     // 인증 예외 //
 

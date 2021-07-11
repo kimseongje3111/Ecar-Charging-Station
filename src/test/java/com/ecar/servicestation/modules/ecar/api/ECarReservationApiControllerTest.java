@@ -91,9 +91,6 @@ class ECarReservationApiControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        eCarStationFactory.createStationAndAddCharger(2, 2);
-        eCarStationFactory.createStationAndAddCharger(3, 3);
-
         RegisterCarRequestDto registerCarRequest = new RegisterCarRequestDto();
         registerCarRequest.setCarModel("소나타");
         registerCarRequest.setCarModel("2020");
@@ -101,6 +98,9 @@ class ECarReservationApiControllerTest {
         registerCarRequest.setCarNumber("99수9999");
 
         this.car = carFactory.createCar(withLoginAccount.getAccount(), registerCarRequest);
+
+        eCarStationFactory.createStationAndAddCharger(2, 2);
+        eCarStationFactory.createStationAndAddCharger(3, 3);
     }
 
     @AfterEach

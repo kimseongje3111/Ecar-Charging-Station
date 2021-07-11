@@ -32,6 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .authorizeRequests()
                         .antMatchers("/h2-console/**", "/user/login", "/user/sign-up", "/user/email-auth-token").permitAll()
+                        .antMatchers("/ecar/charge/**").permitAll()     // 충전기의 요청
                         .antMatchers(HttpMethod.GET, "/exception/**").permitAll()
                         .antMatchers("/users").hasRole("ADMIN")
                         .anyRequest().hasRole("USER")

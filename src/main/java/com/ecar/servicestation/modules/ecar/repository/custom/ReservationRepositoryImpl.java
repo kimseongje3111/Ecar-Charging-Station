@@ -75,6 +75,15 @@ public class ReservationRepositoryImpl extends Querydsl4RepositorySupport implem
     }
 
     @Override
+    public ReservationTable findReservationWithChargerAndAccountByReserveTitle(String reserveTitle) {
+        return selectFrom(reservationTable)
+                .join(reservationTable.charger, charger).fetchJoin()
+                .join(reservationTable.account, account).fetchJoin()
+                .where(reservationTable.reserveTitle.eq(reserveTitle))
+                .fetchOne();
+    }
+
+    @Override
     public List<ReservationTable> findAllWithChargerAndCarByAccountAndState(long accountId, ReservationState state) {
         JPAQuery<ReservationTable> query =
                 selectFrom(reservationTable)

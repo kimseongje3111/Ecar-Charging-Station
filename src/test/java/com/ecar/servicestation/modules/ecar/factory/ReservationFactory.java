@@ -55,4 +55,13 @@ public class ReservationFactory {
 
         return reservation;
     }
+
+    @Transactional
+    public ReservationTable chargingReservation(ReservationTable reservation) {
+        if (reservation.startCharging(30)) {
+            return reservation;
+        }
+
+        return null;
+    }
 }

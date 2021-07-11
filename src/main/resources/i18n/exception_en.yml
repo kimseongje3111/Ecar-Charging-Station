@@ -58,6 +58,14 @@ reservationCancelFailed:
   code: "-1012"
   msg: "You have exceeded the available time to cancel your reservation. There will be a 20% fee for automatic cancellation."
 
+reservationStartFailed:
+  code: "-1013"
+  msg: "Now is before the reserved charging start time or auto-canceled due to delay exceeded."
+
+reservationEndFailed:
+  code: "-1014"
+  msg: "The reservation is not being charged."
+
 #### Security error #####################################################
 #########################################################################
 entryPoint:

@@ -17,5 +17,7 @@ public interface ReservationRepositoryCustom {
 
     ReservationTable findReservationWithChargerAndCarByReserveTitle(String reserveTitle);
 
+    ReservationTable findReservationWithChargerAndAccountByReserveTitle(String reserveTitle);
+
     List<ReservationTable> findAllWithChargerAndCarByAccountAndState(long accountId, ReservationState state);
 }

@@ -112,12 +112,16 @@ public class ECarReservationService {
 
         // 요금 계산 //
 
+        int faresByChargerType = 0;
+
         if (charger.getType() == CHARGER_TYPE_SLOW) {
-            reserveItem.applyReservation(properties.getSlowChargingFares() * CHARGER_TYPE_SLOW_KW);
+            faresByChargerType = properties.getSlowChargingFares() * CHARGER_TYPE_SLOW_KW;
 
         } else if (charger.getType() == CHARGER_TYPE_FAST) {
-            reserveItem.applyReservation(properties.getFastChargingFares() * CHARGER_TYPE_FAST_KW);
+            faresByChargerType = properties.getFastChargingFares() * CHARGER_TYPE_FAST_KW;
         }
+
+        reserveItem.applyReservation(faresByChargerType);
 
         return getReserveResponse(account.getName(), reserveItem);
     }

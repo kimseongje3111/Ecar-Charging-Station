@@ -63,14 +63,14 @@ public class ReservationTable {
 
     // 비지니스 메서드 //
 
-    public void applyReservation(int faresByChargerType) {
+    public void applyReservation(int fares) {
         // 요금 계산
         Duration duration = Duration.between(chargeStartDateTime, chargeEndDateTime);
         BigDecimal seconds = new BigDecimal(String.valueOf(duration.getSeconds()));
         BigDecimal secondsPerHour = new BigDecimal("3600");
-        BigDecimal faresPerHour = new BigDecimal(String.valueOf(faresByChargerType));
+        BigDecimal faresPerHour = new BigDecimal(String.valueOf(fares));
 
-        this.reserveFares = seconds.divide(secondsPerHour).multiply(faresPerHour).intValue();
+        this.reserveFares = seconds.divide(secondsPerHour,2, BigDecimal.ROUND_CEILING).multiply(faresPerHour).intValue();
         this.reserveState = ReservationState.STAND_BY;
         this.stateLastChangedAt = LocalDateTime.now();
     }
@@ -95,6 +95,41 @@ public class ReservationTable {
 
     public void setOffNotification() {
         this.isNotificationSet = false;
+    }
+
+    public boolean startCharging(int availableDelay) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (chargeStartDateTime.isAfter(now) || now.isAfter(chargeStartDateTime.plusMinutes(availableDelay))) {
+            return false;
+        }
+
+        this.reserveState = ReservationState.CHARGING;
+        this.stateLastChangedAt = now;
+
+        return true;
+    }
+
+    public boolean endCharging() {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (!reserveState.equals(ReservationState.CHARGING) || chargeStartDateTime.isAfter(now)) {
+            return false;
+        }
+
+        this.reserveState = ReservationState.COMPLETE;
+        this.stateLastChangedAt = now;
+
+        return true;
+    }
+
+    public int calRefundCashPoint(int refundCashPoint) {
+        Duration duration = Duration.between(LocalDateTime.now(), chargeEndDateTime);
+        BigDecimal seconds = new BigDecimal(String.valueOf(duration.getSeconds()));
+        BigDecimal secondsPerHour = new BigDecimal("3600");
+        BigDecimal faresPerHour = new BigDecimal(String.valueOf(refundCashPoint));
+
+        return seconds.divide(secondsPerHour, 2, BigDecimal.ROUND_CEILING).multiply(faresPerHour).intValue();
     }
 
     private String makeReserveTitle() {
