@@ -8,4 +8,5 @@ import lombok.Setter;
 public class SingleResult<T> extends CommonResult {
 
     private T data;
+
 }

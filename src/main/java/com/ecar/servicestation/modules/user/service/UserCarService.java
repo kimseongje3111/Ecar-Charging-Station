@@ -5,7 +5,7 @@ import com.ecar.servicestation.modules.user.domain.Car;
 import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequestDto;
 import com.ecar.servicestation.modules.user.dto.response.UserCarDto;
 import com.ecar.servicestation.modules.user.exception.CCarNotFoundException;
-import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,16 +28,30 @@ public class UserCarService {
     private final ModelMapper modelMapper;
 
     @Transactional
-    public void saveCar(RegisterCarRequestDto request) {
-        Account account = getUserBasicInfo();
+    public void registerUserCar(RegisterCarRequestDto request) {
+        Account account = getLoginUserContext();
         Car car = carRepository.save(modelMapper.map(request, Car.class));
 
         account.addCar(car);
     }
 
-    public List<UserCarDto> getMyCarInfo() {
-        return getUserBasicInfo().getMyCars()
-                .stream()
+    @Transactional
+    public void deleteUserCar(long carId) {
+        Account account = getLoginUserContext();
+        Car car = carRepository.findCarByIdAndAccount(carId, account);
+
+        if (car == null) {
+            throw new CCarNotFoundException();
+        }
+
+        carRepository.delete(account.removeCar(car));
+    }
+
+    public List<UserCarDto> getUserCars() {
+        Account account = getLoginUserContext();
+        List<Car> myCars = account.getMyCars();
+
+        return myCars.stream()
                 .map(myCar -> {
                     UserCarDto userCar = modelMapper.map(myCar, UserCarDto.class);
                     userCar.setCarId(myCar.getId());
@@ -47,21 +61,10 @@ public class UserCarService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void deleteCar(long id) {
-        Account account = getUserBasicInfo();
-        Car car = carRepository.findCarByIdAndAccount(id, account);
-
-        if (car == null) {
-            throw new CCarNotFoundException();
-        }
-
-        carRepository.delete(account.removeCar(car));
-    }
-
-    private Account getUserBasicInfo() {
+    private Account getLoginUserContext() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         return userRepository.findAccountByEmail(authentication.getName()).orElseThrow(CUserNotFoundException::new);
     }
+
 }

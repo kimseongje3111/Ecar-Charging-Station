@@ -1,6 +1,5 @@
 package com.ecar.servicestation.modules.user.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -11,8 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 
 @Entity
 @Getter
@@ -80,4 +77,5 @@ public class Bank {
         this.paymentPassword = password;
         this.bankAccountAccessToken = token;
     }
+
 }

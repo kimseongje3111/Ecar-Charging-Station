@@ -22,4 +22,5 @@ public class AddressDto {
     public String getNewAddress() {
         return siNm + " " + sggNm + " " + rn;
     }
+
 }

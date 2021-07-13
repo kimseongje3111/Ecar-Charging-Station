@@ -14,4 +14,5 @@ public class AddressCommonDto {
     private Integer currentPage;
 
     private String totalCount;
+
 }

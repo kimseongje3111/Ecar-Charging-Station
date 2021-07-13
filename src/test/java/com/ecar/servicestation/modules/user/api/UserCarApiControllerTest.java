@@ -8,14 +8,13 @@ import com.ecar.servicestation.modules.user.factory.CarFactory;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
-import javax.annotation.PostConstruct;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,8 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @MockMvcTest
 class UserCarApiControllerTest {
-
-    private static final String USER_CAR = "/user/car";
 
     @Autowired
     MockMvc mockMvc;
@@ -43,10 +40,12 @@ class UserCarApiControllerTest {
     @Autowired
     CarRepository carRepository;
 
+    private static final String BASE_URL_USER_CAR = "/user/car";
+
     private RegisterCarRequestDto registerCarRequest;
 
-    @PostConstruct
-    void init() {
+    @BeforeEach
+    void beforeEach() {
         this.registerCarRequest = new RegisterCarRequestDto();
         registerCarRequest.setCarModel("TEST MODEL");
         registerCarRequest.setCarModelYear("2021");
@@ -57,6 +56,7 @@ class UserCarApiControllerTest {
     @AfterEach
     void afterEach() {
         withLoginAccount.getAccount().getMyCars().clear();
+
         carRepository.deleteAll();
     }
 
@@ -66,7 +66,7 @@ class UserCarApiControllerTest {
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(USER_CAR + "/register")
+                        post(BASE_URL_USER_CAR + "/register")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(registerCarRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
@@ -86,13 +86,13 @@ class UserCarApiControllerTest {
     @Test
     @DisplayName("[사용자 차량 조회]정상 처리")
     public void find_user_car_success() throws Exception {
-        // Given
-        Car car = carFactory.createCar(withLoginAccount.getAccount(), registerCarRequest);
+        // Base
+        carFactory.createCar(withLoginAccount.getAccount(), registerCarRequest);
 
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        get(USER_CAR).header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
+                        get(BASE_URL_USER_CAR).header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
         // Then
@@ -107,13 +107,13 @@ class UserCarApiControllerTest {
     @Test
     @DisplayName("[사용자 차량 삭제]정상 처리")
     public void delete_user_car_success() throws Exception {
-        // Given
+        // Base
         Car car = carFactory.createCar(withLoginAccount.getAccount(), registerCarRequest);
 
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        delete(USER_CAR + "/" + car.getId())
+                        delete(BASE_URL_USER_CAR + "/" + car.getId())
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -127,4 +127,5 @@ class UserCarApiControllerTest {
         // Then(2)
         assertThat(carRepository.findAllByAccount(withLoginAccount.getAccount())).isEmpty();
     }
+
 }

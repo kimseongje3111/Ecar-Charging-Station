@@ -4,12 +4,12 @@ import com.ecar.servicestation.infra.MockMvcTest;
 import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Bank;
-import com.ecar.servicestation.modules.user.dto.request.CashInDto;
-import com.ecar.servicestation.modules.user.dto.request.CashOutDto;
-import com.ecar.servicestation.modules.user.dto.request.ConfirmBankRequestDto;
-import com.ecar.servicestation.modules.user.dto.request.RegisterBankRequestDto;
-import com.ecar.servicestation.modules.user.exception.CBankNotFoundException;
-import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.dto.request.banks.CashInRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.banks.CashOutRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.banks.AuthBankRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.banks.RegisterBankRequestDto;
+import com.ecar.servicestation.modules.user.exception.banks.CBankNotFoundException;
+import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.factory.BankFactory;
 import com.ecar.servicestation.modules.user.factory.UserFactory;
 import com.ecar.servicestation.modules.user.repository.BankRepository;
@@ -34,8 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @MockMvcTest
 class UserBankApiControllerTest {
 
-    private static final String USER_BANK = "/user/bank";
-
     @Autowired
     MockMvc mockMvc;
 
@@ -57,9 +55,12 @@ class UserBankApiControllerTest {
     @Autowired
     BankRepository bankRepository;
 
+    private static final String BASE_URL_USER_BANK = "/user/bank";
+
     @AfterEach
     void afterEach() {
         withLoginAccount.getAccount().getMyBanks().clear();
+
         bankRepository.deleteAll();
     }
 
@@ -75,7 +76,7 @@ class UserBankApiControllerTest {
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(USER_BANK + "/register")
+                        post(BASE_URL_USER_BANK + "/register")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(registerBankRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
@@ -91,6 +92,7 @@ class UserBankApiControllerTest {
 
         // Then(2)
         List<Bank> myBanks = bankRepository.findAllByAccount(withLoginAccount.getAccount());
+
         assertThat(myBanks.size()).isEqualTo(1);
         assertThat(myBanks.get(0).isMainUsed()).isTrue();
         assertThat(myBanks.get(0).isBankAccountVerified()).isFalse();
@@ -99,23 +101,24 @@ class UserBankApiControllerTest {
     @Test
     @DisplayName("[사용자 계좌 인증]정상 처리")
     public void confirm_user_bank_account_success() throws Exception {
-        // Given
+        // Base
         Account account = withLoginAccount.getAccount();
         Bank bank = bankFactory.createBank("농협", "99999999999", account);
 
-        ConfirmBankRequestDto confirmBankRequest = new ConfirmBankRequestDto();
-        confirmBankRequest.setBankId(bank.getId());
-        confirmBankRequest.setPaymentPassword("12341234");
-        confirmBankRequest.setAuthMsg(bank.getBankAccountAuthMsg());
-        confirmBankRequest.setCertificateId(1L);
-        confirmBankRequest.setCertificatePassword("123456789");
+        // Given
+        AuthBankRequestDto authBankRequest = new AuthBankRequestDto();
+        authBankRequest.setBankId(bank.getId());
+        authBankRequest.setPaymentPassword("12341234");
+        authBankRequest.setAuthMsg(bank.getBankAccountAuthMsg());
+        authBankRequest.setCertificateId(1L);
+        authBankRequest.setCertificatePassword("123456789");
 
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(USER_BANK + "/confirm")
+                        post(BASE_URL_USER_BANK + "/auth")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(confirmBankRequest))
+                                .content(objectMapper.writeValueAsString(authBankRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -128,6 +131,7 @@ class UserBankApiControllerTest {
 
         // Then(2)
         List<Bank> myBanks = bankRepository.findAllByAccount(account);
+
         assertThat(myBanks.size()).isEqualTo(1);
         assertThat(myBanks.get(0).isMainUsed()).isTrue();
         assertThat(myBanks.get(0).isBankAccountVerified()).isTrue();
@@ -137,23 +141,24 @@ class UserBankApiControllerTest {
     @Test
     @DisplayName("[사용자 계좌 인증]실패 - 인증 메시지 불일치")
     public void confirm_user_bank_account_failed_by_auth_message_mismatched() throws Exception {
-        // Given
+        // Base
         Account account = withLoginAccount.getAccount();
         Bank bank = bankFactory.createBank("농협", "99999999999", account);
 
-        ConfirmBankRequestDto confirmBankRequest = new ConfirmBankRequestDto();
-        confirmBankRequest.setBankId(bank.getId());
-        confirmBankRequest.setPaymentPassword("12341234");
-        confirmBankRequest.setAuthMsg("INVALID_AUTH_MESSAGE");
-        confirmBankRequest.setCertificateId(1L);
-        confirmBankRequest.setCertificatePassword("123456789");
+        // Given
+        AuthBankRequestDto authBankRequest = new AuthBankRequestDto();
+        authBankRequest.setBankId(bank.getId());
+        authBankRequest.setPaymentPassword("12341234");
+        authBankRequest.setAuthMsg("INVALID_AUTH_MESSAGE");
+        authBankRequest.setCertificateId(1L);
+        authBankRequest.setCertificatePassword("123456789");
 
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(USER_BANK + "/confirm")
+                        post(BASE_URL_USER_BANK + "/auth")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(confirmBankRequest))
+                                .content(objectMapper.writeValueAsString(authBankRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -167,14 +172,13 @@ class UserBankApiControllerTest {
     @Test
     @DisplayName("[사용자 계좌 목록 조회]정상 처리")
     public void find_user_bank_account_list_success() throws Exception {
-        // Given
-        Account account = withLoginAccount.getAccount();
-        Bank bank = bankFactory.createVerifiedBank("농협", "99999999999", account);
+        // Base
+        bankFactory.createVerifiedBank("농협", "99999999999", withLoginAccount.getAccount());
 
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        get(USER_BANK).header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
+                        get(BASE_URL_USER_BANK).header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
         // Then
@@ -189,14 +193,14 @@ class UserBankApiControllerTest {
     @Test
     @DisplayName("[사용자 계좌 삭제]정상 처리")
     public void delete_user_bank_account_success() throws Exception {
-        // Given
+        // Base
         Account account = withLoginAccount.getAccount();
         Bank bank = bankFactory.createVerifiedBank("농협", "99999999999", account);
 
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        delete(USER_BANK + "/" + bank.getId())
+                        delete(BASE_URL_USER_BANK + "/" + bank.getId())
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -209,19 +213,20 @@ class UserBankApiControllerTest {
 
         // Then(2)
         List<Bank> myBanks = bankRepository.findAllByAccount(account);
+
         assertThat(myBanks.size()).isEqualTo(0);
     }
 
     @Test
     @DisplayName("[사용자 계좌 삭제]실패 - 인증 계좌 미등록")
     public void delete_user_bank_account_failed_by_not_found() throws Exception {
-        // Given
+        // Base
         Bank bank = bankFactory.createBank("농협", "99999999999", withLoginAccount.getAccount());
 
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        delete(USER_BANK + "/" + bank.getId())
+                        delete(BASE_URL_USER_BANK + "/" + bank.getId())
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -235,7 +240,7 @@ class UserBankApiControllerTest {
     @Test
     @DisplayName("[주사용 계좌 변경]정상 처리")
     public void change_user_main_used_bank_account_success() throws Exception {
-        // Given
+        // Base
         Account account = withLoginAccount.getAccount();
         Bank bank1 = bankFactory.createVerifiedBank("농협", "99999999999", account);
         Bank bank2 = bankFactory.createVerifiedBank("신한", "11111111111", account);
@@ -243,7 +248,7 @@ class UserBankApiControllerTest {
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(USER_BANK + "/main-used/" + bank2.getId())
+                        post(BASE_URL_USER_BANK + "/main-used/" + bank2.getId())
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -262,20 +267,21 @@ class UserBankApiControllerTest {
     @Test
     @DisplayName("[현금(캐쉬) 충전]정상 처리")
     public void charge_cash_success() throws Exception {
-        // Given
+        // Base
         Account account = withLoginAccount.getAccount();
-        Bank bank = bankFactory.createVerifiedBank("농협", "99999999999", account);
+        bankFactory.createVerifiedBank("농협", "99999999999", account);
 
-        CashInDto cashIn = new CashInDto();
-        cashIn.setAmount(10000L);
-        cashIn.setPaymentPassword("12341234");
+        // Given
+        CashInRequestDto cashInRequest = new CashInRequestDto();
+        cashInRequest.setAmount(10000);
+        cashInRequest.setPaymentPassword("12341234");
 
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(USER_BANK + "/cash-in")
+                        post(BASE_URL_USER_BANK + "/cash-in")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(cashIn))
+                                .content(objectMapper.writeValueAsString(cashInRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -293,20 +299,20 @@ class UserBankApiControllerTest {
     @Test
     @DisplayName("[현금(캐쉬) 충전]실패 - 결제 비밀번호 불일치")
     public void charge_cash_failed_by_payment_password_mismatched() throws Exception {
-        // Given
-        Account account = withLoginAccount.getAccount();
-        Bank bank = bankFactory.createVerifiedBank("농협", "99999999999", account);
+        // Base
+        bankFactory.createVerifiedBank("농협", "99999999999", withLoginAccount.getAccount());
 
-        CashInDto cashIn = new CashInDto();
-        cashIn.setAmount(10000L);
-        cashIn.setPaymentPassword("1234");
+        // Given
+        CashInRequestDto cashInRequest = new CashInRequestDto();
+        cashInRequest.setAmount(10000);
+        cashInRequest.setPaymentPassword("1234");
 
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(USER_BANK + "/cash-in")
+                        post(BASE_URL_USER_BANK + "/cash-in")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(cashIn))
+                                .content(objectMapper.writeValueAsString(cashInRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -320,21 +326,21 @@ class UserBankApiControllerTest {
     @Test
     @DisplayName("[현금(캐쉬) 환불]정상 처리")
     public void refund_cash_success() throws Exception {
-        // Given
+        // Base
         Account account = withLoginAccount.getAccount();
-        Bank bank = bankFactory.createVerifiedBank("농협", "99999999999", account);
-
-        CashOutDto cashOut = new CashOutDto();
-        cashOut.setAmount(10000L);
-
-        // When
+        bankFactory.createVerifiedBank("농협", "99999999999", account);
         userFactory.cashInit(account, 50000);
 
+        // Given
+        CashOutRequestDto cashOutRequest = new CashOutRequestDto();
+        cashOutRequest.setAmount(10000);
+
+        // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(USER_BANK + "/cash-out")
+                        post(BASE_URL_USER_BANK + "/cash-out")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(cashOut))
+                                .content(objectMapper.writeValueAsString(cashOutRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -352,21 +358,21 @@ class UserBankApiControllerTest {
     @Test
     @DisplayName("[현금(캐쉬) 환불]실패 - 보유 현금을 초과한 환불 요청")
     public void refund_cash_failed_by_user_cash_not_enough() throws Exception {
-        // Given
+        // Base
         Account account = withLoginAccount.getAccount();
-        Bank bank = bankFactory.createVerifiedBank("농협", "99999999999", account);
-
-        CashOutDto cashOut = new CashOutDto();
-        cashOut.setAmount(60000L);
-
-        // When
+        bankFactory.createVerifiedBank("농협", "99999999999", account);
         userFactory.cashInit(account, 50000);
 
+        // Given
+        CashOutRequestDto cashOutRequest = new CashOutRequestDto();
+        cashOutRequest.setAmount(60000);
+
+        // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(USER_BANK + "/cash-out")
+                        post(BASE_URL_USER_BANK + "/cash-out")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(cashOut))
+                                .content(objectMapper.writeValueAsString(cashOutRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -376,4 +382,5 @@ class UserBankApiControllerTest {
                 .andExpect(jsonPath("success").value(false))
                 .andExpect(jsonPath("responseCode").value(-1011));
     }
+
 }

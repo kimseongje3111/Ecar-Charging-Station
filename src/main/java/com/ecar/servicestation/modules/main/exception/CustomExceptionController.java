@@ -20,4 +20,5 @@ public class CustomExceptionController {
     public CommonResult accessDeniedException() {
         throw new AccessDeniedException("");
     }
+
 }

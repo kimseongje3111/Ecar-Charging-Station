@@ -13,4 +13,5 @@ public class RegisterBankResponseDto {
 
     // only console
     private String msg;
+
 }

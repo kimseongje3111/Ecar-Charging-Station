@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ReservationRepository extends JpaRepository<ReservationTable, Long>, ReservationRepositoryCustom {
 
     ReservationTable findReservationTableByReserveTitle(String reserveTitle);
+
 }

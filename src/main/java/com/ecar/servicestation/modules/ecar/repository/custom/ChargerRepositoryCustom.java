@@ -1,8 +1,8 @@
 package com.ecar.servicestation.modules.ecar.repository.custom;
 
 import com.ecar.servicestation.modules.ecar.domain.Charger;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchConditionDto;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchLocationDto;
+import com.ecar.servicestation.modules.ecar.dto.request.searchs.SearchConditionDto;
+import com.ecar.servicestation.modules.ecar.dto.request.searchs.SearchLocationDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -12,4 +12,5 @@ public class MapResponseDto {
     private MapStatusDto status;
 
     private List<MapResultDto> results;
+
 }

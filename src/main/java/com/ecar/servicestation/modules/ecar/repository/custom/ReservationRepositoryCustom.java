@@ -9,10 +9,6 @@ import java.util.List;
 
 public interface ReservationRepositoryCustom {
 
-    List<ReservationTable> findAllByChargerAndStateAndBetweenDateTime(long chargerId, ReservationState state, LocalDateTime start, LocalDateTime end);
-
-    long updateStateFromStandByToCancelByOutstandingTime(int outstandingTimeMinutes);
-
     ReservationTable findReservationWithChargerAndCarById(long reservationId);
 
     ReservationTable findReservationWithChargerAndCarByReserveTitle(String reserveTitle);
@@ -20,4 +16,11 @@ public interface ReservationRepositoryCustom {
     ReservationTable findReservationWithChargerAndAccountByReserveTitle(String reserveTitle);
 
     List<ReservationTable> findAllWithChargerAndCarByAccountAndState(long accountId, ReservationState state);
+
+    List<ReservationTable> findAllByChargerAndStateAndBetweenDateTime(long chargerId, ReservationState state, LocalDateTime start, LocalDateTime end);
+
+    long updateStateToCancelByUnpaidTimeOver(int unpaidTimeMinutes);
+
+    long updateStateToCancelByNoShowTimeOver(int noShowTimeMinutes);
+
 }

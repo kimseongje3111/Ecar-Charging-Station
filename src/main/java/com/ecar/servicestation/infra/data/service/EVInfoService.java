@@ -49,7 +49,7 @@ public class EVInfoService implements ECarChargingStationInfoProvider {
         }
 
         if (body.getItems().size() == 0) {
-            throw new EVINfoNotFoundException();
+            return new HashSet<>();
         }
 
         Set<EVInfoDto> results = new HashSet<>(body.getItems());
@@ -95,4 +95,5 @@ public class EVInfoService implements ECarChargingStationInfoProvider {
                 .append("&ServiceKey=").append(SERVICE_KEY_DECODING)
                 .toString();
     }
+
 }

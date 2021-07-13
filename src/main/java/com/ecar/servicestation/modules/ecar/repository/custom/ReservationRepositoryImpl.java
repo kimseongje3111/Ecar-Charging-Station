@@ -3,8 +3,6 @@ package com.ecar.servicestation.modules.ecar.repository.custom;
 import com.ecar.servicestation.infra.querydsl.Querydsl4RepositorySupport;
 import com.ecar.servicestation.modules.ecar.domain.ReservationState;
 import com.ecar.servicestation.modules.ecar.domain.ReservationTable;
-import com.ecar.servicestation.modules.user.domain.Account;
-import com.ecar.servicestation.modules.user.domain.QAccount;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 
@@ -21,39 +19,6 @@ public class ReservationRepositoryImpl extends Querydsl4RepositorySupport implem
 
     public ReservationRepositoryImpl() {
         super(ReservationTable.class);
-    }
-
-    @Override
-    public List<ReservationTable> findAllByChargerAndStateAndBetweenDateTime(long chargerId, ReservationState state, LocalDateTime start, LocalDateTime end) {
-        return selectFrom(reservationTable)
-                .join(reservationTable.charger, charger)
-                .where(
-                        charger.id.eq(chargerId),
-                        reservationTable.reserveState.eq(state),
-                        reservationTable.chargeStartDateTime.eq(start)
-                                .or(reservationTable.chargeStartDateTime.between(start, end))
-                                .or(reservationTable.chargeEndDateTime.eq(start))
-                                .or(reservationTable.chargeEndDateTime.between(start, end))
-                )
-                .fetch();
-    }
-
-    @Override
-    public long updateStateFromStandByToCancelByOutstandingTime(int outstandingTimeMinutes) {
-        long count =
-                update(reservationTable)
-                        .set(reservationTable.reserveState, CANCEL)
-                        .where(
-                                reservationTable.reserveState.eq(STAND_BY),
-                                isOverOutstandingTime(outstandingTimeMinutes)
-                        )
-                        .execute();
-
-        if (count != 0) {
-            getEntityManager().clear();
-        }
-
-        return count;
     }
 
     @Override
@@ -110,7 +75,63 @@ public class ReservationRepositoryImpl extends Querydsl4RepositorySupport implem
         }
     }
 
-    private BooleanExpression isOverOutstandingTime(int outstandingTimeMinutes) {
+    @Override
+    public List<ReservationTable> findAllByChargerAndStateAndBetweenDateTime(long chargerId, ReservationState state, LocalDateTime start, LocalDateTime end) {
+        return selectFrom(reservationTable)
+                .join(reservationTable.charger, charger)
+                .where(
+                        charger.id.eq(chargerId),
+                        reservationTable.reserveState.eq(state),
+                        reservationTable.chargeStartDateTime.eq(start)
+                                .or(reservationTable.chargeStartDateTime.between(start, end))
+                                .or(reservationTable.chargeEndDateTime.eq(start))
+                                .or(reservationTable.chargeEndDateTime.between(start, end))
+                )
+                .fetch();
+    }
+
+    @Override
+    public long updateStateToCancelByUnpaidTimeOver(int unpaidTimeMinutes) {
+        long count =
+                update(reservationTable)
+                        .set(reservationTable.reserveState, CANCEL)
+                        .where(
+                                reservationTable.reserveState.eq(STAND_BY),
+                                isOverUnpaidTime(unpaidTimeMinutes)
+                        )
+                        .execute();
+
+        if (count != 0) {
+            getEntityManager().clear();
+        }
+
+        return count;
+    }
+
+    @Override
+    public long updateStateToCancelByNoShowTimeOver(int noShowTimeMinutes) {
+        long count =
+                update(reservationTable)
+                        .set(reservationTable.reserveState, CANCEL)
+                        .where(
+                                reservationTable.reserveState.eq(PAYMENT),
+                                isOverUnpaidTime(noShowTimeMinutes)
+                        )
+                        .execute();
+
+        if (count != 0) {
+            getEntityManager().clear();
+        }
+
+        return 0;
+    }
+
+    private BooleanExpression isOverUnpaidTime(int outstandingTimeMinutes) {
         return reservationTable.reservedAt.before(LocalDateTime.now().minusMinutes(outstandingTimeMinutes));
     }
+
+    private BooleanExpression isOverNoShowTime(int noShowTimeMinutes) {
+        return reservationTable.chargeStartDateTime.before(LocalDateTime.now().minusMinutes(noShowTimeMinutes));
+    }
+
 }

@@ -41,4 +41,5 @@ public class Charger {
     public boolean isRequiredUpdate(LocalDateTime localDateTime) {
         return this.stateUpdatedAt.isBefore(localDateTime);
     }
+
 }

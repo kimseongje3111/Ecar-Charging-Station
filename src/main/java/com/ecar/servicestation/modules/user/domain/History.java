@@ -1,6 +1,5 @@
 package com.ecar.servicestation.modules.user.domain;
 
-import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.Station;
 import lombok.*;
 

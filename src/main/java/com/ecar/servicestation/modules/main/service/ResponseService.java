@@ -45,4 +45,5 @@ public class ResponseService {
         result.setSuccess(true);
         result.setResponse(ApiCommonResponse.SUCCESS);
     }
+
 }

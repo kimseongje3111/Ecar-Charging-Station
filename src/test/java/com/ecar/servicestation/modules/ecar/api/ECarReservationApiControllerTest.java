@@ -5,11 +5,10 @@ import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.ReservationState;
 import com.ecar.servicestation.modules.ecar.domain.ReservationTable;
-import com.ecar.servicestation.modules.ecar.dto.request.NotificationRequestDto;
-import com.ecar.servicestation.modules.ecar.dto.request.PaymentRequestDto;
-import com.ecar.servicestation.modules.ecar.dto.request.ReserveRequestDto;
-import com.ecar.servicestation.modules.ecar.dto.response.ChargerTimeTableDto;
-import com.ecar.servicestation.modules.ecar.exception.CReservationNotFoundException;
+import com.ecar.servicestation.modules.ecar.dto.request.books.PaymentRequestDto;
+import com.ecar.servicestation.modules.ecar.dto.request.books.ReserveRequestDto;
+import com.ecar.servicestation.modules.ecar.dto.response.books.ChargerTimeTableDto;
+import com.ecar.servicestation.modules.ecar.exception.books.CReservationNotFoundException;
 import com.ecar.servicestation.modules.ecar.factory.ECarStationFactory;
 import com.ecar.servicestation.modules.ecar.factory.ReservationFactory;
 import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
@@ -19,7 +18,7 @@ import com.ecar.servicestation.modules.ecar.service.ECarReservationService;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Car;
 import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequestDto;
-import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.factory.CarFactory;
 import com.ecar.servicestation.modules.user.factory.UserFactory;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
@@ -45,8 +44,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @MockMvcTest
 class ECarReservationApiControllerTest {
-
-    private static final String RESERVE = "/ecar/reserve";
 
     @Autowired
     MockMvc mockMvc;
@@ -87,6 +84,8 @@ class ECarReservationApiControllerTest {
     @Autowired
     ECarReservationService eCarReservationService;
 
+    private static final String BASE_URL_RESERVE = "/ecar/reserve";
+
     private Car car;
 
     @BeforeEach
@@ -106,6 +105,7 @@ class ECarReservationApiControllerTest {
     @AfterEach
     void afterEach() {
         withLoginAccount.getAccount().getMyCars().clear();
+
         carRepository.deleteAll();
         stationRepository.deleteAll();
         reservationRepository.deleteAll();
@@ -114,13 +114,13 @@ class ECarReservationApiControllerTest {
     @Test
     @DisplayName("[충전기 예약 시간 테이블 조회]정상 처리")
     public void find_charger_scheduled_time_table_success() throws Exception {
-        // Given
+        // Base
         Charger charger = chargerRepository.findChargerByChargerNumber(2);
 
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        get(RESERVE + "/" + charger.getId())
+                        get(BASE_URL_RESERVE + "/" + charger.getId())
                                 .param("day", "0")
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
@@ -137,12 +137,12 @@ class ECarReservationApiControllerTest {
     @Test
     @DisplayName("[충전기 예약]정상 처리")
     public void reserve_charger_success() throws Exception {
-        // Given
+        // Base
         Charger charger = chargerRepository.findChargerByChargerNumber(2);
         LocalDateTime start = getDataTimeAfter2HourFromNow(charger.getId());
         LocalDateTime end = start.plusHours(2);
 
-        // Given(2)
+        // Given
         ReserveRequestDto reserveRequest = new ReserveRequestDto();
         reserveRequest.setChargerId(charger.getId());
         reserveRequest.setCarId(car.getId());
@@ -152,7 +152,7 @@ class ECarReservationApiControllerTest {
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(RESERVE)
+                        post(BASE_URL_RESERVE)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(reserveRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
@@ -167,7 +167,8 @@ class ECarReservationApiControllerTest {
                 .andExpect(jsonPath("data").isNotEmpty());
 
         // Then(2)
-        List<ReservationTable> stand_by = reservationRepository.findAllByChargerAndStateAndBetweenDateTime(charger.getId(), ReservationState.STAND_BY, start, end);
+        List<ReservationTable> stand_by =
+                reservationRepository.findAllByChargerAndStateAndBetweenDateTime(charger.getId(), ReservationState.STAND_BY, start, end);
 
         assertThat(stand_by.size()).isEqualTo(1);
     }
@@ -175,12 +176,15 @@ class ECarReservationApiControllerTest {
     @Test
     @DisplayName("[충전기 예약]실패 - 이미 완료된 예약 요청")
     public void reserve_charger_failed_by_already_confirmed_reservation() throws Exception {
-        // Given
+        // Base
         Charger charger = chargerRepository.findChargerByChargerNumber(2);
         LocalDateTime start = getDataTimeAfter2HourFromNow(charger.getId());
         LocalDateTime end = start.plusHours(2);
 
-        // Given(2)
+        // Base(2)
+        reservationFactory.createReservation(withLoginAccount.getAccount(), car.getId(), charger.getId(), start, end);
+
+        // Given
         ReserveRequestDto reserveRequest = new ReserveRequestDto();
         reserveRequest.setChargerId(charger.getId());
         reserveRequest.setCarId(car.getId());
@@ -188,11 +192,9 @@ class ECarReservationApiControllerTest {
         reserveRequest.setEnd(end);
 
         // When
-        reservationFactory.createReservation(withLoginAccount.getAccount(), car.getId(), charger.getId(), start, end);
-
         ResultActions perform =
                 mockMvc.perform(
-                        post(RESERVE)
+                        post(BASE_URL_RESERVE)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(reserveRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
@@ -208,17 +210,19 @@ class ECarReservationApiControllerTest {
     @Test
     @DisplayName("[충전기 에약 결제]정상 처리")
     public void pay_reservation_fares_success() throws Exception {
-        // Given
+        // Base
         Account account = withLoginAccount.getAccount();
+        userFactory.cashInit(account, 10000);
+
+        // Base(2)
         Charger charger = chargerRepository.findChargerByChargerNumber(2);
         LocalDateTime start = getDataTimeAfter2HourFromNow(charger.getId());
         LocalDateTime end = start.plusHours(2);
 
-        // Given(2)
-        userFactory.cashInit(account, 10000);
+        // Base(3)
         ReservationTable reservation = reservationFactory.createReservation(account, car.getId(), charger.getId(), start, end);
 
-        // Given(3)
+        // Given
         PaymentRequestDto paymentRequest = new PaymentRequestDto();
         paymentRequest.setReservationId(reservation.getId());
         paymentRequest.setUsedCashPoint(0);
@@ -226,7 +230,7 @@ class ECarReservationApiControllerTest {
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(RESERVE + "/payment")
+                        post(BASE_URL_RESERVE + "/payment")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(paymentRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
@@ -251,17 +255,19 @@ class ECarReservationApiControllerTest {
     @Test
     @DisplayName("[충전기 에약 결제]실패 - 보유 결제 금액 또는 포인트 부족")
     public void pay_reservation_fares_failed_by_not_available_cash_or_point() throws Exception {
-        // Given
+        // Base
         Account account = withLoginAccount.getAccount();
+        userFactory.cashInit(account, 1000);
+
+        // Base(2)
         Charger charger = chargerRepository.findChargerByChargerNumber(2);
         LocalDateTime start = getDataTimeAfter2HourFromNow(charger.getId());
         LocalDateTime end = start.plusHours(2);
 
-        // Given(2)
-        userFactory.cashInit(account, 1000);
+        // Base(3)
         ReservationTable reservation = reservationFactory.createReservation(account, car.getId(), charger.getId(), start, end);
 
-        // Given(3)
+        // Given
         PaymentRequestDto paymentRequest = new PaymentRequestDto();
         paymentRequest.setReservationId(reservation.getId());
         paymentRequest.setUsedCashPoint(0);
@@ -269,7 +275,7 @@ class ECarReservationApiControllerTest {
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(RESERVE + "/payment")
+                        post(BASE_URL_RESERVE + "/payment")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(paymentRequest))
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
@@ -285,14 +291,16 @@ class ECarReservationApiControllerTest {
     @Test
     @DisplayName("[충전기 예약 취소]정상 처리")
     public void cancel_charger_reservation_success() throws Exception {
-        // Given
+        // Base
         Account account = withLoginAccount.getAccount();
+        userFactory.cashInit(account, 10000);
+
+        // Base(2)
         Charger charger = chargerRepository.findChargerByChargerNumber(2);
         LocalDateTime start = getDataTimeAfter2HourFromNow(charger.getId());
         LocalDateTime end = start.plusHours(2);
 
-        // Given(2)
-        userFactory.cashInit(account, 10000);
+        // Base(3)
         ReservationTable reservation = reservationFactory.confirmReservation(
                 reservationFactory.createReservation(account, car.getId(), charger.getId(), start, end)
         );
@@ -300,7 +308,7 @@ class ECarReservationApiControllerTest {
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        delete(RESERVE)
+                        delete(BASE_URL_RESERVE)
                                 .param("reserveTitle", reservation.getReserveTitle())
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
@@ -321,52 +329,11 @@ class ECarReservationApiControllerTest {
         assertThat(account.getCash()).isEqualTo(10000 + (reservation.getReserveFares() - reservation.getUsedCashPoint()));
     }
 
-    @Test
-    @DisplayName("[충전 종료 알림 설정]정상 처리")
-    public void set_notification_end_of_charging_success() throws Exception {
-        // Given
-        Account account = withLoginAccount.getAccount();
-        Charger charger = chargerRepository.findChargerByChargerNumber(2);
-        LocalDateTime start = getDataTimeAfter2HourFromNow(charger.getId());
-        LocalDateTime end = start.plusHours(2);
-
-        // Given(2)
-        ReservationTable reservation = reservationFactory.confirmReservation(
-                reservationFactory.createReservation(account, car.getId(), charger.getId(), start, end)
-        );
-
-        // Given(3)
-        NotificationRequestDto notificationRequestDto = new NotificationRequestDto();
-        notificationRequestDto.setReserveTitle(reservation.getReserveTitle());
-        notificationRequestDto.setIsOn(true);
-        notificationRequestDto.setMinutes(30);
-
-        // When
-        ResultActions perform =
-                mockMvc.perform(
-                        post(RESERVE + "/notification")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(notificationRequestDto))
-                                .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
-                );
-
-        // Then
-        perform
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("success").value(true))
-                .andExpect(jsonPath("responseCode").value(0))
-                .andExpect(jsonPath("message").value("성공하였습니다."));
-
-        // Then(2)
-        reservation = reservationRepository.findReservationTableByReserveTitle(reservation.getReserveTitle());
-        assertThat(reservation.isNotificationSet()).isTrue();
-        assertThat(reservation.getNotificationScheduledAt()).isEqualTo(reservation.getChargeEndDateTime().minusMinutes(30));
-    }
-
     private LocalDateTime getDataTimeAfter2HourFromNow(long chargerId) {
         ChargerTimeTableDto chargerTimeTable = eCarReservationService.getChargerTimeTable(chargerId, 0);
         List<LocalDateTime> timeList = chargerTimeTable.getTimeTable().keySet().stream().sorted().collect(Collectors.toList());
 
         return timeList.get(0).plusHours(2);
     }
+
 }

@@ -12,4 +12,5 @@ import java.net.URLConnection;
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long>, BookmarkRepositoryCustom {
 
     Bookmark findBookmarkByAccountAndStation(Account account, Station station);
+
 }

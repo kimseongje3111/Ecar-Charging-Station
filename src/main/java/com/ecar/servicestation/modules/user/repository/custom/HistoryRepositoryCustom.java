@@ -7,4 +7,5 @@ import org.springframework.data.domain.Pageable;
 public interface HistoryRepositoryCustom {
 
     Page<History> findAllWithStationByAccountAndPaging(long accountId, Pageable pageable);
+
 }

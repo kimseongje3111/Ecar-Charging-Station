@@ -38,6 +38,7 @@ public class HtmlMailService implements MailService {
             throw new RuntimeException(e);
         }
     }
+
 }
 
 

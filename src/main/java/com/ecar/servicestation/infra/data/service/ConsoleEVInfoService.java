@@ -19,4 +19,5 @@ public class ConsoleEVInfoService implements ECarChargingStationInfoProvider {
 
         return new HashSet<>();
     }
+
 }

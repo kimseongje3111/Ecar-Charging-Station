@@ -24,7 +24,7 @@ public class ConsoleBankService implements BankService {
     }
 
     @Override
-    public void depositTo(String bankName, String accountNumber, long amount, String msg) {
+    public void depositTo(String bankName, String accountNumber, int amount, String msg) {
         // 서버 계좌로부터 대상 계좌에 금액 송금 //
 
         log.info("Deposit completed.");
@@ -32,11 +32,12 @@ public class ConsoleBankService implements BankService {
     }
 
     @Override
-    public void withdrawFrom(String bankName, String accountNumber, String accessToken, long amount) {
+    public void withdrawFrom(String bankName, String accountNumber, String accessToken, int amount) {
         // 대상 계좌로부터 서버 계좌로 금액 출금 //
         // 대상 계좌의 ACCESS_TOKEN 유효성 검증 //
 
         log.info("Withdraw completed.");
         log.info("FROM:{}, TO:{} ,AMOUNT:{}", accountNumber, SERVER_BANK_ACCOUNT, amount);
     }
+
 }

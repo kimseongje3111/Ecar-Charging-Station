@@ -1,11 +1,8 @@
 package com.ecar.servicestation.modules.user.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.*;
-
-import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 
 @Entity
 @Getter
@@ -37,4 +34,5 @@ public class Car {
     public String get4DigitsOfCarNumber() {
         return this.carNumber.replaceAll(" ", "").split("[가-힣]")[1];
     }
+
 }

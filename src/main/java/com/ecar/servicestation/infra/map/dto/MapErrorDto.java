@@ -8,4 +8,5 @@ public class MapErrorDto {
     private String errorCode;
 
     private String message;
+
 }

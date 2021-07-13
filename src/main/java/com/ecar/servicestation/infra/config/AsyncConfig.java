@@ -20,7 +20,7 @@ public class AsyncConfig implements AsyncConfigurer {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(getAvailableProcessors());
         executor.setMaxPoolSize(getAvailableProcessors() * 2);
-        executor.setQueueCapacity(30);
+        executor.setQueueCapacity(50);
         executor.setKeepAliveSeconds(120);
         executor.initialize();
 
@@ -37,4 +37,5 @@ public class AsyncConfig implements AsyncConfigurer {
     private int getAvailableProcessors() {
         return Runtime.getRuntime().availableProcessors();
     }
+
 }

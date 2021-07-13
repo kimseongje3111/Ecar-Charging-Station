@@ -27,4 +27,5 @@ public class EVInfoBodyDto {
     public List<EVInfoDto> getItems() {
         return items;
     }
+
 }

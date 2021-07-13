@@ -16,4 +16,5 @@ public interface AuthTokenProvider {
     String resolveToken(HttpServletRequest request);
 
     boolean validateToken(String token);
+
 }

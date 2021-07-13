@@ -47,4 +47,5 @@ public class Station {
         this.chargers.add(charger);
         charger.setStation(this);
     }
+
 }

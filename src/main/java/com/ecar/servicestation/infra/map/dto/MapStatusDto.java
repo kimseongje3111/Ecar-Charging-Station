@@ -10,4 +10,5 @@ public class MapStatusDto {
     private String name;
 
     private String message;
+
 }

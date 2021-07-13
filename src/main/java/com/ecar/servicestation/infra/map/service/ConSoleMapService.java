@@ -16,4 +16,5 @@ public class ConSoleMapService implements MapService {
 
         return "SUCCESS";
     }
+
 }

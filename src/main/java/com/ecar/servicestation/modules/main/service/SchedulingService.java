@@ -18,16 +18,30 @@ public class SchedulingService {
 
     private final ReservationRepository reservationRepository;
 
-    private static final int OUTSTANDING_TIME_MINUTES = 15;
+    private static final int UNPAID_TIME_MINUTES = 15;
+    private static final int NO_SHOW_TIME_MINUTES = 30;
 
     @Scheduled(initialDelay = 1000 * 60, fixedRate = 1000 * 60)
     @Transactional
     public void cancelOutstandingReservations() {
-        long count = reservationRepository.updateStateFromStandByToCancelByOutstandingTime(OUTSTANDING_TIME_MINUTES);
+        long count = reservationRepository.updateStateToCancelByUnpaidTimeOver(UNPAID_TIME_MINUTES);
 
-        log.info("Scheduled task message : '{} reservations were cancelled'", count);
+        if (count > 0) {
+            log.info("Scheduled task message : '{} reservations were cancelled due to unpaid'", count);
+        }
     }
 
-    // TODO: 예약된 충전 시작 시간을 초과하고(15~20분?) 아직 충전을 시작하지 않은 예약 취소 처리
+    @Scheduled(initialDelay = 1000 * 60, fixedRate = 1000 * 60)
+    @Transactional
+    public void cancelNoShowReservations() {
+        long count = reservationRepository.updateStateToCancelByNoShowTimeOver(NO_SHOW_TIME_MINUTES);
+
+        if (count > 0) {
+            log.info("Scheduled task message : '{} reservations were cancelled due to no-show'", count);
+        }
+    }
+
+    // TODO: 예약 시간 알림
     // TODO: 종료 알림
+
 }

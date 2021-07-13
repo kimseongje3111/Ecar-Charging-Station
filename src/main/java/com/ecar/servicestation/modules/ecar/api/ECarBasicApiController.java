@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api(tags = {"(5) E_CAR BASIC SERVICE"})
+@Api(tags = {"(6) E_CAR BASIC SERVICE"})
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ecar")
@@ -36,9 +36,9 @@ public class ECarBasicApiController {
                     required = true, dataType = "String", paramType = "header")
     })
     @ApiOperation(value = "전기차 충전소 단건 조회 및 기록 저장", notes = "전기차 충전소 단건 조회 및 기록 저장 요청")
-    @GetMapping("/station/{id}/register")
-    public SingleResult<StationInfoDto> getStationInfoAndSaveHistory(@ApiParam(value = "충전기 ID") @PathVariable Long id) {
-        return responseService.getSingleResult(eCarBasicService.getStationInfoAndSaveHistory(id));
+    @GetMapping("/station/{id}/record")
+    public SingleResult<StationInfoDto> getStationInfoAndRecordHistory(@ApiParam(value = "충전기 ID") @PathVariable Long id) {
+        return responseService.getSingleResult(eCarBasicService.getStationInfoAndRecordHistory(id));
     }
 
     @ApiImplicitParams({
@@ -56,8 +56,9 @@ public class ECarBasicApiController {
                     required = true, dataType = "String", paramType = "header")
     })
     @ApiOperation(value = "전기차 충전소의 충전기 단건 조회 및 기록 저장", notes = "전기차 충전소의 충전기 단건 조회 및 기록 저장 요청")
-    @GetMapping("/charger/{id}/register")
-    public SingleResult<ChargerInfoDto> getChargerInfoAndSaveHistory(@ApiParam(value = "충전기 ID") @PathVariable Long id) {
-        return responseService.getSingleResult(eCarBasicService.getChargerInfoAndSaveHistory(id));
+    @GetMapping("/charger/{id}/record")
+    public SingleResult<ChargerInfoDto> getChargerInfoAndRecordHistory(@ApiParam(value = "충전기 ID") @PathVariable Long id) {
+        return responseService.getSingleResult(eCarBasicService.getChargerInfoAndRecordHistory(id));
     }
+
 }

@@ -28,4 +28,5 @@ public class HistoryRepositoryImpl extends Querydsl4RepositorySupport implements
 
         return applyPagination(pageable, countQuery -> countQuery.selectFrom(history).where(history.in(fetch)));
     }
+
 }

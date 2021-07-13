@@ -3,16 +3,16 @@ package com.ecar.servicestation.modules.user.service;
 import com.ecar.servicestation.infra.bank.service.BankService;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Bank;
-import com.ecar.servicestation.modules.user.dto.request.CashInDto;
-import com.ecar.servicestation.modules.user.dto.request.CashOutDto;
-import com.ecar.servicestation.modules.user.dto.request.ConfirmBankRequestDto;
-import com.ecar.servicestation.modules.user.dto.request.RegisterBankRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.banks.CashInRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.banks.CashOutRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.banks.AuthBankRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.banks.RegisterBankRequestDto;
 import com.ecar.servicestation.modules.user.dto.response.RegisterBankResponseDto;
-import com.ecar.servicestation.modules.user.dto.response.UserBankDto;
-import com.ecar.servicestation.modules.user.exception.CBankAuthFailedException;
-import com.ecar.servicestation.modules.user.exception.CBankNotFoundException;
-import com.ecar.servicestation.modules.user.exception.CUserCashFailedException;
-import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.dto.response.users.UserBankDto;
+import com.ecar.servicestation.modules.user.exception.banks.CBankAuthFailedException;
+import com.ecar.servicestation.modules.user.exception.banks.CBankNotFoundException;
+import com.ecar.servicestation.modules.user.exception.banks.CUserCashFailedException;
+import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.BankRepository;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +38,8 @@ public class UserBankService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public RegisterBankResponseDto saveBank(RegisterBankRequestDto request) {
-        Account account = getUserBasicInfo();
+    public RegisterBankResponseDto registerUserBankAccount(RegisterBankRequestDto request) {
+        Account account = getLoginUserContext();
         Bank bank = bankRepository.save(modelMapper.map(request, Bank.class));
 
         bankService.depositTo(bank.getBankName(), bank.getBankAccountNumber(), 1, bank.generateAuthMsg());
@@ -49,8 +49,35 @@ public class UserBankService {
     }
 
     @Transactional
-    public void validateAuthAndConfirmBank(ConfirmBankRequestDto request) {
-        Account account = getUserBasicInfo();
+    public void deleteUserBankAccount(long bankId) {
+        Account account = getLoginUserContext();
+        Bank bank = bankRepository.findBankByIdAndAccount(bankId, account);
+
+        if (bank == null || !bank.isBankAccountVerified()) {
+            throw new CBankNotFoundException();
+        }
+
+        bankRepository.delete(account.removeBank(bank));
+    }
+
+    public List<UserBankDto> getUserBankAccounts() {
+        Account account = getLoginUserContext();
+        List<Bank> myBanks = account.getMyBanks();
+
+        return myBanks.stream()
+                .filter(Bank::isBankAccountVerified)
+                .map(myBank -> {
+                    UserBankDto userBank = modelMapper.map(myBank, UserBankDto.class);
+                    userBank.setBankId(myBank.getId());
+
+                    return userBank;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void validateAuthAndConfirmUserBankAccount(AuthBankRequestDto request) {
+        Account account = getLoginUserContext();
         Bank bank = bankRepository.findBankByIdAndAccount(request.getBankId(), account);
 
         if (bank == null) {
@@ -73,35 +100,10 @@ public class UserBankService {
         bank.setPaymentPasswordAndAccessToken(passwordEncoder.encode(request.getPaymentPassword()), accessToken);
     }
 
-    public List<UserBankDto> getMyBanks() {
-        return getUserBasicInfo().getMyBanks()
-                .stream()
-                .filter(Bank::isBankAccountVerified)
-                .map(myBank -> {
-                    UserBankDto userBank = modelMapper.map(myBank, UserBankDto.class);
-                    userBank.setBankId(myBank.getId());
-
-                    return userBank;
-                })
-                .collect(Collectors.toList());
-    }
-
     @Transactional
-    public void deleteBank(Long id) {
-        Account account = getUserBasicInfo();
-        Bank bank = bankRepository.findBankByIdAndAccount(id, account);
-
-        if (bank == null || !bank.isBankAccountVerified()) {
-            throw new CBankNotFoundException();
-        }
-
-        bankRepository.delete(account.removeBank(bank));
-    }
-
-    @Transactional
-    public void changeMainUsedBank(Long id) {
-        Account account = getUserBasicInfo();
-        Bank bank = bankRepository.findBankByIdAndAccount(id, account);
+    public void changeMainUsedBank(long bankId) {
+        Account account = getLoginUserContext();
+        Bank bank = bankRepository.findBankByIdAndAccount(bankId, account);
 
         if (bank == null || !bank.isBankAccountVerified()) {
             throw new CBankNotFoundException();
@@ -112,37 +114,43 @@ public class UserBankService {
     }
 
     @Transactional
-    public void chargeCash(CashInDto cashIn) {
-        Account account = getUserBasicInfo();
+    public void chargeCashFromMainUsedBankAccount(CashInRequestDto request) {
+        Account account = getLoginUserContext();
         Bank mainUsedBank = account.getMyMainUsedBank();
 
         if (mainUsedBank == null) {
             throw new CBankNotFoundException();
         }
 
-        if (!passwordEncoder.matches(cashIn.getPaymentPassword(), mainUsedBank.getPaymentPassword())) {
+        if (!passwordEncoder.matches(request.getPaymentPassword(), mainUsedBank.getPaymentPassword())) {
             throw new CUserCashFailedException();
         }
 
-        bankService.withdrawFrom(mainUsedBank.getBankName(), mainUsedBank.getBankAccountNumber(), mainUsedBank.getBankAccountAccessToken(), cashIn.getAmount());
-        account.chargingCash(cashIn.getAmount().intValue());
+        bankService.withdrawFrom(mainUsedBank.getBankName(), mainUsedBank.getBankAccountNumber(), mainUsedBank.getBankAccountAccessToken(), request.getAmount());
+        account.chargingCash(request.getAmount());
     }
 
     @Transactional
-    public void refundCash(CashOutDto cashOut) {
-        Account account = getUserBasicInfo();
+    public void refundCashToMainUsedBankAccount(CashOutRequestDto request) {
+        Account account = getLoginUserContext();
         Bank mainUsedBank = account.getMyMainUsedBank();
 
         if (mainUsedBank == null) {
             throw new CBankNotFoundException();
         }
 
-        if (cashOut.getAmount() > account.getCash()) {
+        if (request.getAmount() > account.getCash()) {
             throw new CUserCashFailedException();
         }
 
-        bankService.depositTo(mainUsedBank.getBankName(), mainUsedBank.getBankAccountNumber(), cashOut.getAmount(), "");
-        account.paymentOrRefundCash(cashOut.getAmount().intValue());
+        bankService.depositTo(mainUsedBank.getBankName(), mainUsedBank.getBankAccountNumber(), request.getAmount(), "");
+        account.paymentOrRefundCash(request.getAmount());
+    }
+
+    private Account getLoginUserContext() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        return userRepository.findAccountByEmail(authentication.getName()).orElseThrow(CUserNotFoundException::new);
     }
 
     private RegisterBankResponseDto getRegisterBankResponse(Bank bank) {
@@ -155,9 +163,4 @@ public class UserBankService {
         return response;
     }
 
-    private Account getUserBasicInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        return userRepository.findAccountByEmail(authentication.getName()).orElseThrow(CUserNotFoundException::new);
-    }
 }

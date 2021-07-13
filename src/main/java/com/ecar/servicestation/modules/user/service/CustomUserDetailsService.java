@@ -1,7 +1,7 @@
 package com.ecar.servicestation.modules.user.service;
 
 import com.ecar.servicestation.modules.user.domain.Account;
-import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,4 +24,5 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return account.orElseThrow(CUserNotFoundException::new);
     }
+
 }

@@ -10,4 +10,5 @@ public class AddressResultsDto {
     private AddressCommonDto common;
 
     private List<AddressDto> juso;
+
 }

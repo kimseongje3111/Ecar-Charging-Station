@@ -14,4 +14,5 @@ public class AppProperties {
     private int fastChargingFares;
 
     private int slowChargingFares;
+
 }

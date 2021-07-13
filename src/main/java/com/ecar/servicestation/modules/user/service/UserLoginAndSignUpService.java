@@ -5,15 +5,14 @@ import com.ecar.servicestation.infra.auth.AuthTokenProvider;
 import com.ecar.servicestation.infra.mail.dto.EmailMessageDto;
 import com.ecar.servicestation.infra.mail.service.MailService;
 import com.ecar.servicestation.modules.user.domain.Account;
-import com.ecar.servicestation.modules.user.dto.request.EmailAuthRequestDto;
-import com.ecar.servicestation.modules.user.dto.request.LoginRequestDto;
-import com.ecar.servicestation.modules.user.dto.request.SignUpRequestDto;
-import com.ecar.servicestation.modules.user.exception.CUserLoginFailedException;
-import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
-import com.ecar.servicestation.modules.user.exception.CUserSignUpFailedException;
+import com.ecar.servicestation.modules.user.dto.request.users.EmailAuthRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.users.LoginRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.users.SignUpRequestDto;
+import com.ecar.servicestation.modules.user.exception.users.CUserLoginFailedException;
+import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.exception.users.CUserSignUpFailedException;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +24,6 @@ import java.util.Collections;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-@Slf4j
 public class UserLoginAndSignUpService {
 
     private final UserRepository userRepository;
@@ -34,16 +32,6 @@ public class UserLoginAndSignUpService {
     private final PasswordEncoder passwordEncoder;
     private final TemplateEngine templateEngine;
     private final AppProperties appProperties;
-
-    public String login(LoginRequestDto request) {      // 로그인 성공시, 인증 token 발급
-        Account account = findAccountByEmail(request.getEmail());
-
-        if (!passwordEncoder.matches(request.getPassword(), account.getPassword()) || !account.isEmailAuthVerified()) {
-            throw new CUserLoginFailedException();
-        }
-
-        return authTokenProvider.createToken(String.valueOf(account.getId()), account.getRoles());
-    }
 
     @Transactional
     public Account signUp(SignUpRequestDto request) {
@@ -85,6 +73,18 @@ public class UserLoginAndSignUpService {
         }
     }
 
+    public String login(LoginRequestDto request) {
+        Account account = findAccountByEmail(request.getEmail());
+
+        if (!passwordEncoder.matches(request.getPassword(), account.getPassword()) || !account.isEmailAuthVerified()) {
+            throw new CUserLoginFailedException();
+        }
+
+        // 로그인 성공시, 인증 token 발급 //
+
+        return authTokenProvider.createToken(String.valueOf(account.getId()), account.getRoles());
+    }
+
     private Account findAccountByEmail(String email) {
         return userRepository.findAccountByEmail(email).orElseThrow(CUserNotFoundException::new);
     }
@@ -100,4 +100,5 @@ public class UserLoginAndSignUpService {
 
         return templateEngine.process("simple-email-template", context);
     }
+
 }

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-@Api(tags = {"(8) E_CAR CHARGING SERVICE"})
+@Api(tags = {"(9) E_CAR CHARGING SERVICE"})
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ecar/charge")
@@ -22,17 +22,18 @@ public class ECarChargingApiController {
 
     @ApiOperation(value = "예약 충전 시작", notes = "예약 충전 시작 요청")
     @PostMapping("")
-    public CommonResult startChargingReservation(@RequestBody @Valid ChargerRequestDto chargerRequest) {
-        eCarChargingService.checkReservationAndStartCharging(chargerRequest);
+    public CommonResult startChargingReservation(@RequestBody @Valid ChargerRequestDto request) {
+        eCarChargingService.checkReservationAndStartCharging(request);
 
         return responseService.getSuccessResult();
     }
 
     @ApiOperation(value = "예약 충전 종료", notes = "예약 충전 종료 요청")
     @PostMapping("/finish")
-    public CommonResult finishChargingReservation(@RequestBody @Valid ChargerRequestDto chargerRequest) {
-        eCarChargingService.checkReservationAndEndCharging(chargerRequest);
+    public CommonResult finishChargingReservation(@RequestBody @Valid ChargerRequestDto request) {
+        eCarChargingService.checkReservationAndEndCharging(request);
 
         return responseService.getSuccessResult();
     }
+
 }

@@ -8,8 +8,8 @@ import com.ecar.servicestation.infra.map.dto.MapLocationDto;
 import com.ecar.servicestation.infra.map.service.MapService;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.Station;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchConditionDto;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchLocationDto;
+import com.ecar.servicestation.modules.ecar.dto.request.searchs.SearchConditionDto;
+import com.ecar.servicestation.modules.ecar.dto.request.searchs.SearchLocationDto;
 import com.ecar.servicestation.modules.ecar.repository.ChargerRepository;
 import com.ecar.servicestation.modules.ecar.repository.StationRepository;
 import com.ecar.servicestation.modules.ecar.service.SearchMapConverter.Node;
@@ -40,7 +40,6 @@ public class ECarSearchService {
     private final AddressService addressService;
     private final MapService mapService;
     private final ModelMapper modelMapper;
-    private final SearchMapConverter searchMapConverter;
 
     @Transactional
     public List<Charger> getSearchResultsBy(SearchConditionDto condition, Pageable pageable) {
@@ -52,13 +51,14 @@ public class ECarSearchService {
 
         // 결과 병합 //
 
-        Set<EVInfoDto> evInfoSet = new HashSet<>();
+        List<Set<EVInfoDto>> join =
+                CompletableFuture
+                        .allOf(futures.toArray(new CompletableFuture[futures.size()]))
+                        .thenApply(result -> futures.stream().map(CompletableFuture::join).collect(Collectors.toList()))
+                        .join();
 
-        CompletableFuture
-                .allOf(futures.toArray(new CompletableFuture[futures.size()]))
-                .thenApply(result -> futures.stream().map(CompletableFuture::join).collect(Collectors.toList()))
-                .join()
-                .forEach(evInfoSet::addAll);
+        Set<EVInfoDto> evInfoSet = new HashSet<>();
+        join.forEach(evInfoSet::addAll);
 
         return chargerRepository
                 .findAllWithStationBySearchConditionAndPaging(
@@ -71,18 +71,8 @@ public class ECarSearchService {
 
     @Transactional
     public List<Charger> getSearchResultsBy(SearchLocationDto location, Pageable pageable) {
-        Set<EVInfoDto> evInfoSet = new HashSet<>();
         String search = mapService.reverseGeoCoding(modelMapper.map(location, MapLocationDto.class));
-
-        try {
-            evInfoSet.addAll(eCarSearchAsyncService.getSearchResult(search,0).get());
-
-        } catch (InterruptedException e) {
-            log.error("Interrupted error.");
-
-        } catch (ExecutionException e) {
-            log.error("Execution error.");
-        }
+        Set<EVInfoDto> evInfoSet = new HashSet<>(eCarSearchAsyncService.getSearchResult(search, 0).join());
 
         return chargerRepository
                 .findAllWithStationBySearchLocationAndPaging(
@@ -94,6 +84,7 @@ public class ECarSearchService {
     }
 
     private Node preProcessingAndExtractSearchKeywords(String search) {
+        SearchMapConverter searchMapConverter = new SearchMapConverter();
         Set<AddressDto> address = addressService.convertToAddressDto(search, 1, 100);
 
         address.stream()
@@ -123,6 +114,10 @@ public class ECarSearchService {
     }
 
     private List<Long> getUpdatedChargers(Set<EVInfoDto> evInfoSet, String sortType, Double myLat, Double myLongi) {
+        if (evInfoSet.size() == 0) {
+            throw new EVINfoNotFoundException();
+        }
+
         List<Charger> chargers = new ArrayList<>();
 
         evInfoSet.forEach(evInfo -> {
@@ -188,4 +183,5 @@ public class ECarSearchService {
     private double radianToDegree(double radian) {
         return (radian * 180 / Math.PI);
     }
+
 }

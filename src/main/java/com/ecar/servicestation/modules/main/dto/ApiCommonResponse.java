@@ -10,4 +10,5 @@ public enum ApiCommonResponse {
         this.responseCode = responseCode;
         this.message = message;
     }
+
 }

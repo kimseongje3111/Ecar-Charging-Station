@@ -17,4 +17,5 @@ public class CustomLocalDateTimeAdapter extends XmlAdapter<String, LocalDateTime
     public String marshal(LocalDateTime dateTime) throws Exception {
         return dateTime.format(formatter);
     }
+
 }

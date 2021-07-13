@@ -25,4 +25,5 @@ public class SchedulerConfig implements SchedulingConfigurer {
 
         registrar.setTaskScheduler(threadPoolTaskScheduler);
     }
+
 }

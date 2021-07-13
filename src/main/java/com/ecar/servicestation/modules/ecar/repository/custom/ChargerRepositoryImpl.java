@@ -3,8 +3,8 @@ package com.ecar.servicestation.modules.ecar.repository.custom;
 
 import com.ecar.servicestation.infra.querydsl.Querydsl4RepositorySupport;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchConditionDto;
-import com.ecar.servicestation.modules.ecar.dto.request.SearchLocationDto;
+import com.ecar.servicestation.modules.ecar.dto.request.searchs.SearchConditionDto;
+import com.ecar.servicestation.modules.ecar.dto.request.searchs.SearchLocationDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,4 +65,5 @@ public class ChargerRepositoryImpl extends Querydsl4RepositorySupport implements
     private BooleanExpression cpTpEq(Integer cpTp) {
         return cpTp != null ? charger.mode.eq(cpTp) : null;
     }
+
 }

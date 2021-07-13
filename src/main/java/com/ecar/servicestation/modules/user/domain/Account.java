@@ -86,6 +86,16 @@ public class Account implements UserDetails {
 
     private Integer cashPoint;
 
+    // 알림 서비스 //
+
+    private boolean isOnNotificationOfReservationStart;
+
+    private Integer notificationMinutesBeforeReservationStart;
+
+    private boolean isOnNotificationOfChargingEnd;
+
+    private Integer notificationMinutesBeforeChargingEnd;
+
     // Security UserDetails 메서드 재정의 //
 
     @Override
@@ -183,6 +193,13 @@ public class Account implements UserDetails {
         this.joinedAt = LocalDateTime.now();
         this.cash = 0;
         this.cashPoint = 5000;
+
+        // 알림 기본 설정 //
+
+        this.isOnNotificationOfReservationStart = true;
+        this.notificationMinutesBeforeReservationStart = 30;
+        this.isOnNotificationOfChargingEnd = true;
+        this.notificationMinutesBeforeChargingEnd = 30;
     }
 
     public Bank getMyMainUsedBank() {
@@ -191,6 +208,7 @@ public class Account implements UserDetails {
                 return myBank;
             }
         }
+
 
         return null;
     }
@@ -210,4 +228,5 @@ public class Account implements UserDetails {
     public void paymentCashPoint(int amount) {
         this.cashPoint -= amount;
     }
+
 }

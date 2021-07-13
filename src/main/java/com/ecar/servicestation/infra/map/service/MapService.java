@@ -5,4 +5,5 @@ import com.ecar.servicestation.infra.map.dto.MapLocationDto;
 public interface MapService {
 
     String reverseGeoCoding(MapLocationDto location);
+
 }

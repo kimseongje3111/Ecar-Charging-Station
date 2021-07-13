@@ -31,7 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                     .authorizeRequests()
-                        .antMatchers("/h2-console/**", "/user/login", "/user/sign-up", "/user/email-auth-token").permitAll()
+                        .antMatchers("/h2-console/**", "/login", "/sign-up", "/email-auth-token").permitAll()
                         .antMatchers("/ecar/charge/**").permitAll()     // 충전기의 요청
                         .antMatchers(HttpMethod.GET, "/exception/**").permitAll()
                         .antMatchers("/users").hasRole("ADMIN")
@@ -56,4 +56,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
+
 }

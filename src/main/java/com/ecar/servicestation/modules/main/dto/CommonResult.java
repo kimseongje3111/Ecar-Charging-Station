@@ -21,4 +21,5 @@ public class CommonResult {
         this.responseCode = response.responseCode;
         this.message = response.message;
     }
+
 }

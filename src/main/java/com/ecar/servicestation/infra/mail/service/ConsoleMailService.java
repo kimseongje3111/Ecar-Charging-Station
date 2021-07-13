@@ -14,6 +14,7 @@ public class ConsoleMailService implements MailService {
     public void send(EmailMessageDto emailMessage) {
         log.info("E-mail sent successfully.");
     }
+
 }
 
 

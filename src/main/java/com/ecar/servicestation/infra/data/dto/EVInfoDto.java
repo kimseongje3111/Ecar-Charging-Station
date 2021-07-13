@@ -75,4 +75,5 @@ public class EVInfoDto {
 
         return charger;
     }
+
 }

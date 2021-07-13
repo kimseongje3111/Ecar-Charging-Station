@@ -5,7 +5,6 @@ import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.ReservationState;
 import com.ecar.servicestation.modules.ecar.domain.ReservationTable;
-import com.ecar.servicestation.modules.ecar.domain.Station;
 import com.ecar.servicestation.modules.ecar.dto.request.ChargerRequestDto;
 import com.ecar.servicestation.modules.ecar.factory.ECarStationFactory;
 import com.ecar.servicestation.modules.ecar.factory.ReservationFactory;
@@ -35,8 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @MockMvcTest
 class ECarChargingApiControllerTest {
-
-    private static final String CHARGING = "/ecar/charge";
 
     @Autowired
     MockMvc mockMvc;
@@ -68,6 +65,8 @@ class ECarChargingApiControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    private static final String BASE_URL_CHARGING = "/ecar/charge";
+
     private Car car;
 
     @BeforeEach
@@ -86,6 +85,7 @@ class ECarChargingApiControllerTest {
     @AfterEach
     void afterEach() {
         withLoginAccount.getAccount().getMyCars().clear();
+
         carRepository.deleteAll();
         stationRepository.deleteAll();
         reservationRepository.deleteAll();
@@ -94,17 +94,17 @@ class ECarChargingApiControllerTest {
     @Test
     @DisplayName("[예약 충전 시작]정상 처리")
     public void start_charging_reservation_success() throws Exception {
-        // Given
+        // Base
         Charger charger = chargerRepository.findChargerByChargerNumber(2);
-
-        // Given(2)
         LocalDateTime start = LocalDateTime.now().minusMinutes(5);
         LocalDateTime end = start.plusHours(1);
 
-        ReservationTable reservation = reservationFactory.createReservation(withLoginAccount.getAccount(), car.getId(), charger.getId(), start, end);
-        reservation = reservationFactory.confirmReservation(reservation);
+        // Base(2)
+        ReservationTable reservation = reservationFactory.confirmReservation(
+                reservationFactory.createReservation(withLoginAccount.getAccount(), car.getId(), charger.getId(), start, end)
+        );
 
-        // Given(3)
+        // Given
         ChargerRequestDto chargerRequest = new ChargerRequestDto();
         chargerRequest.setChargerNumber(2L);
         chargerRequest.setReserveTitle(reservation.getReserveTitle());
@@ -112,7 +112,7 @@ class ECarChargingApiControllerTest {
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(CHARGING)
+                        post(BASE_URL_CHARGING)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(chargerRequest))
                 );
@@ -126,23 +126,24 @@ class ECarChargingApiControllerTest {
 
         // Then(2)
         reservation = reservationRepository.findReservationTableByReserveTitle(reservation.getReserveTitle());
+
         assertThat(reservation.getReserveState()).isEqualTo(ReservationState.CHARGING);
     }
 
     @Test
     @DisplayName("[예약 충전 시작]실패 - 예약된 충전 시작 시간 이전 요청")
     public void start_charging_reservation_failed_by_before_start_time() throws Exception {
-        // Given
+        // Base
         Charger charger = chargerRepository.findChargerByChargerNumber(2);
-
-        // Given(2)
         LocalDateTime start = LocalDateTime.now().plusHours(1);
         LocalDateTime end = start.plusHours(1);
 
-        ReservationTable reservation = reservationFactory.createReservation(withLoginAccount.getAccount(), car.getId(), charger.getId(), start, end);
-        reservation = reservationFactory.confirmReservation(reservation);
+        // Base(2)
+        ReservationTable reservation = reservationFactory.confirmReservation(
+                reservationFactory.createReservation(withLoginAccount.getAccount(), car.getId(), charger.getId(), start, end)
+        );
 
-        // Given(3)
+        // Given
         ChargerRequestDto chargerRequest = new ChargerRequestDto();
         chargerRequest.setChargerNumber(2L);
         chargerRequest.setReserveTitle(reservation.getReserveTitle());
@@ -150,7 +151,7 @@ class ECarChargingApiControllerTest {
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(CHARGING)
+                        post(BASE_URL_CHARGING)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(chargerRequest))
                 );
@@ -165,18 +166,17 @@ class ECarChargingApiControllerTest {
     @Test
     @DisplayName("[예약 충전 종료]정상 처리")
     public void finish_charging_reservation_success() throws Exception {
-        // Given
+        // Base
         Charger charger = chargerRepository.findChargerByChargerNumber(2);
-
-        // Given(2)
         LocalDateTime start = LocalDateTime.now().minusMinutes(5);
         LocalDateTime end = start.plusHours(1);
 
+        // Base(2)
         ReservationTable reservation = reservationFactory.createReservation(withLoginAccount.getAccount(), car.getId(), charger.getId(), start, end);
         reservation = reservationFactory.confirmReservation(reservation);
         reservation = reservationFactory.chargingReservation(reservation);
 
-        // Given(3)
+        // Given
         ChargerRequestDto chargerRequest = new ChargerRequestDto();
         chargerRequest.setChargerNumber(2L);
         chargerRequest.setReserveTitle(reservation.getReserveTitle());
@@ -184,7 +184,7 @@ class ECarChargingApiControllerTest {
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        post(CHARGING + "/finish")
+                        post(BASE_URL_CHARGING + "/finish")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(chargerRequest))
                 );
@@ -198,6 +198,8 @@ class ECarChargingApiControllerTest {
 
         // Then(2)
         reservation = reservationRepository.findReservationTableByReserveTitle(reservation.getReserveTitle());
+
         assertThat(reservation.getReserveState()).isEqualTo(ReservationState.COMPLETE);
     }
+
 }

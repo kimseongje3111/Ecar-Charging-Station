@@ -24,4 +24,5 @@ public class WithLoginAccount {
         this.account = userFactory.createVerifiedAccount("admin", "1234", "admin@test.com");
         this.authToken = authTokenProvider.createToken(String.valueOf(account.getId()), account.getRoles());
     }
+
 }

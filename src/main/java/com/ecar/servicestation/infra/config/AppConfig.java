@@ -49,4 +49,5 @@ public class AppConfig {
 
         return WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
     }
+
 }

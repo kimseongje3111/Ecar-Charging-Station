@@ -106,4 +106,5 @@ public class LinkAddressService implements AddressService {
                 .append("&resultType=json")
                 .toString();
     }
+
 }

@@ -8,4 +8,5 @@ public class MapResultDto {
     private String name;
 
     private MapRegionDto region;
+
 }

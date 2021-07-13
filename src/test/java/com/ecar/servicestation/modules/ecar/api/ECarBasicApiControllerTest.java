@@ -6,7 +6,6 @@ import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.Station;
 import com.ecar.servicestation.modules.ecar.factory.ECarStationFactory;
 import com.ecar.servicestation.modules.ecar.repository.StationRepository;
-import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.repository.HistoryRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockMvcTest
 class ECarBasicApiControllerTest {
 
-    private static final String E_CAR = "/ecar";
-
     @Autowired
     MockMvc mockMvc;
 
@@ -43,6 +40,8 @@ class ECarBasicApiControllerTest {
 
     @Autowired
     StationRepository stationRepository;
+
+    private static final String BASE_URL_ECAR = "/ecar";
 
     private Station station;
 
@@ -62,7 +61,7 @@ class ECarBasicApiControllerTest {
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        get(E_CAR + "/station/" + station.getId())
+                        get(BASE_URL_ECAR + "/station/" + station.getId())
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -78,13 +77,10 @@ class ECarBasicApiControllerTest {
     @Test
     @DisplayName("[전기차 충전소 단건 조회 및 기록 저장]정상 처리")
     public void find_station_and_save_history_success() throws Exception {
-        // Given
-        Account account = withLoginAccount.getAccount();
-
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        get(E_CAR + "/station/" + station.getId() + "/register")
+                        get(BASE_URL_ECAR + "/station/" + station.getId() + "/record")
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -97,19 +93,19 @@ class ECarBasicApiControllerTest {
                 .andExpect(jsonPath("data").isNotEmpty());
 
         // Then(2)
-        assertThat(historyRepository.existsHistoryByAccountAndStation(account, station)).isTrue();
+        assertThat(historyRepository.existsHistoryByAccountAndStation(withLoginAccount.getAccount(), station)).isTrue();
     }
 
     @Test
     @DisplayName("[전기차 충전소의 충전기 단건 조회]정상 처리")
     public void find_charger_success() throws Exception {
-        // Given
+        // Base
         List<Charger> chargers = new ArrayList<>(station.getChargers());
 
         // When
         ResultActions perform =
                 mockMvc.perform(
-                        get(E_CAR + "/charger/" + chargers.get(0).getId())
+                        get(BASE_URL_ECAR + "/charger/" + chargers.get(0).getId())
                                 .header("X-AUTH-TOKEN", withLoginAccount.getAuthToken())
                 );
 
@@ -121,4 +117,6 @@ class ECarBasicApiControllerTest {
                 .andExpect(jsonPath("message").value("성공하였습니다."))
                 .andExpect(jsonPath("data").isNotEmpty());
     }
+
+
 }

@@ -14,4 +14,5 @@ public class MapRegionDto {
     private MapAreaDto area3;
 
     private MapAreaDto area4;
+
 }

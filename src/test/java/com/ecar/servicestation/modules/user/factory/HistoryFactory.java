@@ -3,7 +3,7 @@ package com.ecar.servicestation.modules.user.factory;
 import com.ecar.servicestation.modules.ecar.domain.Station;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.History;
-import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.HistoryRepository;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,4 +36,5 @@ public class HistoryFactory {
 
         return history;
     }
+
 }

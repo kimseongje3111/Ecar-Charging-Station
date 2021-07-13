@@ -28,4 +28,5 @@ public class BookmarkRepositoryImpl extends Querydsl4RepositorySupport implement
 
         return applyPagination(pageable, countQuery -> countQuery.selectFrom(bookmark).where(bookmark.in(fetch)));
     }
+
 }

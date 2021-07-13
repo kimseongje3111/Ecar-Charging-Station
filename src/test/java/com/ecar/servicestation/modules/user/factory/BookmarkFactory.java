@@ -3,7 +3,7 @@ package com.ecar.servicestation.modules.user.factory;
 import com.ecar.servicestation.modules.ecar.domain.Station;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Bookmark;
-import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.BookmarkRepository;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,4 +35,5 @@ public class BookmarkFactory {
 
         return bookmark;
     }
+
 }

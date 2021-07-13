@@ -3,7 +3,7 @@ package com.ecar.servicestation.modules.user.factory;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Car;
 import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequestDto;
-import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,4 +36,5 @@ public class CarFactory {
 
         return car;
     }
+
 }

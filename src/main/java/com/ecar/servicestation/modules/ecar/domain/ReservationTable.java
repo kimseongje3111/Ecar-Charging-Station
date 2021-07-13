@@ -45,10 +45,6 @@ public class ReservationTable {
 
     private Integer usedCashPoint;
 
-    private boolean isNotificationSet;
-
-    private LocalDateTime notificationScheduledAt;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
@@ -86,15 +82,6 @@ public class ReservationTable {
     public void cancelReservation() {
         this.reserveState = ReservationState.CANCEL;
         this.stateLastChangedAt = LocalDateTime.now();
-    }
-
-    public void setOnNotification(int minutes) {
-        this.isNotificationSet = true;
-        this.notificationScheduledAt = this.chargeEndDateTime.minusMinutes(minutes);
-    }
-
-    public void setOffNotification() {
-        this.isNotificationSet = false;
     }
 
     public boolean startCharging(int availableDelay) {
@@ -143,4 +130,5 @@ public class ReservationTable {
                 .append("CN#").append(this.car.get4DigitsOfCarNumber())
                 .toString();
     }
+
 }

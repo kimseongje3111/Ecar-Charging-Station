@@ -8,4 +8,5 @@ public class MapLocationDto {
     private Double latitude;
 
     private Double longitude;
+
 }

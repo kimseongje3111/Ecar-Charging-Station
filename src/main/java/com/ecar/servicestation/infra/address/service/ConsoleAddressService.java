@@ -16,4 +16,5 @@ public class ConsoleAddressService implements AddressService {
     public Set<AddressDto> convertToAddressDto(String search, int page, int numberOfRows) {
         return null;
     }
+
 }

@@ -8,9 +8,17 @@ import com.ecar.servicestation.infra.data.exception.EVInfoServiceException;
 import com.ecar.servicestation.infra.map.exception.MapNotFoundException;
 import com.ecar.servicestation.infra.map.exception.MapServiceException;
 import com.ecar.servicestation.modules.ecar.exception.*;
+import com.ecar.servicestation.modules.ecar.exception.books.CReservationCancelFailedException;
+import com.ecar.servicestation.modules.ecar.exception.books.CReservationEndFailedException;
+import com.ecar.servicestation.modules.ecar.exception.books.CReservationStartFailedException;
+import com.ecar.servicestation.modules.ecar.exception.books.CReserveFailedException;
 import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
-import com.ecar.servicestation.modules.user.exception.*;
+import com.ecar.servicestation.modules.user.exception.banks.CBankAuthFailedException;
+import com.ecar.servicestation.modules.user.exception.banks.CBankNotFoundException;
+import com.ecar.servicestation.modules.user.exception.banks.CUserCashFailedException;
+import com.ecar.servicestation.modules.user.exception.CCarNotFoundException;
+import com.ecar.servicestation.modules.user.exception.users.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -193,4 +201,5 @@ public class ExceptionAdvice {
     private String getMessage(String value, Object[] args) {
         return messageSource.getMessage(value, args, LocaleContextHolder.getLocale());
     }
+
 }

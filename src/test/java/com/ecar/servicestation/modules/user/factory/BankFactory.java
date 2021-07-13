@@ -3,7 +3,7 @@ package com.ecar.servicestation.modules.user.factory;
 import com.ecar.servicestation.infra.bank.service.BankService;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Bank;
-import com.ecar.servicestation.modules.user.exception.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.BankRepository;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -56,4 +56,5 @@ public class BankFactory {
 
         return bank;
     }
+
 }

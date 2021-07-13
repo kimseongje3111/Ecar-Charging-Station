@@ -4,13 +4,12 @@ import com.ecar.servicestation.modules.main.dto.CommonResult;
 import com.ecar.servicestation.modules.main.dto.ListResult;
 import com.ecar.servicestation.modules.main.dto.SingleResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
-import com.ecar.servicestation.modules.user.domain.Bank;
-import com.ecar.servicestation.modules.user.dto.request.CashInDto;
-import com.ecar.servicestation.modules.user.dto.request.CashOutDto;
-import com.ecar.servicestation.modules.user.dto.request.ConfirmBankRequestDto;
-import com.ecar.servicestation.modules.user.dto.request.RegisterBankRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.banks.CashInRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.banks.CashOutRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.banks.AuthBankRequestDto;
+import com.ecar.servicestation.modules.user.dto.request.banks.RegisterBankRequestDto;
 import com.ecar.servicestation.modules.user.dto.response.RegisterBankResponseDto;
-import com.ecar.servicestation.modules.user.dto.response.UserBankDto;
+import com.ecar.servicestation.modules.user.dto.response.users.UserBankDto;
 import com.ecar.servicestation.modules.user.service.UserBankService;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
@@ -33,18 +32,18 @@ public class UserBankApiController {
     })
     @ApiOperation(value = "사용자 계좌 등록", notes = "사용자 계좌 등록 및 인증 메시지 요청")
     @PostMapping("/register")
-    public SingleResult<RegisterBankResponseDto> registerMyBankAccount(@RequestBody @Valid RegisterBankRequestDto registerBankRequest) {
-        return responseService.getSingleResult(userBankService.saveBank(registerBankRequest));
+    public SingleResult<RegisterBankResponseDto> registerUserBankAccount(@RequestBody @Valid RegisterBankRequestDto request) {
+        return responseService.getSingleResult(userBankService.registerUserBankAccount(request));
     }
 
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급된 ACCESS_TOKEN",
                     required = true, dataType = "String", paramType = "header")
     })
-    @ApiOperation(value = "사용자 계좌 인증", notes = "사용자 계좌 인증 요청")
-    @PostMapping("/confirm")
-    public CommonResult confirmMyBankAccount(@RequestBody @Valid ConfirmBankRequestDto confirmBankRequest) {
-        userBankService.validateAuthAndConfirmBank(confirmBankRequest);
+    @ApiOperation(value = "사용자 계좌 삭제", notes = "사용자 계좌 삭제 요청")
+    @DeleteMapping("/{id}")
+    public CommonResult deleteUserBankAccount(@ApiParam(value = "계좌 ID") @PathVariable Long id) {
+        userBankService.deleteUserBankAccount(id);
 
         return responseService.getSuccessResult();
     }
@@ -55,18 +54,18 @@ public class UserBankApiController {
     })
     @ApiOperation(value = "사용자 계좌 목록 조회", notes = "사용자 계좌 목록 조회 요청")
     @GetMapping("")
-    public ListResult<UserBankDto> getMyBankAccounts() {
-        return responseService.getListResult(userBankService.getMyBanks());
+    public ListResult<UserBankDto> getUserBankAccounts() {
+        return responseService.getListResult(userBankService.getUserBankAccounts());
     }
 
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급된 ACCESS_TOKEN",
                     required = true, dataType = "String", paramType = "header")
     })
-    @ApiOperation(value = "사용자 계좌 삭제", notes = "사용자 계좌 삭제 요청")
-    @DeleteMapping("/{id}")
-    public CommonResult removeMyBankAccounts(@ApiParam(value = "계좌 ID") @PathVariable Long id) {
-        userBankService.deleteBank(id);
+    @ApiOperation(value = "사용자 계좌 인증", notes = "사용자 계좌 인증 요청")
+    @PostMapping("/auth")
+    public CommonResult authenticationUserBankAccount(@RequestBody @Valid AuthBankRequestDto request) {
+        userBankService.validateAuthAndConfirmUserBankAccount(request);
 
         return responseService.getSuccessResult();
     }
@@ -87,10 +86,10 @@ public class UserBankApiController {
             @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급된 ACCESS_TOKEN",
                     required = true, dataType = "String", paramType = "header")
     })
-    @ApiOperation(value = "현금(캐쉬) 충전", notes = "주사용 계좌로 현금(캐쉬) 충전 요청")
+    @ApiOperation(value = "현금(캐쉬) 충전", notes = "주사용 계좌로부터 현금(캐쉬) 충전 요청")
     @PostMapping("/cash-in")
-    public CommonResult chargeCashFromMyMainUsedBankAccount(@RequestBody @Valid CashInDto cashIn) {
-        userBankService.chargeCash(cashIn);
+    public CommonResult chargeCashFromMainUsedBankAccount(@RequestBody @Valid CashInRequestDto request) {
+        userBankService.chargeCashFromMainUsedBankAccount(request);
 
         return responseService.getSuccessResult();
     }
@@ -101,9 +100,10 @@ public class UserBankApiController {
     })
     @ApiOperation(value = "현금(캐쉬) 환불", notes = "주사용 계좌로 현금(캐쉬) 환불 요청")
     @PostMapping("/cash-out")
-    public CommonResult refundCashToMyMainUsedBankAccount(@RequestBody @Valid CashOutDto cashOut) {
-        userBankService.refundCash(cashOut);
+    public CommonResult refundCashToMainUsedBankAccount(@RequestBody @Valid CashOutRequestDto request) {
+        userBankService.refundCashToMainUsedBankAccount(request);
 
         return responseService.getSuccessResult();
     }
+
 }
