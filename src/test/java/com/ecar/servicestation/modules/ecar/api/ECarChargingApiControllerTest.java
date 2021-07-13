@@ -15,6 +15,7 @@ import com.ecar.servicestation.modules.user.domain.Car;
 import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequestDto;
 import com.ecar.servicestation.modules.user.factory.CarFactory;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
+import com.ecar.servicestation.modules.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +52,7 @@ class ECarChargingApiControllerTest {
     ReservationFactory reservationFactory;
 
     @Autowired
-    CarRepository carRepository;
+    UserRepository userRepository;
 
     @Autowired
     StationRepository stationRepository;
@@ -71,22 +72,21 @@ class ECarChargingApiControllerTest {
 
     @BeforeEach
     void beforeEach() {
+        withLoginAccount.init();
+        eCarStationFactory.createStationAndAddCharger(1, 2);
+
         RegisterCarRequestDto registerCarRequest = new RegisterCarRequestDto();
-        registerCarRequest.setCarModel("소나타");
-        registerCarRequest.setCarModel("2020");
-        registerCarRequest.setCarType("중형");
-        registerCarRequest.setCarNumber("99수9999");
+        registerCarRequest.setCarModel("CAR01-MODEL");
+        registerCarRequest.setCarModelYear("2021");
+        registerCarRequest.setCarType("CAR01-TYPE");
+        registerCarRequest.setCarNumber("99가9999");
 
         this.car = carFactory.createCar(withLoginAccount.getAccount(), registerCarRequest);
-
-        eCarStationFactory.createStationAndAddCharger(2, 2);
     }
 
     @AfterEach
     void afterEach() {
-        withLoginAccount.getAccount().getMyCars().clear();
-
-        carRepository.deleteAll();
+        userRepository.deleteAll();
         stationRepository.deleteAll();
         reservationRepository.deleteAll();
     }
@@ -106,7 +106,7 @@ class ECarChargingApiControllerTest {
 
         // Given
         ChargerRequestDto chargerRequest = new ChargerRequestDto();
-        chargerRequest.setChargerNumber(2L);
+        chargerRequest.setChargerNumber(charger.getChargerNumber());
         chargerRequest.setReserveTitle(reservation.getReserveTitle());
 
         // When
@@ -145,7 +145,7 @@ class ECarChargingApiControllerTest {
 
         // Given
         ChargerRequestDto chargerRequest = new ChargerRequestDto();
-        chargerRequest.setChargerNumber(2L);
+        chargerRequest.setChargerNumber(charger.getChargerNumber());
         chargerRequest.setReserveTitle(reservation.getReserveTitle());
 
         // When
@@ -178,7 +178,7 @@ class ECarChargingApiControllerTest {
 
         // Given
         ChargerRequestDto chargerRequest = new ChargerRequestDto();
-        chargerRequest.setChargerNumber(2L);
+        chargerRequest.setChargerNumber(charger.getChargerNumber());
         chargerRequest.setReserveTitle(reservation.getReserveTitle());
 
         // When

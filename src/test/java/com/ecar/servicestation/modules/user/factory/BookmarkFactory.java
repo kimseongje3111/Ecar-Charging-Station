@@ -20,7 +20,7 @@ public class BookmarkFactory {
     private final BookmarkRepository bookmarkRepository;
 
     @Transactional
-    public Bookmark createBookmark(Account account, Station station) {
+    public void createBookmark(Account account, Station station) {
         account = userRepository.findAccountByEmail(account.getEmail()).orElseThrow(CUserNotFoundException::new);
 
         Bookmark bookmark = bookmarkRepository.save(
@@ -32,8 +32,6 @@ public class BookmarkFactory {
         );
 
         account.addBookmark(bookmark);
-
-        return bookmark;
     }
 
 }

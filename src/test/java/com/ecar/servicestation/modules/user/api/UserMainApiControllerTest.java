@@ -21,7 +21,9 @@ import com.ecar.servicestation.modules.user.factory.HistoryFactory;
 import com.ecar.servicestation.modules.user.repository.BookmarkRepository;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
 import com.ecar.servicestation.modules.user.repository.HistoryRepository;
+import com.ecar.servicestation.modules.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +64,9 @@ class UserMainApiControllerTest {
     ReservationFactory reservationFactory;
 
     @Autowired
+    UserRepository userRepository;
+
+    @Autowired
     HistoryRepository historyRepository;
 
     @Autowired
@@ -84,16 +89,19 @@ class UserMainApiControllerTest {
 
     private static final String BASE_URL_USER = "/user";
 
+    private Station station;
+
+    @BeforeEach
+    void beforeEach() {
+        withLoginAccount.init();
+
+        this.station = eCarStationFactory.createStationAndAddCharger(1, 2);
+    }
+
     @AfterEach
     void afterEach() {
-        withLoginAccount.getAccount().getHistories().clear();
-        withLoginAccount.getAccount().getBookmarks().clear();
-        withLoginAccount.getAccount().getMyCars().clear();
-
-        carRepository.deleteAll();
+        userRepository.deleteAll();
         stationRepository.deleteAll();
-        historyRepository.deleteAll();
-        bookmarkRepository.deleteAll();
         reservationRepository.deleteAll();
     }
 
@@ -101,7 +109,6 @@ class UserMainApiControllerTest {
     @DisplayName("[최근 검색 목록 조회]정상 처리")
     public void find_histories_success() throws Exception {
         // Base
-        Station station = eCarStationFactory.createStationAndAddCharger(1, 1);
         historyFactory.createHistory(withLoginAccount.getAccount(), station);
 
         // When
@@ -123,9 +130,6 @@ class UserMainApiControllerTest {
     @Test
     @DisplayName("[즐겨찾기 등록]정상 처리")
     public void save_bookmark_success() throws Exception {
-        // Base
-        Station station = eCarStationFactory.createStationAndAddCharger(1, 1);
-
         // When
         ResultActions perform =
                 mockMvc.perform(
@@ -148,7 +152,6 @@ class UserMainApiControllerTest {
     @DisplayName("[즐겨찾기 목록 조회]정상 처리")
     public void find_bookmark_success() throws Exception {
         // Base
-        Station station = eCarStationFactory.createStationAndAddCharger(1, 1);
         bookmarkFactory.createBookmark(withLoginAccount.getAccount(), station);
 
         // When
@@ -171,7 +174,6 @@ class UserMainApiControllerTest {
     @DisplayName("[즐겨찾기 삭제]정상 처리")
     public void delete_bookmark_success() throws Exception {
         // Base
-        Station station = eCarStationFactory.createStationAndAddCharger(1, 1);
         bookmarkFactory.createBookmark(withLoginAccount.getAccount(), station);
 
         // When
@@ -196,7 +198,6 @@ class UserMainApiControllerTest {
     @DisplayName("[즐겨찾기 삭제]실패 - 즐겨찾기 목록에 없는 삭제 요청")
     public void delete_bookmark_failed_by_not_found() throws Exception {
         // Base
-        Station station = eCarStationFactory.createStationAndAddCharger(1, 1);
         bookmarkFactory.createBookmark(withLoginAccount.getAccount(), station);
 
         // When
@@ -221,15 +222,12 @@ class UserMainApiControllerTest {
         Car car = registerCar(account);
 
         // Base(2)
-        eCarStationFactory.createStationAndAddCharger(5, 5);
-
-        Charger charger = chargerRepository.findChargerByChargerNumber(5);
+        Charger charger = chargerRepository.findChargerByChargerNumber(2);
         LocalDateTime start = getDataTimeAfter2HourFromNow(charger.getId());
         LocalDateTime end = start.plusHours(2);
 
         // Base(3)
-        ReservationTable reservation = reservationFactory.createReservation(account, car.getId(), charger.getId(), start, end);
-        reservationFactory.confirmReservation(reservation);
+        reservationFactory.confirmReservation(reservationFactory.createReservation(account, car.getId(), charger.getId(), start, end));
 
         // When
         ResultActions perform =

@@ -29,7 +29,7 @@ public class BankFactory {
                         Bank.builder()
                                 .bankName(bankName)
                                 .bankAccountNumber(accountNumber)
-                                .bankAccountOwner("ADMIN")
+                                .bankAccountOwner("ADMIN01")
                                 .build()
                 );
 
@@ -47,12 +47,12 @@ public class BankFactory {
                 bankService.bankAccountUserAuthentication(
                         bank.getBankName(),
                         bank.getBankAccountNumber(),
-                        1,
-                        "123456789"
+                        1L,
+                        "ADMIN01-CERTIFICATE-PASSWORD"
                 );
 
         bank.successBankAccountAuthentication();
-        bank.setPaymentPasswordAndAccessToken(passwordEncoder.encode("12341234"), accessToken);
+        bank.setPaymentPasswordAndAccessToken(passwordEncoder.encode(bankName + "-PAYMENT-PASSWORD"), accessToken);
 
         return bank;
     }

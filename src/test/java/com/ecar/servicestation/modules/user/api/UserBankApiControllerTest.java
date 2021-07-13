@@ -16,6 +16,7 @@ import com.ecar.servicestation.modules.user.repository.BankRepository;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,11 +58,14 @@ class UserBankApiControllerTest {
 
     private static final String BASE_URL_USER_BANK = "/user/bank";
 
+    @BeforeEach
+    void beforeEach() {
+        withLoginAccount.init();
+    }
+
     @AfterEach
     void afterEach() {
-        withLoginAccount.getAccount().getMyBanks().clear();
-
-        bankRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -69,9 +73,9 @@ class UserBankApiControllerTest {
     public void save_user_bank_account_success() throws Exception {
         // Given
         RegisterBankRequestDto registerBankRequest = new RegisterBankRequestDto();
-        registerBankRequest.setBankName("농협");
-        registerBankRequest.setBankAccountNumber("99999999999");
-        registerBankRequest.setBankAccountOwner("ADMIN");
+        registerBankRequest.setBankName("BANK01");
+        registerBankRequest.setBankAccountNumber("BANK01-ACCOUNT-NUMBER");
+        registerBankRequest.setBankAccountOwner("ADMIN01");
 
         // When
         ResultActions perform =
@@ -103,15 +107,15 @@ class UserBankApiControllerTest {
     public void confirm_user_bank_account_success() throws Exception {
         // Base
         Account account = withLoginAccount.getAccount();
-        Bank bank = bankFactory.createBank("농협", "99999999999", account);
+        Bank bank = bankFactory.createBank("BANK01", "BANK01-ACCOUNT-NUMBER", account);
 
         // Given
         AuthBankRequestDto authBankRequest = new AuthBankRequestDto();
         authBankRequest.setBankId(bank.getId());
-        authBankRequest.setPaymentPassword("12341234");
+        authBankRequest.setPaymentPassword("BANK01-PAYMENT-PASSWORD");
         authBankRequest.setAuthMsg(bank.getBankAccountAuthMsg());
         authBankRequest.setCertificateId(1L);
-        authBankRequest.setCertificatePassword("123456789");
+        authBankRequest.setCertificatePassword("ADMIN01-CERTIFICATE-PASSWORD");
 
         // When
         ResultActions perform =
@@ -143,15 +147,15 @@ class UserBankApiControllerTest {
     public void confirm_user_bank_account_failed_by_auth_message_mismatched() throws Exception {
         // Base
         Account account = withLoginAccount.getAccount();
-        Bank bank = bankFactory.createBank("농협", "99999999999", account);
+        Bank bank = bankFactory.createBank("BANK01", "BANK01-ACCOUNT-NUMBER", account);
 
         // Given
         AuthBankRequestDto authBankRequest = new AuthBankRequestDto();
         authBankRequest.setBankId(bank.getId());
-        authBankRequest.setPaymentPassword("12341234");
-        authBankRequest.setAuthMsg("INVALID_AUTH_MESSAGE");
+        authBankRequest.setPaymentPassword("BANK01-PAYMENT-PASSWORD");
+        authBankRequest.setAuthMsg("INVALID-AUTH-MESSAGE");
         authBankRequest.setCertificateId(1L);
-        authBankRequest.setCertificatePassword("123456789");
+        authBankRequest.setCertificatePassword("ADMIN01-CERTIFICATE-PASSWORD");
 
         // When
         ResultActions perform =
@@ -173,7 +177,7 @@ class UserBankApiControllerTest {
     @DisplayName("[사용자 계좌 목록 조회]정상 처리")
     public void find_user_bank_account_list_success() throws Exception {
         // Base
-        bankFactory.createVerifiedBank("농협", "99999999999", withLoginAccount.getAccount());
+        bankFactory.createVerifiedBank("BANK01", "BANK01-ACCOUNT-NUMBER", withLoginAccount.getAccount());
 
         // When
         ResultActions perform =
@@ -195,7 +199,7 @@ class UserBankApiControllerTest {
     public void delete_user_bank_account_success() throws Exception {
         // Base
         Account account = withLoginAccount.getAccount();
-        Bank bank = bankFactory.createVerifiedBank("농협", "99999999999", account);
+        Bank bank = bankFactory.createVerifiedBank("BANK01", "BANK01-ACCOUNT-NUMBER", account);
 
         // When
         ResultActions perform =
@@ -221,7 +225,7 @@ class UserBankApiControllerTest {
     @DisplayName("[사용자 계좌 삭제]실패 - 인증 계좌 미등록")
     public void delete_user_bank_account_failed_by_not_found() throws Exception {
         // Base
-        Bank bank = bankFactory.createBank("농협", "99999999999", withLoginAccount.getAccount());
+        Bank bank = bankFactory.createBank("BANK01", "BANK01-ACCOUNT-NUMBER", withLoginAccount.getAccount());
 
         // When
         ResultActions perform =
@@ -242,8 +246,8 @@ class UserBankApiControllerTest {
     public void change_user_main_used_bank_account_success() throws Exception {
         // Base
         Account account = withLoginAccount.getAccount();
-        Bank bank1 = bankFactory.createVerifiedBank("농협", "99999999999", account);
-        Bank bank2 = bankFactory.createVerifiedBank("신한", "11111111111", account);
+        Bank bank1 = bankFactory.createVerifiedBank("BANK01", "BANK01-ACCOUNT-NUMBER", account);
+        Bank bank2 = bankFactory.createVerifiedBank("BANK02", "BANK02-ACCOUNT-NUMBER", account);
 
         // When
         ResultActions perform =
@@ -269,12 +273,12 @@ class UserBankApiControllerTest {
     public void charge_cash_success() throws Exception {
         // Base
         Account account = withLoginAccount.getAccount();
-        bankFactory.createVerifiedBank("농협", "99999999999", account);
+        bankFactory.createVerifiedBank("BANK01", "BANK01-ACCOUNT-NUMBER", account);
 
         // Given
         CashInRequestDto cashInRequest = new CashInRequestDto();
         cashInRequest.setAmount(10000);
-        cashInRequest.setPaymentPassword("12341234");
+        cashInRequest.setPaymentPassword("BANK01-PAYMENT-PASSWORD");
 
         // When
         ResultActions perform =
@@ -300,12 +304,12 @@ class UserBankApiControllerTest {
     @DisplayName("[현금(캐쉬) 충전]실패 - 결제 비밀번호 불일치")
     public void charge_cash_failed_by_payment_password_mismatched() throws Exception {
         // Base
-        bankFactory.createVerifiedBank("농협", "99999999999", withLoginAccount.getAccount());
+        bankFactory.createVerifiedBank("BANK01", "BANK01-ACCOUNT-NUMBER", withLoginAccount.getAccount());
 
         // Given
         CashInRequestDto cashInRequest = new CashInRequestDto();
         cashInRequest.setAmount(10000);
-        cashInRequest.setPaymentPassword("1234");
+        cashInRequest.setPaymentPassword("INVALID-PAYMENT-PASSWORD");
 
         // When
         ResultActions perform =
@@ -328,12 +332,13 @@ class UserBankApiControllerTest {
     public void refund_cash_success() throws Exception {
         // Base
         Account account = withLoginAccount.getAccount();
-        bankFactory.createVerifiedBank("농협", "99999999999", account);
+        bankFactory.createVerifiedBank("BANK01", "BANK01-ACCOUNT-NUMBER", account);
         userFactory.cashInit(account, 50000);
 
         // Given
         CashOutRequestDto cashOutRequest = new CashOutRequestDto();
         cashOutRequest.setAmount(10000);
+        cashOutRequest.setPaymentPassword("BANK01-PAYMENT-PASSWORD");
 
         // When
         ResultActions perform =
@@ -360,12 +365,13 @@ class UserBankApiControllerTest {
     public void refund_cash_failed_by_user_cash_not_enough() throws Exception {
         // Base
         Account account = withLoginAccount.getAccount();
-        bankFactory.createVerifiedBank("농협", "99999999999", account);
+        bankFactory.createVerifiedBank("BANK01", "BANK01-ACCOUNT-NUMBER", account);
         userFactory.cashInit(account, 50000);
 
         // Given
         CashOutRequestDto cashOutRequest = new CashOutRequestDto();
         cashOutRequest.setAmount(60000);
+        cashOutRequest.setPaymentPassword("BANK01-PAYMENT-PASSWORD");
 
         // When
         ResultActions perform =

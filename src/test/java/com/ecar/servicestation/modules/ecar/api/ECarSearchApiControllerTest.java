@@ -5,6 +5,7 @@ import com.ecar.servicestation.infra.auth.WithLoginAccount;
 import com.ecar.servicestation.modules.ecar.dto.request.searchs.SearchConditionDto;
 import com.ecar.servicestation.modules.ecar.dto.request.searchs.SearchLocationDto;
 import com.ecar.servicestation.modules.ecar.repository.StationRepository;
+import com.ecar.servicestation.modules.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +28,9 @@ class ECarSearchApiControllerTest {
     WithLoginAccount withLoginAccount;
 
     @Autowired
+    UserRepository userRepository;
+
+    @Autowired
     StationRepository stationRepository;
 
     private static final String BASE_URL_ECAR_SEARCH = "/ecar/find";
@@ -36,6 +40,8 @@ class ECarSearchApiControllerTest {
 
     @BeforeEach
     void beforeEach() {
+        withLoginAccount.init();
+
         this.searchCondition = new SearchConditionDto();
         searchCondition.setSearch("대전 서구 둔산동");
         searchCondition.setChargerTp(2);  // 급속
@@ -50,6 +56,7 @@ class ECarSearchApiControllerTest {
 
     @AfterEach
     void afterEach() {
+        userRepository.deleteAll();
         stationRepository.deleteAll();
     }
 

@@ -6,6 +6,7 @@ import com.ecar.servicestation.modules.user.domain.Car;
 import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequestDto;
 import com.ecar.servicestation.modules.user.factory.CarFactory;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
+import com.ecar.servicestation.modules.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,9 @@ class UserCarApiControllerTest {
     CarFactory carFactory;
 
     @Autowired
+    UserRepository userRepository;
+
+    @Autowired
     CarRepository carRepository;
 
     private static final String BASE_URL_USER_CAR = "/user/car";
@@ -46,18 +50,18 @@ class UserCarApiControllerTest {
 
     @BeforeEach
     void beforeEach() {
+        withLoginAccount.init();
+
         this.registerCarRequest = new RegisterCarRequestDto();
-        registerCarRequest.setCarModel("TEST MODEL");
+        registerCarRequest.setCarModel("CAR01-MODEL");
         registerCarRequest.setCarModelYear("2021");
-        registerCarRequest.setCarType("중형");
-        registerCarRequest.setCarNumber("12T 3456");
+        registerCarRequest.setCarType("CAR01-TYPE");
+        registerCarRequest.setCarNumber("99T9999");
     }
 
     @AfterEach
     void afterEach() {
-        withLoginAccount.getAccount().getMyCars().clear();
-
-        carRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test

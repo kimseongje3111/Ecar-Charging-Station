@@ -5,7 +5,7 @@ import com.ecar.servicestation.modules.main.dto.SingleResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.dto.request.users.UpdateNotificationRequest;
-import com.ecar.servicestation.modules.user.dto.request.users.UpdatePasswordRequest;
+import com.ecar.servicestation.modules.user.dto.request.users.UpdatePasswordRequestDto;
 import com.ecar.servicestation.modules.user.dto.request.users.UpdateUserRequestDto;
 import com.ecar.servicestation.modules.user.service.UserBasicService;
 import io.swagger.annotations.*;
@@ -51,7 +51,7 @@ public class UserBasicApiController {
     })
     @ApiOperation(value = "사용자 비밀번호 변경", notes = "사용자 비밀번호 변경 요청")
     @PostMapping("/password")
-    public CommonResult updateUserPassword(@RequestBody @Valid UpdatePasswordRequest request) {
+    public CommonResult updateUserPassword(@RequestBody @Valid UpdatePasswordRequestDto request) {
         userBasicService.updateUserPassword(request);
 
         return responseService.getSuccessResult();

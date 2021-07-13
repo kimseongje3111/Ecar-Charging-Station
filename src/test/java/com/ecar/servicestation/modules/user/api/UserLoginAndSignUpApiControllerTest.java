@@ -48,10 +48,10 @@ class UserLoginAndSignUpApiControllerTest {
     public void signUp_success() throws Exception {
         // Given
         SignUpRequestDto signUpRequest = new SignUpRequestDto();
-        signUpRequest.setUserName("user1");
-        signUpRequest.setPassword("1234");
-        signUpRequest.setEmail("user1@test.com");
-        signUpRequest.setPhoneNumber("01099999999");
+        signUpRequest.setUserName("USER01");
+        signUpRequest.setPassword("USER01-PASSWORD");
+        signUpRequest.setEmail("USER01@test.com");
+        signUpRequest.setPhoneNumber("USER01-PHONE-NUMBER");
 
         // When
         ResultActions perform =
@@ -79,14 +79,14 @@ class UserLoginAndSignUpApiControllerTest {
     @DisplayName("[회원가입]실패 - 이미 존재하는 계정(이메일 중복)")
     public void signUp_failed_by_duplicated_email() throws Exception {
         // Base
-        userFactory.createSimpleAccount("user1", "1234", "user1@test.com");
+        userFactory.createSimpleAccount("USER01", "USER01-PASSWORD", "USER01@test.com");
 
         // Given
         SignUpRequestDto signUpRequest = new SignUpRequestDto();
-        signUpRequest.setUserName("user1");
-        signUpRequest.setPassword("1234");
-        signUpRequest.setEmail("user1@test.com");
-        signUpRequest.setPhoneNumber("01099999999");
+        signUpRequest.setUserName("USER02");
+        signUpRequest.setPassword("USER02-PASSWORD");
+        signUpRequest.setEmail("USER01@test.com");
+        signUpRequest.setPhoneNumber("USER02-PHONE-NUMBER");
 
         // When
         ResultActions perform =
@@ -107,7 +107,7 @@ class UserLoginAndSignUpApiControllerTest {
     @DisplayName("[회원가입 후 이메일 계정 인증]정상 처리")
     public void account_email_authentication_after_signUp_success() throws Exception {
         // Base
-        Account newAccount = userFactory.createSimpleAccount("user1", "1234", "user1@test.com");
+        Account newAccount = userFactory.createSimpleAccount("USER01", "USER01-PASSWORD", "USER01@test.com");
 
         // When
         ResultActions perform =
@@ -136,12 +136,12 @@ class UserLoginAndSignUpApiControllerTest {
     @DisplayName("[로그인]정상 처리 - 로그인 정보 일치, 이메일 인증이 완료된 계정")
     public void login_success() throws Exception {
         // Base
-        userFactory.createVerifiedAccount("user1", "1234", "user1@test.com");
+        userFactory.createVerifiedAccount("USER01", "USER01-PASSWORD", "USER01@test.com");
 
         // Given
         LoginRequestDto loginRequest = new LoginRequestDto();
-        loginRequest.setEmail("user1@test.com");
-        loginRequest.setPassword("1234");
+        loginRequest.setEmail("USER01@test.com");
+        loginRequest.setPassword("USER01-PASSWORD");
 
         // When
         ResultActions perform =
@@ -164,12 +164,12 @@ class UserLoginAndSignUpApiControllerTest {
     @DisplayName("[로그인]실패 - 존재하지 않은 계정")
     public void login_failed_by_user_not_found() throws Exception {
         // Base
-        userFactory.createVerifiedAccount("user1", "1234", "user1@test.com");
+        userFactory.createVerifiedAccount("USER01", "USER01-PASSWORD", "USER01@test.com");
 
         // Given
         LoginRequestDto loginRequest = new LoginRequestDto();
-        loginRequest.setEmail("user2@test.com");
-        loginRequest.setPassword("1234");
+        loginRequest.setEmail("USER02@test.com");
+        loginRequest.setPassword("USER02-PASSWORD");
 
         // When
         ResultActions perform =
@@ -190,12 +190,12 @@ class UserLoginAndSignUpApiControllerTest {
     @DisplayName("[로그인]실패 - 로그인 정보 불일치")
     public void login_failed_by_login_info_mismatched() throws Exception {
         // Base
-        userFactory.createVerifiedAccount("user1", "1234", "user1@test.com");
+        userFactory.createVerifiedAccount("USER01", "USER01-PASSWORD", "USER01@test.com");
 
         // Given
         LoginRequestDto loginRequest = new LoginRequestDto();
-        loginRequest.setEmail("user1@test.com");
-        loginRequest.setPassword("4321");
+        loginRequest.setEmail("USER01@test.com");
+        loginRequest.setPassword("USER01-INVALID-PASSWORD");
 
         // When
         ResultActions perform =

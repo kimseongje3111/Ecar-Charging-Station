@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotBlank;
 
 @Data
-public class UpdatePasswordRequest {
+public class UpdatePasswordRequestDto {
 
     @ApiParam(value = "현재 비밀번호", required = true)
     @NotBlank

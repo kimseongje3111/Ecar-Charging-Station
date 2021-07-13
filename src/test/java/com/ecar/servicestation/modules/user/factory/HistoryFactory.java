@@ -20,7 +20,7 @@ public class HistoryFactory {
     private final HistoryRepository historyRepository;
 
     @Transactional
-    public History createHistory(Account account, Station station) {
+    public void createHistory(Account account, Station station) {
         account = userRepository.findAccountByEmail(account.getEmail()).orElseThrow(CUserNotFoundException::new);
 
         History history =
@@ -33,8 +33,6 @@ public class HistoryFactory {
                 );
 
         account.addHistory(history);
-
-        return history;
     }
 
 }

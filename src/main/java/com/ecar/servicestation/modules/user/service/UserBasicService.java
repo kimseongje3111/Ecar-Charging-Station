@@ -2,7 +2,7 @@ package com.ecar.servicestation.modules.user.service;
 
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.dto.request.users.UpdateNotificationRequest;
-import com.ecar.servicestation.modules.user.dto.request.users.UpdatePasswordRequest;
+import com.ecar.servicestation.modules.user.dto.request.users.UpdatePasswordRequestDto;
 import com.ecar.servicestation.modules.user.dto.request.users.UpdateUserRequestDto;
 import com.ecar.servicestation.modules.user.exception.users.CUserLoginFailedException;
 import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
@@ -37,7 +37,7 @@ public class UserBasicService {
     }
 
     @Transactional
-    public void updateUserPassword(UpdatePasswordRequest request) {
+    public void updateUserPassword(UpdatePasswordRequestDto request) {
         Account account = getLoginUserContext();
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), account.getPassword())) {

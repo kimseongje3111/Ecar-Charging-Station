@@ -139,7 +139,9 @@ public class UserBankService {
             throw new CBankNotFoundException();
         }
 
-        if (request.getAmount() > account.getCash()) {
+        if (!passwordEncoder.matches(request.getPaymentPassword(), mainUsedBank.getPaymentPassword())
+                || request.getAmount() > account.getCash()) {
+
             throw new CUserCashFailedException();
         }
 

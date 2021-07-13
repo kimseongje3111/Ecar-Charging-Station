@@ -15,7 +15,7 @@ public class RegisterBankRequestDto {
 
     @ApiParam(name = "계좌번호", required = true)
     @NotBlank
-    @Pattern(regexp = "^[0-9]*$")
+    // @Pattern(regexp = "^[0-9]*$")
     private String bankAccountNumber;
 
     @ApiParam(name = "계좌 명의", required = true)

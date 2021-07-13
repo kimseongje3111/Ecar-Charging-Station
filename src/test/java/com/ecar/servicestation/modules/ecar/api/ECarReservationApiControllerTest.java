@@ -90,23 +90,21 @@ class ECarReservationApiControllerTest {
 
     @BeforeEach
     void beforeEach() {
+        withLoginAccount.init();
+        eCarStationFactory.createStationAndAddCharger(1, 2);
+
         RegisterCarRequestDto registerCarRequest = new RegisterCarRequestDto();
-        registerCarRequest.setCarModel("소나타");
-        registerCarRequest.setCarModel("2020");
-        registerCarRequest.setCarType("중형");
-        registerCarRequest.setCarNumber("99수9999");
+        registerCarRequest.setCarModel("CAR01-MODEL");
+        registerCarRequest.setCarModelYear("2021");
+        registerCarRequest.setCarType("CAR01-TYPE");
+        registerCarRequest.setCarNumber("99가9999");
 
         this.car = carFactory.createCar(withLoginAccount.getAccount(), registerCarRequest);
-
-        eCarStationFactory.createStationAndAddCharger(2, 2);
-        eCarStationFactory.createStationAndAddCharger(3, 3);
     }
 
     @AfterEach
     void afterEach() {
-        withLoginAccount.getAccount().getMyCars().clear();
-
-        carRepository.deleteAll();
+        userRepository.deleteAll();
         stationRepository.deleteAll();
         reservationRepository.deleteAll();
     }
@@ -257,7 +255,7 @@ class ECarReservationApiControllerTest {
     public void pay_reservation_fares_failed_by_not_available_cash_or_point() throws Exception {
         // Base
         Account account = withLoginAccount.getAccount();
-        userFactory.cashInit(account, 1000);
+        userFactory.cashInit(account, 100);
 
         // Base(2)
         Charger charger = chargerRepository.findChargerByChargerNumber(2);
@@ -293,7 +291,6 @@ class ECarReservationApiControllerTest {
     public void cancel_charger_reservation_success() throws Exception {
         // Base
         Account account = withLoginAccount.getAccount();
-        userFactory.cashInit(account, 10000);
 
         // Base(2)
         Charger charger = chargerRepository.findChargerByChargerNumber(2);
@@ -326,7 +323,7 @@ class ECarReservationApiControllerTest {
         account = userRepository.findAccountByEmail(account.getEmail()).orElseThrow(CUserNotFoundException::new);
 
         assertThat(reservation.getReserveState()).isEqualTo(ReservationState.CANCEL);
-        assertThat(account.getCash()).isEqualTo(10000 + (reservation.getReserveFares() - reservation.getUsedCashPoint()));
+        assertThat(account.getCash()).isEqualTo(reservation.getReserveFares() - reservation.getUsedCashPoint());
     }
 
     private LocalDateTime getDataTimeAfter2HourFromNow(long chargerId) {

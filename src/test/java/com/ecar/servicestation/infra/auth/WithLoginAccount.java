@@ -19,10 +19,8 @@ public class WithLoginAccount {
     private String authToken;
     private Account account;
 
-    @PostConstruct
-    protected void init() {
-        this.account = userFactory.createVerifiedAccount("admin", "1234", "admin@test.com");
+    public void init() {
+        this.account = userFactory.createVerifiedAccount("ADMIN01", "ADMIN01-PASSWORD", "ADMIN01@test.com");
         this.authToken = authTokenProvider.createToken(String.valueOf(account.getId()), account.getRoles());
     }
-
 }
