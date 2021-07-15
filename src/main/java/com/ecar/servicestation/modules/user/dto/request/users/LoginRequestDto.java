@@ -21,4 +21,8 @@ public class LoginRequestDto {
     @Length(max = 100)
     private String password;
 
+    @ApiParam(value = "디바이스 토큰", required = true)
+    @NotBlank
+    private String deviceToken;
+
 }

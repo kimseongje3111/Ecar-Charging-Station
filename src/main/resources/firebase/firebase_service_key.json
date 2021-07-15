@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "ecar-charging-station",
+  "private_key_id": "f9d341dc55634ee468a659dea5512a8995f4f6f1",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDFdBRpVlLH6wie\npn8/hEvKzDCAwsbd2f0jYbxzm+uBY+5mNIwmFgT7McKrXjRtTcmNJINg/nzbLt+P\nwAOwA7Go90CNPyBqrGz+cYO9wC3bmLXKCsGeMMH+fLGrJBWNCEbLhQs7ul16O8+i\n+FJQTBq5929Im6I4HqJOWBCuM8mUyLFT16/PE6aPe3aVRSYYBB4FUcpjO7zz16Qt\nw93TEDkQfsc+w8ZeYnn/3SroU2wIk5eis2ZSMFHUzjKRBbDxnINPn5JGxtXvCNp5\nMuS+O3cFGkYT22jSZDrkbR5FHx8e5ZnbEyrjra/2k/GXTvvqiRhs0wimFcsFLNfG\nW4umJVOZAgMBAAECggEAGML7NvqMXGXX1DgtB6905x8UNhGMaZCcyNhzjvakDLtA\nz7BnTZ9qoIBtA/CcbS4EHfR7mqj6H208EVrocM+wcpq54vy3o/5bl3fE0wGhaUM4\nCPkFruuOaHZavDZE6EV8G1Rj7umVhMQGFfnuLgOyllUMBPRU3j95OznwCD3rrwID\ne41Bj9sH173NGOnlvRF1EPrjgLuT2dgXxUJJ0PJMNQ5SPJSgPJUFdPW36cUdVRIB\nBTya/JjlZBfpTQEFnKzPOOEi8qN1xm1KogIcyvZKgN+0uSjeGJX8AEYIAkvnueTO\nBc+nte/qLbzzhdrJZHtKaf+aASBWoPba0NygKNCjwQKBgQD0GKARMhkv/J1J9KUL\nkkpyXsLd0LHUfADv3JcpQR2IFtaa0HG2jLo+24qwYx2rZL7o42naf67H57UOUYhL\nkWVAhyMzV1HJAaNgTym84BvU2gh0ZlIfEpzLirxumouNrUZVf3oSvGPO0jpR6/H8\nLBtyG8LrcWJUFYoFL7uQxVapSwKBgQDPFSbDv84IrZq+HFZivH0iWs5pIxjMuOuV\n/6AxEFMiC0VEgwnla1NxfITpgiVqxJQJOfZPZeek7q1oNN5VAEkqBPHJI2vRT/rK\nl0gnoGUR6fZmaqmfbMFPwfQ1I2ToJaUAP23QC/j4+Jpfn575dDC3Q0t2ZI4tTT5I\nIZtL8bosKwKBgHeGU2L4MCMyRGbBV8v5v2CPjEYHefx9GAxb7NzzmJ1Z6Y33QadM\n86nx4NCMSCvz8hOhv+SRHymeCSdQvzeZo4XcZl0uhcqydaikOuDUsGwis38j11SF\nzadRcQGLxYgDb+xPtpvUCd9tS8dvjJeZlXrjoyec5rQbs/DkNaknKE9PAoGAOlEi\nkY26YAdDxLYGPdgHBV29My6HFWAeOCe83RRT1QqHfzvH1avb2+HNLFVSZDbn2ZFR\nJBr2mSP+AZKh6h4ifIrX7GTlQBTd85+W2lH5JIpWsZDoI9VkuylLtIs7J4Uyaldy\nfVxhyPt5veQdyPJHpdR1s+mtgGR4XafZLBHu8/ECgYB51ApsYnrBCNv6N+sfJdU7\nx9I0l1UALogJj4PW2bvY5ZZJ8fENDGWMw+vIh4cjrHYvQMKy8l72JiNbAVmPhmK0\nYwz3qJY0agfm9lZ/ATDP53gLyLlwZ7nU4IUPF2ShW7GwNzCIRNuBsjS5x4Ybfcdt\n8fswh/sNPxu3edyEBXIw1g==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-ol6ff@ecar-charging-station.iam.gserviceaccount.com",
+  "client_id": "102820052144982353344",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-ol6ff%40ecar-charging-station.iam.gserviceaccount.com"
+}

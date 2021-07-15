@@ -1,6 +1,7 @@
 package com.ecar.servicestation.modules.ecar.service;
 
 import com.ecar.servicestation.infra.app.AppProperties;
+import com.ecar.servicestation.infra.notification.service.PushMessageService;
 import com.ecar.servicestation.modules.ecar.domain.Charger;
 import com.ecar.servicestation.modules.ecar.domain.ReservationTable;
 import com.ecar.servicestation.modules.ecar.dto.request.ChargerRequestDto;
@@ -10,6 +11,7 @@ import com.ecar.servicestation.modules.ecar.exception.books.CReservationNotFound
 import com.ecar.servicestation.modules.ecar.exception.books.CReservationStartFailedException;
 import com.ecar.servicestation.modules.ecar.repository.ReservationRepository;
 import com.ecar.servicestation.modules.user.domain.Account;
+import com.ecar.servicestation.modules.user.domain.DeviceToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,7 @@ public class ECarChargingService {
     private static final int CHARGER_TYPE_FAST_KW = 50;
 
     private final ReservationRepository reservationRepository;
+    private final PushMessageService pushMessageService;
     private final AppProperties properties;
 
     @Transactional
@@ -66,20 +69,30 @@ public class ECarChargingService {
             throw new CReservationEndFailedException();
         }
 
+        // 종료 알림 및 포인트 환급 //
+
+        Account account = reservedItem.getAccount();
+
+        if (account.isOnNotificationOfChargingEnd() && !reservedItem.isSentNotificationOfChargingEnd()) {
+            DeviceToken deviceToken = account.getDeviceToken();
+            String title = "충전 종료 알림";
+            String body = "충전이 종료되었습니다. 충전이 완료된 차량을 회수해 주세요.";
+
+            pushMessageService.sendPushMessageTo(deviceToken.getDeviceUniqueToken(), title, body);
+            reservedItem.setSentNotificationOfChargingEnd(true);
+        }
+
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime end = reservedItem.getChargeEndDateTime();
 
-        // 포인트 환급 //
-
         if (now.isBefore(end) && end.isAfter(now.plusMinutes(AVAILABLE_TIME_MINUTE_REFUND))) {
             int faresByChargerType = 0;
-            Account account = reservedItem.getAccount();
 
             if (charger.getType() == CHARGER_TYPE_SLOW) {
-                faresByChargerType = (int) ((properties.getSlowChargingFares() * CHARGER_TYPE_SLOW_KW) * 0.2);
+                faresByChargerType = (int) ((properties.getSlowChargingFares() * CHARGER_TYPE_SLOW_KW) * 0.5);
 
             } else if (charger.getType() == CHARGER_TYPE_FAST) {
-                faresByChargerType = (int) ((properties.getFastChargingFares() * CHARGER_TYPE_FAST_KW) * 0.2);
+                faresByChargerType = (int) ((properties.getFastChargingFares() * CHARGER_TYPE_FAST_KW) * 0.5);
             }
 
             account.chargingCashPoint(reservedItem.calRefundCashPoint(faresByChargerType));

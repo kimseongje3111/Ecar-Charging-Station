@@ -45,6 +45,12 @@ public class ReservationTable {
 
     private Integer usedCashPoint;
 
+    // 알림 //
+
+    private boolean isSentNotificationOfReservationStart;
+
+    private boolean isSentNotificationOfChargingEnd;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;

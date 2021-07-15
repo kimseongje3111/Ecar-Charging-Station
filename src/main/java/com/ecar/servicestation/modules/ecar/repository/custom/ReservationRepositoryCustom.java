@@ -19,8 +19,11 @@ public interface ReservationRepositoryCustom {
 
     List<ReservationTable> findAllByChargerAndStateAndBetweenDateTime(long chargerId, ReservationState state, LocalDateTime start, LocalDateTime end);
 
+    List<ReservationTable> findAllWithAccountByPaymentStateAndCanNotificationOfReservationStart();
+
+    List<ReservationTable> findAllWithAccountByChargingStateAndCanNotificationOfChargingEnd();
+
     long updateStateToCancelByUnpaidTimeOver(int unpaidTimeMinutes);
 
     long updateStateToCancelByNoShowTimeOver(int noShowTimeMinutes);
-
 }

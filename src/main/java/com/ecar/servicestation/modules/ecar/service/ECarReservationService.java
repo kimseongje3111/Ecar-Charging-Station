@@ -108,6 +108,8 @@ public class ECarReservationService {
                                 .reservedAt(LocalDateTime.now())
                                 .chargeStartDateTime(start)
                                 .chargeEndDateTime(end)
+                                .isSentNotificationOfReservationStart(false)
+                                .isSentNotificationOfChargingEnd(false)
                                 .account(account)
                                 .car(car)
                                 .charger(charger)

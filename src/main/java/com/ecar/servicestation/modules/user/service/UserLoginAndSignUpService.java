@@ -5,12 +5,14 @@ import com.ecar.servicestation.infra.auth.AuthTokenProvider;
 import com.ecar.servicestation.infra.mail.dto.EmailMessageDto;
 import com.ecar.servicestation.infra.mail.service.MailService;
 import com.ecar.servicestation.modules.user.domain.Account;
+import com.ecar.servicestation.modules.user.domain.DeviceToken;
 import com.ecar.servicestation.modules.user.dto.request.users.EmailAuthRequestDto;
 import com.ecar.servicestation.modules.user.dto.request.users.LoginRequestDto;
 import com.ecar.servicestation.modules.user.dto.request.users.SignUpRequestDto;
 import com.ecar.servicestation.modules.user.exception.users.CUserLoginFailedException;
 import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.exception.users.CUserSignUpFailedException;
+import com.ecar.servicestation.modules.user.repository.DeviceTokenRepository;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +29,7 @@ import java.util.Collections;
 public class UserLoginAndSignUpService {
 
     private final UserRepository userRepository;
+    private final DeviceTokenRepository deviceTokenRepository;
     private final AuthTokenProvider authTokenProvider;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
@@ -78,6 +81,22 @@ public class UserLoginAndSignUpService {
 
         if (!passwordEncoder.matches(request.getPassword(), account.getPassword()) || !account.isEmailAuthVerified()) {
             throw new CUserLoginFailedException();
+        }
+
+        // 디바이스 토큰 등록 //
+
+        DeviceToken deviceToken = deviceTokenRepository.findDeviceTokenByAccount(account);
+
+        if (deviceToken == null) {
+            deviceTokenRepository.save(
+                    DeviceToken.builder()
+                            .deviceUniqueToken(request.getDeviceToken())
+                            .account(account)
+                            .build()
+            );
+
+        } else {
+            deviceToken.setDeviceUniqueToken(request.getDeviceToken());
         }
 
         // 로그인 성공시, 인증 token 발급 //

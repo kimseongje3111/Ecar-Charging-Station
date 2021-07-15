@@ -88,6 +88,10 @@ public class Account implements UserDetails {
 
     // 알림 서비스 //
 
+    @JsonProperty(access = WRITE_ONLY)
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
+    private DeviceToken deviceToken;
+
     private boolean isOnNotificationOfReservationStart;
 
     private Integer notificationMinutesBeforeReservationStart;

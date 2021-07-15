@@ -142,6 +142,7 @@ class UserLoginAndSignUpApiControllerTest {
         LoginRequestDto loginRequest = new LoginRequestDto();
         loginRequest.setEmail("USER01@test.com");
         loginRequest.setPassword("USER01-PASSWORD");
+        loginRequest.setDeviceToken("USER01-DEVICE-TOKEN");
 
         // When
         ResultActions perform =
@@ -170,6 +171,7 @@ class UserLoginAndSignUpApiControllerTest {
         LoginRequestDto loginRequest = new LoginRequestDto();
         loginRequest.setEmail("USER02@test.com");
         loginRequest.setPassword("USER02-PASSWORD");
+        loginRequest.setDeviceToken("USER02-DEVICE-TOKEN");
 
         // When
         ResultActions perform =
@@ -196,6 +198,7 @@ class UserLoginAndSignUpApiControllerTest {
         LoginRequestDto loginRequest = new LoginRequestDto();
         loginRequest.setEmail("USER01@test.com");
         loginRequest.setPassword("USER01-INVALID-PASSWORD");
+        loginRequest.setDeviceToken("USER01-DEVICE-TOKEN");
 
         // When
         ResultActions perform =

@@ -14,6 +14,7 @@ import static com.ecar.servicestation.modules.ecar.domain.QReservationTable.*;
 import static com.ecar.servicestation.modules.ecar.domain.ReservationState.*;
 import static com.ecar.servicestation.modules.user.domain.QAccount.*;
 import static com.ecar.servicestation.modules.user.domain.QCar.*;
+import static com.ecar.servicestation.modules.user.domain.QDeviceToken.*;
 
 public class ReservationRepositoryImpl extends Querydsl4RepositorySupport implements ReservationRepositoryCustom {
 
@@ -44,6 +45,7 @@ public class ReservationRepositoryImpl extends Querydsl4RepositorySupport implem
         return selectFrom(reservationTable)
                 .join(reservationTable.charger, charger).fetchJoin()
                 .join(reservationTable.account, account).fetchJoin()
+                .join(account.deviceToken, deviceToken).fetchJoin()
                 .where(reservationTable.reserveTitle.eq(reserveTitle))
                 .fetchOne();
     }
@@ -91,6 +93,32 @@ public class ReservationRepositoryImpl extends Querydsl4RepositorySupport implem
     }
 
     @Override
+    public List<ReservationTable> findAllWithAccountByPaymentStateAndCanNotificationOfReservationStart() {
+        return selectFrom(reservationTable)
+                .join(reservationTable.account, account).fetchJoin()
+                .join(account.deviceToken, deviceToken).fetchJoin()
+                .where(
+                        reservationTable.reserveState.eq(PAYMENT),
+                        reservationTable.isSentNotificationOfReservationStart.isFalse(),
+                        account.isOnNotificationOfReservationStart.isTrue()
+                )
+                .fetch();
+    }
+
+    @Override
+    public List<ReservationTable> findAllWithAccountByChargingStateAndCanNotificationOfChargingEnd() {
+        return selectFrom(reservationTable)
+                .join(reservationTable.account, account).fetchJoin()
+                .join(account.deviceToken, deviceToken).fetchJoin()
+                .where(
+                        reservationTable.reserveState.eq(CHARGING),
+                        reservationTable.isSentNotificationOfChargingEnd.isFalse(),
+                        account.isOnNotificationOfChargingEnd.isTrue()
+                )
+                .fetch();
+    }
+
+    @Override
     public long updateStateToCancelByUnpaidTimeOver(int unpaidTimeMinutes) {
         long count =
                 update(reservationTable)
@@ -115,7 +143,7 @@ public class ReservationRepositoryImpl extends Querydsl4RepositorySupport implem
                         .set(reservationTable.reserveState, CANCEL)
                         .where(
                                 reservationTable.reserveState.eq(PAYMENT),
-                                isOverUnpaidTime(noShowTimeMinutes)
+                                isOverNoShowTime(noShowTimeMinutes)
                         )
                         .execute();
 

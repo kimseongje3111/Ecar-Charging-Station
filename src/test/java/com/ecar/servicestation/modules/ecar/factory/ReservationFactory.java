@@ -35,12 +35,14 @@ public class ReservationFactory {
         ReservationTable reservation =
                 reservationRepository.save(
                         ReservationTable.builder()
-                                .account(account)
-                                .car(car)
-                                .charger(charger)
                                 .reservedAt(LocalDateTime.now())
                                 .chargeStartDateTime(start)
                                 .chargeEndDateTime(end)
+                                .isSentNotificationOfReservationStart(false)
+                                .isSentNotificationOfChargingEnd(false)
+                                .account(account)
+                                .car(car)
+                                .charger(charger)
                                 .build()
                 );
 
