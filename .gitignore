@@ -39,3 +39,6 @@ out/
 ### yml ##
 !**/src/main/resources/application-dev.yml
 !**/src/test/resources/application-test.yml
+
+## firebase ##
+!**/src/main/resources/firebase/
