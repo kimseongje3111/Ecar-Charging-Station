@@ -115,7 +115,7 @@ public class UserLoginAndSignUpService {
         context.setVariable("userName", account.getName());
         context.setVariable("email", account.getEmail());
         context.setVariable("token", account.getEmailAuthToken());
-        context.setVariable("link", appProperties.getHost() + "/user/email-auth-token");
+        context.setVariable("link", appProperties.getHost() + "/email-auth-token");
 
         return templateEngine.process("simple-email-template", context);
     }

@@ -116,7 +116,7 @@ public class UserBankService {
     @Transactional
     public void chargeCashFromMainUsedBankAccount(CashInRequestDto request) {
         Account account = getLoginUserContext();
-        Bank mainUsedBank = account.getMyMainUsedBank();
+        Bank mainUsedBank = account.getMainUsedBank();
 
         if (mainUsedBank == null) {
             throw new CBankNotFoundException();
@@ -133,7 +133,7 @@ public class UserBankService {
     @Transactional
     public void refundCashToMainUsedBankAccount(CashOutRequestDto request) {
         Account account = getLoginUserContext();
-        Bank mainUsedBank = account.getMyMainUsedBank();
+        Bank mainUsedBank = account.getMainUsedBank();
 
         if (mainUsedBank == null) {
             throw new CBankNotFoundException();

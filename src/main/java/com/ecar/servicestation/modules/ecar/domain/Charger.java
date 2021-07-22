@@ -1,9 +1,12 @@
 package com.ecar.servicestation.modules.ecar.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.*;
 
 @Entity
 @Getter
@@ -38,6 +41,7 @@ public class Charger {
     @JoinColumn(name = "station_id")
     private Station station;
 
+    @JsonProperty(access = WRITE_ONLY)
     public boolean isRequiredUpdate(LocalDateTime localDateTime) {
         return this.stateUpdatedAt.isBefore(localDateTime);
     }

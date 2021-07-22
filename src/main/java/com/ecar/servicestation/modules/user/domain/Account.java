@@ -1,5 +1,6 @@
 package com.ecar.servicestation.modules.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -92,10 +93,12 @@ public class Account implements UserDetails {
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     private DeviceToken deviceToken;
 
+    @JsonProperty(value = "isOnNotificationOfReservationStart")
     private boolean isOnNotificationOfReservationStart;
 
     private Integer notificationMinutesBeforeReservationStart;
 
+    @JsonProperty(value = "isOnNotificationOfChargingEnd")
     private boolean isOnNotificationOfChargingEnd;
 
     private Integer notificationMinutesBeforeChargingEnd;
@@ -206,13 +209,13 @@ public class Account implements UserDetails {
         this.notificationMinutesBeforeChargingEnd = 30;
     }
 
-    public Bank getMyMainUsedBank() {
+    @JsonProperty(access = WRITE_ONLY)
+    public Bank getMainUsedBank() {
         for (Bank myBank : this.myBanks) {
             if (myBank.isMainUsed() && myBank.isBankAccountVerified()) {
                 return myBank;
             }
         }
-
 
         return null;
     }
