@@ -72,10 +72,4 @@ public class Bank {
         this.bankAccountVerified = true;
         this.registeredAt = LocalDateTime.now();
     }
-
-    public void setPaymentPasswordAndAccessToken(String password, String token) {
-        this.paymentPassword = password;
-        this.bankAccountAccessToken = token;
-    }
-
 }

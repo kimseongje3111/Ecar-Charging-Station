@@ -21,10 +21,4 @@ public class AuthBankRequestDto {
     @NotBlank
     private String authMsg;
 
-    @ApiParam(name = "공인인증서 ID", required = true)
-    private Long certificateId;
-
-    @ApiParam(name = "공인인증서 비밀번호", required = true)
-    private String certificatePassword;
-
 }

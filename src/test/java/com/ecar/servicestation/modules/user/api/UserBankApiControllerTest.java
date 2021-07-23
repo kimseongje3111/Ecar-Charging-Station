@@ -76,6 +76,8 @@ class UserBankApiControllerTest {
         registerBankRequest.setBankName("BANK01");
         registerBankRequest.setBankAccountNumber("BANK01-ACCOUNT-NUMBER");
         registerBankRequest.setBankAccountOwner("ADMIN01");
+        registerBankRequest.setCertificateId(1L);
+        registerBankRequest.setCertificatePassword("ADMIN01-CERTIFICATE-PASSWORD");
 
         // When
         ResultActions perform =
@@ -99,6 +101,7 @@ class UserBankApiControllerTest {
 
         assertThat(myBanks.size()).isEqualTo(1);
         assertThat(myBanks.get(0).isMainUsed()).isTrue();
+        assertThat(myBanks.get(0).getBankAccountAccessToken()).isNotEmpty();
         assertThat(myBanks.get(0).isBankAccountVerified()).isFalse();
     }
 
@@ -114,8 +117,6 @@ class UserBankApiControllerTest {
         authBankRequest.setBankId(bank.getId());
         authBankRequest.setPaymentPassword("BANK01-PAYMENT-PASSWORD");
         authBankRequest.setAuthMsg(bank.getBankAccountAuthMsg());
-        authBankRequest.setCertificateId(1L);
-        authBankRequest.setCertificatePassword("ADMIN01-CERTIFICATE-PASSWORD");
 
         // When
         ResultActions perform =
@@ -139,7 +140,6 @@ class UserBankApiControllerTest {
         assertThat(myBanks.size()).isEqualTo(1);
         assertThat(myBanks.get(0).isMainUsed()).isTrue();
         assertThat(myBanks.get(0).isBankAccountVerified()).isTrue();
-        assertThat(myBanks.get(0).getBankAccountAccessToken()).isNotEmpty();
     }
 
     @Test
@@ -154,8 +154,6 @@ class UserBankApiControllerTest {
         authBankRequest.setBankId(bank.getId());
         authBankRequest.setPaymentPassword("BANK01-PAYMENT-PASSWORD");
         authBankRequest.setAuthMsg("INVALID-AUTH-MESSAGE");
-        authBankRequest.setCertificateId(1L);
-        authBankRequest.setCertificatePassword("ADMIN01-CERTIFICATE-PASSWORD");
 
         // When
         ResultActions perform =

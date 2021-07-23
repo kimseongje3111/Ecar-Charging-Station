@@ -42,6 +42,15 @@ public class UserBankService {
         Account account = getLoginUserContext();
         Bank bank = bankRepository.save(modelMapper.map(request, Bank.class));
 
+        bank.setBankAccountAccessToken(
+                bankService.bankAccountUserAuthentication(
+                        bank.getBankName(),
+                        bank.getBankAccountNumber(),
+                        request.getCertificateId(),
+                        request.getCertificatePassword()
+                )
+        );
+
         bankService.depositTo(bank.getBankName(), bank.getBankAccountNumber(), 1, bank.generateAuthMsg());
         account.addBank(bank);
 
@@ -88,16 +97,8 @@ public class UserBankService {
             throw new CBankAuthFailedException();
         }
 
-        String accessToken =
-                bankService.bankAccountUserAuthentication(
-                        bank.getBankName(),
-                        bank.getBankAccountNumber(),
-                        request.getCertificateId(),
-                        request.getCertificatePassword()
-                );
-
+        bank.setPaymentPassword(passwordEncoder.encode(request.getPaymentPassword()));
         bank.successBankAccountAuthentication();
-        bank.setPaymentPasswordAndAccessToken(passwordEncoder.encode(request.getPaymentPassword()), accessToken);
     }
 
     @Transactional

@@ -13,12 +13,19 @@ public class ConsoleBankService implements BankService {
     @Override
     public String bankAccountUserAuthentication(String bankName, String accountNumber, long certificateId, String certificatePassword) {
         // 계좌 사용자 인증을 위한 공인인증서 로그인 //
-        // 해당 계좌의 ACCESS_TOKEN 발급 //
+        // 인증서 정보가 유효하다면 해당 계좌의 ACCESS_TOKEN 발급 //
 
-        String bankAccountAccessToken = "VALID_ACCESS_TOKEN";
+        boolean isValid = true;
+        String bankAccountAccessToken = null;
 
-        log.info("Authentication of the bank account completed.");
-        log.info("ACCESS-TOKEN:{}", bankAccountAccessToken);
+        // 유효하지 않은 인증서일 경우, 예외 처리 //
+
+        if (isValid) {
+            bankAccountAccessToken = "VALID_ACCESS_TOKEN";
+
+            log.info("Authentication of the bank account completed.");
+            log.info("ACCESS-TOKEN:{}", bankAccountAccessToken);
+        }
 
         return bankAccountAccessToken;
     }
