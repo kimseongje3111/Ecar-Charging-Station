@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserMainService {
+
+    private static final String RESERVED_ITEMS_STATE_NOT_CANCEL = "0";
+    private static final String RESERVED_ITEMS_STATE_COMPLETE = "1";
 
     private final UserRepository userRepository;
     private final StationRepository stationRepository;
@@ -105,9 +109,16 @@ public class UserMainService {
 
     public List<ReservationStatementDto> getUserReservationStatements(String state) {
         Account account = getLoginUserContext();
-        List<ReservationTable> myReservedItems = reservationRepository.findAllWithChargerAndCarByAccountAndState(account.getId(), getReservationState(state));
+        List<ReservationTable> reservedItems = new ArrayList<>();
 
-        return myReservedItems.stream()
+        if (state.equals(RESERVED_ITEMS_STATE_NOT_CANCEL)) {
+            reservedItems = reservationRepository.findAllWithChargerAndCarByAccountAndNotCancel(account.getId());
+
+        } else if (state.equals(RESERVED_ITEMS_STATE_COMPLETE)) {
+            reservedItems = reservationRepository.findAllWithChargerAndCarByAccountAndComplete(account.getId());
+        }
+
+        return reservedItems.stream()
                 .map(reservedItem -> convertToReservationStatement(account.getName(), reservedItem))
                 .collect(Collectors.toList());
     }
@@ -124,20 +135,9 @@ public class UserMainService {
         statement.setCarNumber(reservedItem.getCar().getCarNumber());
         statement.setCharger(reservedItem.getCharger());
         statement.setState(reservedItem.getReserveState().name());
+        statement.setPaidCash(reservedItem.getReserveFares() - reservedItem.getUsedCashPoint());
+        statement.setCancellationFee(0);
 
         return statement;
     }
-
-    private ReservationState getReservationState(String state) {
-        if (state.equals("0")) {
-            return ReservationState.PAYMENT;
-
-        } else if (state.equals("1")) {
-            return ReservationState.CHARGING;
-
-        } else {
-            return ReservationState.COMPLETE;
-        }
-    }
-
 }

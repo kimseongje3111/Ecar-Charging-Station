@@ -14,8 +14,8 @@ public interface ReservationRepositoryCustom {
     ReservationTable findReservationWithChargerAndCarByReserveTitle(String reserveTitle);
 
     ReservationTable findReservationWithChargerAndAccountByReserveTitle(String reserveTitle);
-
-    List<ReservationTable> findAllWithChargerAndCarByAccountAndState(long accountId, ReservationState state);
+    List<ReservationTable> findAllWithChargerAndCarByAccountAndNotCancel(long accountId);
+    List<ReservationTable> findAllWithChargerAndCarByAccountAndComplete(long accountId);
 
     List<ReservationTable> findAllByChargerAndStateAndBetweenDateTime(long chargerId, ReservationState state, LocalDateTime start, LocalDateTime end);
 
@@ -26,4 +26,5 @@ public interface ReservationRepositoryCustom {
     long updateStateToCancelByUnpaidTimeOver(int unpaidTimeMinutes);
 
     long updateStateToCancelByNoShowTimeOver(int noShowTimeMinutes);
+
 }

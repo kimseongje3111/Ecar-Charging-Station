@@ -9,13 +9,11 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class UpdateUserRequestDto {
 
-    @ApiParam(value = "사용자 이름", required = true)
-    @NotBlank
+    @ApiParam(value = "사용자 이름")
     @Length(max = 100)
     private String userName;
 
-    @ApiParam(value = "휴대폰 번호", required = true)
-    @NotBlank
+    @ApiParam(value = "휴대폰 번호")
     private String phoneNumber;
 
 }

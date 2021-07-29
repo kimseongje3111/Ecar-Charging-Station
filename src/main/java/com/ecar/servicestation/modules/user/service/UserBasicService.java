@@ -32,8 +32,13 @@ public class UserBasicService {
     public void updateUserInfo(UpdateUserRequestDto request) {
         Account account = getLoginUserContext();
 
-        account.setName(request.getUserName());
-        account.setPhoneNumber(request.getPhoneNumber());
+        if (request.getUserName() != null) {
+            account.setName(request.getUserName());
+        }
+
+        if (request.getPhoneNumber() != null) {
+            account.setPhoneNumber(request.getPhoneNumber());
+        }
     }
 
     @Transactional

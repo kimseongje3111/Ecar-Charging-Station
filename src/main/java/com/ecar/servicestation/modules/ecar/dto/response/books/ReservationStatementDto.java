@@ -29,4 +29,5 @@ public class ReservationStatementDto {
     private Integer paidCash;
 
     private Integer cancellationFee;
+
 }

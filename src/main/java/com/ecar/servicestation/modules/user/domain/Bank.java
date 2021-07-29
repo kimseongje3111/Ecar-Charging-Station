@@ -72,4 +72,5 @@ public class Bank {
         this.bankAccountVerified = true;
         this.registeredAt = LocalDateTime.now();
     }
+
 }

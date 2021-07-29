@@ -15,8 +15,6 @@ public class UserBankDto {
 
     private String bankAccountOwner;
 
-    private boolean bankAccountVerified;
-
     private boolean mainUsed;
 
     private LocalDateTime registeredAt;

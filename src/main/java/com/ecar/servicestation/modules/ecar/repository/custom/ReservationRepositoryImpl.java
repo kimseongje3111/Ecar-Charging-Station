@@ -51,30 +51,31 @@ public class ReservationRepositoryImpl extends Querydsl4RepositorySupport implem
     }
 
     @Override
-    public List<ReservationTable> findAllWithChargerAndCarByAccountAndState(long accountId, ReservationState state) {
-        JPAQuery<ReservationTable> query =
-                selectFrom(reservationTable)
-                        .join(reservationTable.account, account)
-                        .join(reservationTable.charger, charger).fetchJoin()
-                        .join(reservationTable.car, car).fetchJoin();
+    public List<ReservationTable> findAllWithChargerAndCarByAccountAndNotCancel(long accountId) {
+        return selectFrom(reservationTable)
+                .join(reservationTable.account, account)
+                .join(reservationTable.charger, charger).fetchJoin()
+                .join(reservationTable.car, car).fetchJoin()
+                .where(
+                        account.id.eq(accountId),
+                        reservationTable.reserveState.eq(STAND_BY)
+                                .or(reservationTable.reserveState.eq(PAYMENT))
+                                .or(reservationTable.reserveState.eq(CHARGING))
+                )
+                .fetch();
+    }
 
-        if (state.equals(PAYMENT)) {
-            return query
-                    .where(
-                            account.id.eq(accountId),
-                            reservationTable.reserveState.eq(state)
-                                    .or(reservationTable.reserveState.eq(STAND_BY))
-                    )
-                    .fetch();
-
-        } else {
-            return query
-                    .where(
-                            account.id.eq(accountId),
-                            reservationTable.reserveState.eq(state)
-                    )
-                    .fetch();
-        }
+    @Override
+    public List<ReservationTable> findAllWithChargerAndCarByAccountAndComplete(long accountId) {
+        return selectFrom(reservationTable)
+                .join(reservationTable.account, account)
+                .join(reservationTable.charger, charger).fetchJoin()
+                .join(reservationTable.car, car).fetchJoin()
+                .where(
+                        account.id.eq(accountId),
+                        reservationTable.reserveState.eq(COMPLETE)
+                )
+                .fetch();
     }
 
     @Override

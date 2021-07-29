@@ -242,7 +242,7 @@ public class ECarReservationService {
         response.setReservationId(reservedItem.getId());
         response.setUserName(userName);
         response.setCarNumber(reservedItem.getCar().getCarNumber());
-        response.setChargerId(reservedItem.getCharger().getId());
+        response.setCharger(reservedItem.getCharger());
         response.setReservedAt(reservedItem.getReservedAt());
         response.setState(reservedItem.getReserveState().name());
         response.setFares(reservedItem.getReserveFares());

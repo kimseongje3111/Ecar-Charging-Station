@@ -23,4 +23,5 @@ public class ChargerInfoDto {
     private LocalDateTime stateUpdatedAt;
 
     private Station station;
+
 }
