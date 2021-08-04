@@ -4,7 +4,8 @@ import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.Car;
 import com.ecar.servicestation.modules.user.dto.request.RegisterCarRequestDto;
 import com.ecar.servicestation.modules.user.dto.response.UserCarDto;
-import com.ecar.servicestation.modules.user.exception.CCarNotFoundException;
+import com.ecar.servicestation.modules.user.exception.cars.CCarNotFoundException;
+import com.ecar.servicestation.modules.user.exception.cars.CCarRegistrationFailedException;
 import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
 import com.ecar.servicestation.modules.user.repository.CarRepository;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
@@ -29,6 +30,10 @@ public class UserCarService {
 
     @Transactional
     public void registerUserCar(RegisterCarRequestDto request) {
+        if (carRepository.existsCarByCarNumber(request.getCarNumber())) {
+            throw new CCarRegistrationFailedException();
+        }
+
         Account account = getLoginUserContext();
         Car car = carRepository.save(modelMapper.map(request, Car.class));
 

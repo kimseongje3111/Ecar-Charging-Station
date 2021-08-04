@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface BankRepository extends JpaRepository<Bank, Long> {
 
+    boolean existsBankByBankAccountNumber(String bankAccountNumber);
+
     Bank findBankByIdAndAccount(long bankId, Account account);
 
     List<Bank> findAllByAccount(Account account);

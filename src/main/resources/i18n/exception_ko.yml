@@ -38,6 +38,10 @@ carNotFound:
   code: "-1007"
   msg: "해당 차량을 찾을 수 없습니다."
 
+carRegistrationFailed:
+  code: "-10072"
+  msg: "중복된 차량 번호입니다."
+
 reserveFailed:
   code: "-1008"
   msg: "해당 예약 API 요청을 처리할 수 없습니다."
@@ -45,6 +49,10 @@ reserveFailed:
 bankNotFound:
   code: "-1009"
   msg: "해당 계좌를 찾을 수 없습니다."
+
+bankExists:
+  code: "-10092"
+  msg: "중복된 계좌 번호입니다."
 
 bankAuthFailed:
   code: "-1010"

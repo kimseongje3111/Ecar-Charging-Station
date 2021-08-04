@@ -1,4 +1,4 @@
-package com.ecar.servicestation.modules.user.exception;
+package com.ecar.servicestation.modules.user.exception.cars;
 
 public class CCarNotFoundException extends RuntimeException {
     public CCarNotFoundException() {

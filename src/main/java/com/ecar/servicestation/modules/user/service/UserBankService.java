@@ -10,6 +10,7 @@ import com.ecar.servicestation.modules.user.dto.request.banks.RegisterBankReques
 import com.ecar.servicestation.modules.user.dto.response.RegisterBankResponseDto;
 import com.ecar.servicestation.modules.user.dto.response.users.UserBankDto;
 import com.ecar.servicestation.modules.user.exception.banks.CBankAuthFailedException;
+import com.ecar.servicestation.modules.user.exception.banks.CBankExistsException;
 import com.ecar.servicestation.modules.user.exception.banks.CBankNotFoundException;
 import com.ecar.servicestation.modules.user.exception.banks.CUserCashFailedException;
 import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
@@ -39,6 +40,10 @@ public class UserBankService {
 
     @Transactional
     public RegisterBankResponseDto registerUserBankAccount(RegisterBankRequestDto request) {
+        if (bankRepository.existsBankByBankAccountNumber(request.getBankAccountNumber())) {
+            throw new CBankExistsException();
+        }
+
         Account account = getLoginUserContext();
         Bank bank = bankRepository.save(modelMapper.map(request, Bank.class));
 

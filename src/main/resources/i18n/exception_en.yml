@@ -38,6 +38,10 @@ carNotFound:
   code: "-1007"
   msg: "The car not found."
 
+carRegistrationFailed:
+  code: "-10072"
+   msg: "The car number is duplicated."
+
 reserveFailed:
   code: "-1008"
   msg: "Processing of the reservation API request failed."
@@ -45,6 +49,10 @@ reserveFailed:
 bankNotFound:
   code: "-1009"
   msg: "The bank account not found."
+
+bankExists:
+  code: "-10092"
+  msg: "The bank account number is duplicated."
 
 bankAuthFailed:
   code: "-1010"
