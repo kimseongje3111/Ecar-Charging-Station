@@ -23,4 +23,5 @@ public class StationInfoDto {
 
     private Set<Charger> chargers = new HashSet<>();
 
+    private boolean bookmarked;
 }

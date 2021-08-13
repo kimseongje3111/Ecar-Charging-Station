@@ -10,4 +10,5 @@ public interface HistoryRepository extends JpaRepository<History, Long>, History
 
     boolean existsHistoryByAccountAndStation(Account account, Station station);
 
+    History findHistoryByAccountAndStation(Account account, Station station);
 }

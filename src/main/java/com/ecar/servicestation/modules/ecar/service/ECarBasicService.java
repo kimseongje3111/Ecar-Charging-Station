@@ -11,6 +11,7 @@ import com.ecar.servicestation.modules.ecar.repository.StationRepository;
 import com.ecar.servicestation.modules.user.domain.Account;
 import com.ecar.servicestation.modules.user.domain.History;
 import com.ecar.servicestation.modules.user.exception.users.CUserNotFoundException;
+import com.ecar.servicestation.modules.user.repository.BookmarkRepository;
 import com.ecar.servicestation.modules.user.repository.HistoryRepository;
 import com.ecar.servicestation.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,15 +30,18 @@ public class ECarBasicService {
 
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final StationRepository stationRepository;
     private final ChargerRepository chargerRepository;
     private final ModelMapper modelMapper;
 
     public StationInfoDto getStationInfo(long stationId) {
+        Account account = getLoginUserContext();
         Station station = stationRepository.findById(stationId).orElseThrow(CStationNotFoundException::new);
-        StationInfoDto stationInfo = modelMapper.map(station, StationInfoDto.class);
 
+        StationInfoDto stationInfo = modelMapper.map(station, StationInfoDto.class);
         stationInfo.setStationId(station.getId());
+        stationInfo.setBookmarked(bookmarkRepository.existsBookmarkByAccountAndStation(account, station));
 
         return stationInfo;
     }
@@ -46,19 +50,26 @@ public class ECarBasicService {
     public StationInfoDto getStationInfoAndRecordHistory(long stationId) {
         Account account = getLoginUserContext();
         Station station = stationRepository.findById(stationId).orElseThrow(CStationNotFoundException::new);
+        History history = historyRepository.findHistoryByAccountAndStation(account, station);
 
-        account.addHistory(
-                historyRepository.save(
-                        History.builder()
-                                .account(account)
-                                .station(station)
-                                .searchedAt(LocalDateTime.now())
-                                .build()
-                )
-        );
+        if (history == null) {
+            account.addHistory(
+                    historyRepository.save(
+                            History.builder()
+                                    .account(account)
+                                    .station(station)
+                                    .searchedAt(LocalDateTime.now())
+                                    .build()
+                    )
+            );
+
+        } else {
+            history.setSearchedAt(LocalDateTime.now());
+        }
 
         StationInfoDto stationInfo = modelMapper.map(station, StationInfoDto.class);
         stationInfo.setStationId(station.getId());
+        stationInfo.setBookmarked(bookmarkRepository.existsBookmarkByAccountAndStation(account, station));
 
         return stationInfo;
     }
@@ -80,16 +91,22 @@ public class ECarBasicService {
     public ChargerInfoDto getChargerInfoAndRecordHistory(Long chargerId) {
         Account account = getLoginUserContext();
         Charger charger = chargerRepository.findChargerWithStationById(chargerId);
+        History history = historyRepository.findHistoryByAccountAndStation(account, charger.getStation());
 
-        account.addHistory(
-                historyRepository.save(
-                        History.builder()
-                        .account(account)
-                        .station(charger.getStation())
-                        .searchedAt(LocalDateTime.now())
-                        .build()
-                )
-        );
+        if (history == null) {
+            account.addHistory(
+                    historyRepository.save(
+                            History.builder()
+                                    .account(account)
+                                    .station(charger.getStation())
+                                    .searchedAt(LocalDateTime.now())
+                                    .build()
+                    )
+            );
+
+        } else {
+            history.setSearchedAt(LocalDateTime.now());
+        }
 
         ChargerInfoDto chargerInfo = modelMapper.map(charger, ChargerInfoDto.class);
         chargerInfo.setChargerId(charger.getId());

@@ -34,6 +34,15 @@ public class BankFactory {
                 );
 
         bank.generateAuthMsg();
+        bank.setBankAccountAccessToken(
+                bankService.bankAccountUserAuthentication(
+                        bank.getBankName(),
+                        bank.getBankAccountNumber(),
+                        1L,
+                        "ADMIN01-CERTIFICATE-PASSWORD"
+                )
+        );
+
         account.addBank(bank);
 
         return bank;
@@ -43,16 +52,8 @@ public class BankFactory {
     public Bank createVerifiedBank(String bankName, String accountNumber, Account account) {
         Bank bank = createBank(bankName, accountNumber, account);
 
-        String accessToken =
-                bankService.bankAccountUserAuthentication(
-                        bank.getBankName(),
-                        bank.getBankAccountNumber(),
-                        1L,
-                        "ADMIN01-CERTIFICATE-PASSWORD"
-                );
-
         bank.successBankAccountAuthentication();
-        bank.setPaymentPasswordAndAccessToken(passwordEncoder.encode(bankName + "-PAYMENT-PASSWORD"), accessToken);
+        bank.setPaymentPassword(passwordEncoder.encode(bankName + "-PAYMENT-PASSWORD"));
 
         return bank;
     }
