@@ -13,6 +13,10 @@ public class ReserveRequestDto {
     @NotNull
     private Long chargerId;
 
+    @ApiParam(value = "사용자 차량 ID", required = true)
+    @NotNull
+    private Long carId;
+
     @ApiParam(value = "충전 시작 날짜", required = true)
     @NotNull
     private LocalDateTime start;
@@ -20,9 +24,5 @@ public class ReserveRequestDto {
     @ApiParam(value = "충전 종료 날짜", required = true)
     @NotNull
     private LocalDateTime end;
-
-    @ApiParam(value = "사용자 차량 ID", required = true)
-    @NotNull
-    private Long carId;
 
 }

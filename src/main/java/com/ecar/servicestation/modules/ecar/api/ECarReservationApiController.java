@@ -3,6 +3,7 @@ package com.ecar.servicestation.modules.ecar.api;
 import com.ecar.servicestation.modules.ecar.dto.request.books.PaymentRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.request.books.ReserveRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.response.books.ChargerTimeTableDto;
+import com.ecar.servicestation.modules.ecar.dto.response.books.MaxEndDateTimeDto;
 import com.ecar.servicestation.modules.ecar.dto.response.books.ReservationStatementDto;
 import com.ecar.servicestation.modules.ecar.dto.response.books.ReserveResponseDto;
 import com.ecar.servicestation.modules.ecar.service.ECarReservationService;
@@ -36,6 +37,19 @@ public class ECarReservationApiController {
             @ApiParam(value = "페이지 번호(MAX:7)") @RequestParam @Pattern(regexp = "^[0-7]$") Integer day) {
 
         return responseService.getSingleResult(eCarReservationService.getChargerTimeTable(id, day));
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급된 ACCESS_TOKEN",
+                    required = true, dataType = "String", paramType = "header")
+    })
+    @ApiOperation(value = "충전기 예약 최대 가능 시간 조회", notes = "충전기 예약 최대 가능 시간 조회 요청")
+    @GetMapping("/{id}/max")
+    public SingleResult<MaxEndDateTimeDto> getMaxEndDateTimeFromStringDateTime(
+            @ApiParam(value = "충전기 ID") @PathVariable Long id,
+            @ApiParam(value = "충전 시작 시간") @RequestParam String startDateTIme) {
+
+        return responseService.getSingleResult(eCarReservationService.getMaxEndDateTimeFromStartDateTime(id, startDateTIme));
     }
 
     @ApiImplicitParams({

@@ -94,6 +94,21 @@ public class ReservationRepositoryImpl extends Querydsl4RepositorySupport implem
     }
 
     @Override
+    public List<ReservationTable> findAllByChargerAndReservedStateAndStartBetweenDateTime(long chargerId, LocalDateTime start, LocalDateTime end) {
+        return selectFrom(reservationTable)
+                .join(reservationTable.charger, charger)
+                .where(
+                        charger.id.eq(chargerId),
+                        reservationTable.reserveState.eq(STAND_BY)
+                                .or(reservationTable.reserveState.eq(PAYMENT)),
+                        reservationTable.chargeStartDateTime.eq(start)
+                                .or(reservationTable.chargeStartDateTime.between(start, end))
+                )
+                .orderBy(reservationTable.chargeStartDateTime.asc())
+                .fetch();
+    }
+
+    @Override
     public List<ReservationTable> findAllWithAccountByPaymentStateAndCanNotificationOfReservationStart() {
         return selectFrom(reservationTable)
                 .join(reservationTable.account, account).fetchJoin()

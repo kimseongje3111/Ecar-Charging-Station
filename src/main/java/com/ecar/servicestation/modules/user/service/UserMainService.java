@@ -131,9 +131,9 @@ public class UserMainService {
 
     private ReservationStatementDto convertToReservationStatement(String userName, ReservationTable reservedItem) {
         ReservationStatementDto statement = modelMapper.map(reservedItem, ReservationStatementDto.class);
+        statement.setChargerId(reservedItem.getCharger().getId());
         statement.setUserName(userName);
         statement.setCarNumber(reservedItem.getCar().getCarNumber());
-        statement.setCharger(reservedItem.getCharger());
         statement.setState(reservedItem.getReserveState().name());
         statement.setPaidCash(reservedItem.getReserveFares() - reservedItem.getUsedCashPoint());
         statement.setCancellationFee(0);

@@ -14,5 +14,5 @@ public class ChargerTimeTableDto {
 
     private LocalDate targetDate;
 
-    private Map<LocalDateTime, Boolean> timeTable = new HashMap<>();
+    private Map<String, Boolean> timeTable = new HashMap<>();
 }

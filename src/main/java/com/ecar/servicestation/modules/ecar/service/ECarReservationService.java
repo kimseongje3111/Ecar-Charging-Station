@@ -6,6 +6,7 @@ import com.ecar.servicestation.modules.ecar.domain.ReservationTable;
 import com.ecar.servicestation.modules.ecar.dto.request.books.PaymentRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.request.books.ReserveRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.response.books.ChargerTimeTableDto;
+import com.ecar.servicestation.modules.ecar.dto.response.books.MaxEndDateTimeDto;
 import com.ecar.servicestation.modules.ecar.dto.response.books.ReservationStatementDto;
 import com.ecar.servicestation.modules.ecar.dto.response.books.ReserveResponseDto;
 import com.ecar.servicestation.modules.ecar.exception.CChargerNotFoundException;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.ecar.servicestation.modules.ecar.domain.ReservationState.*;
@@ -54,24 +56,73 @@ public class ECarReservationService {
             throw new CChargerNotFoundException();
         }
 
+        if (LocalDateTime.now().getHour() == 23 && day == 0) {
+            return getChargerTimeTable(chargerId, LocalDateTime.now(), new HashMap<>());
+        }
+
         LocalDateTime target = getTargetDateTime(day);
         LocalDateTime targetEnd = LocalDateTime.of(target.toLocalDate(), LocalTime.MAX);
-        Map<LocalDateTime, Boolean> timeTableOfDay = makeTimeTableOfDay(target);
+        Map<String, Boolean> timeTableOfDay = makeTimeTableOfDay(target);
+
+        List<ReservationTable> unpaidItems =
+                reservationRepository.findAllByChargerAndStateAndBetweenDateTime(chargerId, STAND_BY, target, targetEnd);
 
         List<ReservationTable> reservedItems =
                 reservationRepository.findAllByChargerAndStateAndBetweenDateTime(chargerId, PAYMENT, target, targetEnd);
+
+        for (ReservationTable unpaidItem : unpaidItems) {
+            LocalDateTime start = unpaidItem.getChargeStartDateTime();
+            LocalDateTime end = unpaidItem.getChargeEndDateTime();
+
+            while (start.isBefore(end) || start.isEqual(end)) {
+                timeTableOfDay.putIfAbsent(start.format(DateTimeFormatter.ofPattern("HH:mm")), false);
+                start = start.plusMinutes(30);
+            }
+        }
 
         for (ReservationTable reservedItem : reservedItems) {
             LocalDateTime start = reservedItem.getChargeStartDateTime();
             LocalDateTime end = reservedItem.getChargeEndDateTime();
 
             while (start.isBefore(end) || start.isEqual(end)) {
-                timeTableOfDay.putIfAbsent(start, false);
+                timeTableOfDay.putIfAbsent(start.format(DateTimeFormatter.ofPattern("HH:mm")), false);
                 start = start.plusMinutes(30);
             }
         }
 
         return getChargerTimeTable(chargerId, target, timeTableOfDay);
+    }
+
+    public MaxEndDateTimeDto getMaxEndDateTimeFromStartDateTime(long chargerId, String startDateTIme) {
+        if (!chargerRepository.existsById(chargerId)) {
+            throw new CChargerNotFoundException();
+        }
+
+        // 충전 시작 시간 이후로 최대 8시간 //
+
+        LocalDateTime startDateTime = LocalDateTime.parse(startDateTIme, DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm"));
+        LocalDateTime maxEndDateTime = startDateTime.plusHours(8);
+
+        List<ReservationTable> reservedItems =
+                reservationRepository.findAllByChargerAndReservedStateAndStartBetweenDateTime(chargerId, startDateTime, maxEndDateTime);
+
+        if (reservedItems.size() != 0) {
+            maxEndDateTime = reservedItems.get(0).getChargeStartDateTime();
+        }
+
+        // 시간당 요금 계산 //
+
+        int faresByChargerType = 0;
+        Charger charger = chargerRepository.findById(chargerId).orElseThrow(CChargerNotFoundException::new);
+
+        if (charger.getType() == CHARGER_TYPE_SLOW) {
+            faresByChargerType = properties.getSlowChargingFares() * CHARGER_TYPE_SLOW_KW;
+
+        } else if (charger.getType() == CHARGER_TYPE_FAST) {
+            faresByChargerType = properties.getFastChargingFares() * CHARGER_TYPE_FAST_KW;
+        }
+
+        return getMaxEndDateTime(chargerId, startDateTime, maxEndDateTime, faresByChargerType);
     }
 
     @Transactional
@@ -199,30 +250,43 @@ public class ECarReservationService {
 
         if (day != 0) {
             now = LocalDateTime.of(now.toLocalDate().plusDays(day), LocalTime.MIDNIGHT);
+
+        } else {
+            now = now.plusHours(1);
         }
 
         return now;
     }
 
-    private Map<LocalDateTime, Boolean> makeTimeTableOfDay(LocalDateTime now) {
-        Map<LocalDateTime, Boolean> timeTableOfDay = new HashMap<>();
+    private Map<String, Boolean> makeTimeTableOfDay(LocalDateTime now) {
+        Map<String, Boolean> timeTableOfDay = new HashMap<>();
         LocalDateTime max = LocalDateTime.of(now.toLocalDate(), LocalTime.MAX);
 
         while (now.isBefore(max)) {
-            timeTableOfDay.put(now, true);
+            timeTableOfDay.put(now.format(DateTimeFormatter.ofPattern("HH:mm")), true);
             now = now.plusMinutes(30);
         }
 
         return timeTableOfDay;
     }
 
-    private ChargerTimeTableDto getChargerTimeTable(long chargerId, LocalDateTime target, Map<LocalDateTime, Boolean> timeTableOfDay) {
+    private ChargerTimeTableDto getChargerTimeTable(long chargerId, LocalDateTime target, Map<String, Boolean> timeTableOfDay) {
         ChargerTimeTableDto timeTable = new ChargerTimeTableDto();
         timeTable.setChargerId(chargerId);
         timeTable.setTargetDate(target.toLocalDate());
         timeTable.setTimeTable(timeTableOfDay);
 
         return timeTable;
+    }
+
+    private MaxEndDateTimeDto getMaxEndDateTime(long chargerId, LocalDateTime start, LocalDateTime end, int faresByChargerType) {
+        MaxEndDateTimeDto maxEndDateTime = new MaxEndDateTimeDto();
+        maxEndDateTime.setChargerId(chargerId);
+        maxEndDateTime.setTargetDateTime(start);
+        maxEndDateTime.setMaxEndDateTime(end);
+        maxEndDateTime.setFaresPerHour(faresByChargerType);
+
+        return maxEndDateTime;
     }
 
     private boolean isValidReserveRequest(ReserveRequestDto request) {
@@ -239,9 +303,9 @@ public class ECarReservationService {
     private ReserveResponseDto getReserveResponse(String userName, ReservationTable reservedItem) {
         ReserveResponseDto response = new ReserveResponseDto();
         response.setReservationId(reservedItem.getId());
+        response.setChargerId(reservedItem.getCharger().getId());
         response.setUserName(userName);
         response.setCarNumber(reservedItem.getCar().getCarNumber());
-        response.setCharger(reservedItem.getCharger());
         response.setReservedAt(reservedItem.getReservedAt());
         response.setState(reservedItem.getReserveState().name());
         response.setFares(reservedItem.getReserveFares());
@@ -257,9 +321,9 @@ public class ECarReservationService {
 
     private ReservationStatementDto getReservationStatement(String username, ReservationTable reservedItem, int cancellationFee) {
         ReservationStatementDto statement = modelMapper.map(reservedItem, ReservationStatementDto.class);
+        statement.setChargerId(reservedItem.getCharger().getId());
         statement.setUserName(username);
         statement.setCarNumber(reservedItem.getCar().getCarNumber());
-        statement.setCharger(reservedItem.getCharger());
         statement.setState(reservedItem.getReserveState().name());
         statement.setPaidCash(reservedItem.getReserveFares() - reservedItem.getUsedCashPoint());
         statement.setCancellationFee(cancellationFee);
