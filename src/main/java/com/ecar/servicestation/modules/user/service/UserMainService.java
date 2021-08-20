@@ -131,13 +131,36 @@ public class UserMainService {
 
     private ReservationStatementDto convertToReservationStatement(String userName, ReservationTable reservedItem) {
         ReservationStatementDto statement = modelMapper.map(reservedItem, ReservationStatementDto.class);
-        statement.setChargerId(reservedItem.getCharger().getId());
         statement.setUserName(userName);
+        statement.setReservationId(reservedItem.getId());
+        statement.setChargerId(reservedItem.getCharger().getId());
         statement.setCarNumber(reservedItem.getCar().getCarNumber());
         statement.setState(reservedItem.getReserveState().name());
         statement.setPaidCash(reservedItem.getReserveFares() - reservedItem.getUsedCashPoint());
-        statement.setCancellationFee(0);
+        statement.setCancellationFee(calCancellationFee(reservedItem));
+
+        if (reservedItem.getReserveTitle() != null) {
+            statement.setReserveTitle(reservedItem.getReserveTitle());
+        }
+
+        if (reservedItem.getReserveState().equals(ReservationState.STAND_BY)) {
+            statement.setPaidCash(0);
+            statement.setCancellationFee(0);
+
+        } else if (reservedItem.getReserveState().equals(ReservationState.CHARGING)) {
+            statement.setCancellationFee(0);
+        }
 
         return statement;
+    }
+
+    private int calCancellationFee(ReservationTable reservedItem) {
+
+        // 취소 수수료 계산 //
+
+        LocalDateTime start = reservedItem.getChargeStartDateTime();
+        LocalDateTime now = LocalDateTime.now();
+
+        return start.minusHours(1).isAfter(now) ? 0 : (int) (reservedItem.getReserveFares() * 0.1);
     }
 }

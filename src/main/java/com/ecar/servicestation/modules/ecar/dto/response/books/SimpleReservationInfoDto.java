@@ -5,19 +5,20 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class ReserveResponseDto {
+public class SimpleReservationInfoDto {
 
-    private Long reservationId;
+    private String stationName;
 
-    private Long chargerId;
+    private String chargerName;
 
     private String userName;
 
     private String carNumber;
 
-    private LocalDateTime reservedAt;
+    private LocalDateTime chargeStartDateTime;
 
-    private String state;
+    private LocalDateTime chargeEndDateTime;
 
     private Integer fares;
+
 }

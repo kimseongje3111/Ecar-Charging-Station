@@ -5,7 +5,7 @@ import com.ecar.servicestation.modules.ecar.dto.request.books.ReserveRequestDto;
 import com.ecar.servicestation.modules.ecar.dto.response.books.ChargerTimeTableDto;
 import com.ecar.servicestation.modules.ecar.dto.response.books.MaxEndDateTimeDto;
 import com.ecar.servicestation.modules.ecar.dto.response.books.ReservationStatementDto;
-import com.ecar.servicestation.modules.ecar.dto.response.books.ReserveResponseDto;
+import com.ecar.servicestation.modules.ecar.dto.response.books.SimpleReservationInfoDto;
 import com.ecar.servicestation.modules.ecar.service.ECarReservationService;
 import com.ecar.servicestation.modules.main.dto.SingleResult;
 import com.ecar.servicestation.modules.main.service.ResponseService;
@@ -56,9 +56,19 @@ public class ECarReservationApiController {
             @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급된 ACCESS_TOKEN",
                     required = true, dataType = "String", paramType = "header")
     })
+    @ApiOperation(value = "충전기 예약 정보 단건 조회", notes = "충전기 예약 정보 단건 조회 요청")
+    @GetMapping("/{id}/info")
+    public SingleResult<SimpleReservationInfoDto> getSimpleReservationInfo(@ApiParam(value = "예약 ID") @PathVariable Long id) {
+        return responseService.getSingleResult(eCarReservationService.getReservationInfo(id));
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-AUTH-TOKEN", value = "로그인 성공 후 발급된 ACCESS_TOKEN",
+                    required = true, dataType = "String", paramType = "header")
+    })
     @ApiOperation(value = "충전기 예약", notes = "충전기 예약(결제 전) 요청")
     @PostMapping("")
-    public SingleResult<ReserveResponseDto> reserveCharger(@RequestBody @Valid ReserveRequestDto request) {
+    public SingleResult<ReservationStatementDto> reserveCharger(@RequestBody @Valid ReserveRequestDto request) {
         return responseService.getSingleResult(eCarReservationService.reserveCharger(request));
     }
 

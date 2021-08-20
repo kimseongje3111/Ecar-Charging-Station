@@ -7,13 +7,17 @@ import java.time.LocalDateTime;
 @Data
 public class ReservationStatementDto {
 
-    private String reserveTitle;
+    private Long reservationId;
 
     private Long chargerId;
+
+    private String reserveTitle;
 
     private String userName;
 
     private String carNumber;
+
+    private String state;
 
     private LocalDateTime reservedAt;
 
@@ -21,7 +25,7 @@ public class ReservationStatementDto {
 
     private LocalDateTime chargeEndDateTime;
 
-    private String state;
+    private Integer reserveFares;
 
     private Integer usedCashPoint;
 

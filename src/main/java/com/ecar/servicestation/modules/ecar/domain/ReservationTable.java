@@ -73,6 +73,7 @@ public class ReservationTable {
         BigDecimal faresPerHour = new BigDecimal(String.valueOf(fares));
 
         this.reserveFares = seconds.divide(secondsPerHour,2, BigDecimal.ROUND_CEILING).multiply(faresPerHour).intValue();
+        this.usedCashPoint = 0;
         this.reserveState = ReservationState.STAND_BY;
         this.stateLastChangedAt = LocalDateTime.now();
     }
