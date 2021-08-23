@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +57,7 @@ public class ECarReservationService {
     private final BankService bankService;
     private final AppProperties properties;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public ChargerTimeTableDto getChargerTimeTable(long chargerId, int day) {
         if (!chargerRepository.existsById(chargerId)) {
@@ -205,13 +207,18 @@ public class ECarReservationService {
     @Transactional
     public ReservationStatementDto paymentInReservation(PaymentRequestDto request) {
         Account account = getLoginUserContext();
+        Bank mainUsedBank = account.getMainUsedBank();
         ReservationTable reservedItem = reservationRepository.findReservationWithChargerAndCarById(request.getReservationId());
 
         if (reservedItem == null) {
             throw new CReservationNotFoundException();
         }
 
-        if (!canPayment(account, reservedItem, request)) {
+        if (mainUsedBank == null) {
+            throw new CBankNotFoundException();
+        }
+
+        if (!passwordEncoder.matches(request.getPaymentPassword(), mainUsedBank.getPaymentPassword()) || !canPayment(account, reservedItem, request)) {
             throw new CUserCashFailedException();
         }
 
@@ -339,10 +346,6 @@ public class ECarReservationService {
 
             if (reservedItem.getReserveFares() - request.getUsedCashPoint() > account.getCash()) {
                 Bank mainUsedBank = account.getMainUsedBank();
-
-                if (mainUsedBank == null) {
-                    throw new CBankNotFoundException();
-                }
 
                 int ussdCash = reservedItem.getReserveFares() - request.getUsedCashPoint();
                 int cashDiff = ussdCash - account.getCash();
