@@ -131,10 +131,10 @@ public class ReservationTable {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HH:mm");
 
         return stringBuilder
-                .append("CH#").append(this.charger.getId())
-                .append("S#").append(this.chargeStartDateTime.format(dateTimeFormatter))
-                .append("E#").append(this.chargeEndDateTime.format(dateTimeFormatter))
-                .append("CN#").append(this.car.get4DigitsOfCarNumber())
+                .append("#R").append(this.id)
+                .append("CH").append(this.charger.getId())
+                .append("C").append(this.car.get4DigitsOfCarNumber())
+                .append("S").append(this.chargeStartDateTime.format(dateTimeFormatter))
                 .toString();
     }
 
