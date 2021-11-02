@@ -43,7 +43,7 @@ class ECarSearchApiControllerTest {
         withLoginAccount.init();
 
         this.searchCondition = new SearchConditionDto();
-        searchCondition.setSearch("대전 서구 둔산동");
+        searchCondition.setSearch("일산");
         searchCondition.setChargerTp(2);  // 급속
         searchCondition.setLatitude(Double.valueOf("36.357692"));
         searchCondition.setLongitude(Double.valueOf("127.381050"));

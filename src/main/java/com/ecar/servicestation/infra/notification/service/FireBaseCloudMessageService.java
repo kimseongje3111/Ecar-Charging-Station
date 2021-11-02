@@ -42,7 +42,7 @@ public class FireBaseCloudMessageService implements PushMessageService {
                             .post(
                                     RequestBody.create(objectMapper.writeValueAsBytes(fcmMessage), MediaType.get("application/json; charset=utf-8"))
                             )
-                            .addHeader(HttpHeaders.AUTHORIZATION, "Bear " + getAccessToken())
+                            .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken())
                             .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
                             .build();
 

@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,29 +43,21 @@ public class ECarSearchService {
     @Transactional
     public List<Charger> getSearchResultsBy(SearchConditionDto condition, Pageable pageable) {
         List<CompletableFuture<Set<EVInfoDto>>> futures = new ArrayList<>();
-        futures.add(eCarSearchAsyncService.getSearchResult(condition.getSearch(), 0));      // 충전소명 검색 키워드
+        Set<EVInfoDto> evInfoSet = new HashSet<>();
 
-        Node searchKeywordMap = preProcessingAndExtractSearchKeywords(condition.getSearch());
-        searchAsAsyncByLongestPrefixes(futures, searchKeywordMap, 0);
+        // 충전소 API 호출 //
+
+        searchAsAsyncByLongestPrefixes(futures, preProcessingAndExtractSearchKeywords(condition.getSearch()), 0);
 
         // 결과 병합 //
 
-        List<Set<EVInfoDto>> join =
-                CompletableFuture
-                        .allOf(futures.toArray(new CompletableFuture[futures.size()]))
-                        .thenApply(result -> futures.stream().map(CompletableFuture::join).collect(Collectors.toList()))
-                        .join();
+        CompletableFuture
+                .allOf(futures.toArray(new CompletableFuture[futures.size()]))
+                .thenApply(result -> futures.stream().map(CompletableFuture::join).collect(Collectors.toList()))
+                .join()
+                .forEach(evInfoSet::addAll);
 
-        Set<EVInfoDto> evInfoSet = new HashSet<>();
-        join.forEach(evInfoSet::addAll);
-
-        return chargerRepository
-                .findAllWithStationBySearchConditionAndPaging(
-                        getUpdatedChargers(evInfoSet, condition.getSortType(), condition.getLatitude(), condition.getLongitude()),
-                        condition,
-                        pageable
-                )
-                .getContent();
+        return getUpdatedChargers(evInfoSet, condition, null);
     }
 
     @Transactional
@@ -74,13 +65,7 @@ public class ECarSearchService {
         String search = mapService.reverseGeoCoding(modelMapper.map(location, MapLocationDto.class));
         Set<EVInfoDto> evInfoSet = new HashSet<>(eCarSearchAsyncService.getSearchResult(search, 0).join());
 
-        return chargerRepository
-                .findAllWithStationBySearchLocationAndPaging(
-                        getUpdatedChargers(evInfoSet, SORT_TYPE_DISTANCE, location.getLatitude(), location.getLongitude()),
-                        location,
-                        pageable
-                )
-                .getContent();
+        return getUpdatedChargers(evInfoSet, null, location);
     }
 
     private Node preProcessingAndExtractSearchKeywords(String search) {
@@ -98,22 +83,17 @@ public class ECarSearchService {
     }
 
     private void searchAsAsyncByLongestPrefixes(List<CompletableFuture<Set<EVInfoDto>>> futures, Node node, int depth) {
-        if (depth >= 3) {
-            if (node.isLeafNode() || node.getNodeMap().size() >= 2) {
-
-                // 비동기 이벤트 //
-
-                futures.add(eCarSearchAsyncService.getSearchResult(node.getTResult(), 0));
-            }
+        if (depth == 3) {
+            futures.add(eCarSearchAsyncService.getSearchResult(node.getTResult(), 0));
 
         } else {
             for (String key : node.getNodeMap().keySet()) {
-                searchAsAsyncByLongestPrefixes(futures, node.getNodeMap().get(key), ++depth);
+                searchAsAsyncByLongestPrefixes(futures, node.getNodeMap().get(key), depth + 1);
             }
         }
     }
 
-    private List<Long> getUpdatedChargers(Set<EVInfoDto> evInfoSet, String sortType, Double myLat, Double myLongi) {
+    private List<Charger> getUpdatedChargers(Set<EVInfoDto> evInfoSet, SearchConditionDto condition, SearchLocationDto location) {
         if (evInfoSet.size() == 0) {
             throw new EVINfoNotFoundException();
         }
@@ -141,21 +121,50 @@ public class ECarSearchService {
             chargers.add(charger);
         });
 
+        String sortType;
+        double myLat, myLongi;
+        List<Charger> fChargers = chargers;
+
+        if (condition != null) {
+            sortType = condition.getSortType();
+            myLat = condition.getLatitude();
+            myLongi = condition.getLongitude();
+
+            if (condition.getCpTp() != null) {
+                fChargers = fChargers.stream().filter(charger -> charger.getType().equals(condition.getCpTp())).collect(Collectors.toList());
+            }
+
+            if (condition.getChargerTp() != null) {
+                fChargers = fChargers.stream().filter(charger -> charger.getMode().equals(condition.getChargerTp())).collect(Collectors.toList());
+            }
+
+        } else {
+            sortType = SORT_TYPE_DISTANCE;
+            myLat = location.getLatitude();
+            myLongi = location.getLongitude();
+
+            if (location.getCpTp() != null) {
+                fChargers = fChargers.stream().filter(charger -> charger.getType().equals(location.getCpTp())).collect(Collectors.toList());
+            }
+
+            if (location.getChargerTp() != null) {
+                fChargers = fChargers.stream().filter(charger -> charger.getMode().equals(location.getChargerTp())).collect(Collectors.toList());
+            }
+        }
+
         if (sortType.equals(SORT_TYPE_NAME)) {
-            return chargers.stream()
+            return fChargers.stream()
                     .sorted(Comparator.comparing(charger -> charger.getStation().getStationAddress()))
-                    .map(Charger::getId)
                     .collect(Collectors.toList());
 
         } else {
-            return chargers.stream()
+            return fChargers.stream()
                     .sorted(
                             Comparator.comparingDouble(charger -> {
                                 Station station = charger.getStation();
                                 return calDistance(myLat, myLongi, station.getLatitude(), station.getLongitude());
                             })
                     )
-                    .map(Charger::getId)
                     .collect(Collectors.toList());
         }
     }

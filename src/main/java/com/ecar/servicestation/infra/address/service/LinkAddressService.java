@@ -57,7 +57,7 @@ public class LinkAddressService implements AddressService {
                 throw new AddressServiceException();
             }
 
-            return new HashSet<>();
+            throw new AddressExceededException();
         }
 
         if (Integer.parseInt(common.getTotalCount()) > RESPONSE_MAX_RESULTS) {

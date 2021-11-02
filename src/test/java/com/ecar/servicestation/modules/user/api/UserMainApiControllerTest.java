@@ -258,9 +258,9 @@ class UserMainApiControllerTest {
 
     private LocalDateTime getDataTimeAfter2HourFromNow(long chargerId) {
         ChargerTimeTableDto chargerTimeTable = eCarReservationService.getChargerTimeTable(chargerId, 0);
-        List<LocalDateTime> timeList = chargerTimeTable.getTimeTable().keySet().stream().sorted().collect(Collectors.toList());
+        //List<LocalDateTime> timeList = chargerTimeTable.getTimeTable().keySet().stream().sorted().collect(Collectors.toList());
 
-        return timeList.get(0).plusHours(2);
+        return LocalDateTime.now();
     }
 
 }

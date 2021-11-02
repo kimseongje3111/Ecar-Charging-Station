@@ -12,8 +12,8 @@ public interface ChargerRepositoryCustom {
 
     Charger findChargerWithStationById(long id);
 
-    Page<Charger> findAllWithStationBySearchConditionAndPaging(List<Long> ids, SearchConditionDto condition, Pageable pageable);
+    Page<Charger> findAllWithStationByPaging(List<Long> ids, Pageable pageable);
 
-    Page<Charger> findAllWithStationBySearchLocationAndPaging(List<Long> ids, SearchLocationDto location, Pageable pageable);
+    Page<Charger> findAllWithStationPaging(List<Long> ids, Pageable pageable);
 
 }

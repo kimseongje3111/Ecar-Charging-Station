@@ -29,41 +29,25 @@ public class ChargerRepositoryImpl extends Querydsl4RepositorySupport implements
     }
 
     @Override
-    public Page<Charger> findAllWithStationBySearchConditionAndPaging(List<Long> ids, SearchConditionDto condition, Pageable pageable) {
+    public Page<Charger> findAllWithStationByPaging(List<Long> ids, Pageable pageable) {
         List<Charger> fetch =
                 selectFrom(charger)
                         .join(charger.station, station).fetchJoin()
-                        .where(
-                                charger.id.in(ids),
-                                chargerTpEq(condition.getChargerTp()),
-                                cpTpEq(condition.getCpTp())
-                        )
+                        .where(charger.id.in(ids))
                         .fetch();
 
         return applyPagination(pageable, countQuery -> countQuery.selectFrom(charger).where(charger.in(fetch)));
     }
 
     @Override
-    public Page<Charger> findAllWithStationBySearchLocationAndPaging(List<Long> ids, SearchLocationDto location, Pageable pageable) {
+    public Page<Charger> findAllWithStationPaging(List<Long> ids, Pageable pageable) {
         List<Charger> fetch =
                 selectFrom(charger)
                         .join(charger.station, station).fetchJoin()
-                        .where(
-                                charger.id.in(ids),
-                                chargerTpEq(location.getChargerTp()),
-                                cpTpEq(location.getCpTp())
-                        )
+                        .where(charger.id.in(ids))
                         .fetch();
 
         return applyPagination(pageable, countQuery -> countQuery.selectFrom(charger).where(charger.in(fetch)));
-    }
-
-    private BooleanExpression chargerTpEq(Integer chargerTp) {
-        return chargerTp != null ? charger.type.eq(chargerTp) : null;
-    }
-
-    private BooleanExpression cpTpEq(Integer cpTp) {
-        return cpTp != null ? charger.mode.eq(cpTp) : null;
     }
 
 }

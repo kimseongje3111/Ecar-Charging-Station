@@ -89,10 +89,10 @@ public class EVInfoService implements ECarChargingStationInfoProvider {
 
         return stringBuilder
                 .append(BASE_URL)
-                .append("?addr=").append(search)
+                .append("?serviceKey=").append(SERVICE_KEY_DECODING)
                 .append("&pageNo=").append(page)
                 .append("&numOfRows=").append(numberOfRows)
-                .append("&ServiceKey=").append(SERVICE_KEY_DECODING)
+                .append("&addr=").append(search)
                 .toString();
     }
 
